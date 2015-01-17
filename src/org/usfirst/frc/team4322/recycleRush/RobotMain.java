@@ -3,8 +3,6 @@ package org.usfirst.frc.team4322.recycleRush;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 
-		//FRC4322 - Changes last made: 1.17.15 @ 2:51pm
-
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the IterativeRobot
@@ -22,7 +20,6 @@ public class RobotMain extends IterativeRobot {
 	
     public void robotInit() {
     	RobotDriveBase.getInstance().initRobotDrive();
-    	RobotLogger.getInstance().open();
     	RobotLogger.getInstance().sendToConsole("Robot Successfully Started.");
     }
     
@@ -37,7 +34,6 @@ public class RobotMain extends IterativeRobot {
 	public void autonomousInit() {
 		// TODO Auto-generated method stub
 		super.autonomousInit();
-		RobotLogger.getInstance().open();
 	}
     
     /**
@@ -54,7 +50,6 @@ public class RobotMain extends IterativeRobot {
     
     public void teleopInit() {
     	RobotDriveBase.getInstance().initTeleop();
-    	RobotLogger.getInstance().open();
     }
 
     /**
@@ -73,7 +68,6 @@ public class RobotMain extends IterativeRobot {
     
     public void testInit() {
     	TestRobot.getInstance().init();
-    	//RobotLogger.getInstance().open();
     }
 
     /**
