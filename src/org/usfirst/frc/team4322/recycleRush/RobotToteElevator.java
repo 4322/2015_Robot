@@ -8,7 +8,7 @@ package org.usfirst.frc.team4322.recycleRush;
 public class RobotToteElevator {
 
 	// Instance for the Singleton Class
-    static private RobotToteElevator _instance = null;
+    private static RobotToteElevator _instance = null;
     
     // This is the static getInstance() method that provides easy access to the RobotToteElevator singleton class.
     public static RobotToteElevator getInstance()

@@ -1,4 +1,3 @@
-
 package org.usfirst.frc.team4322.recycleRush;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
@@ -11,70 +10,184 @@ import edu.wpi.first.wpilibj.IterativeRobot;
  * directory.
  */
 
-public class RobotMain extends IterativeRobot {
-	
-    /**
-     * This function is run when the robot is first started up and should be
-     * used for any initialization code.
-     */
-	
-    public void robotInit() {
-    	RobotDriveBase.getInstance().initRobotDrive();
-    	RobotLogger.getInstance().sendToConsole("Robot Successfully Started.");
-    }
-    
-    @Override
-	public void disabledInit() {
-		// TODO Auto-generated method stub
-		super.disabledInit();
-		RobotLogger.getInstance().close();
-	}
-    
-    @Override
-	public void autonomousInit() {
-		// TODO Auto-generated method stub
-		super.autonomousInit();
-	}
-    
-    /**
-     * This function is called periodically during autonomous
-     */
-    
-    public void autonomousPeriodic() {
-    	
-    }
+public class RobotMain extends IterativeRobot
+{
 
-    /**
-     * This function is called right before operator control
-     */
-    
-    public void teleopInit() {
-    	RobotDriveBase.getInstance().initTeleop();
-    }
+	// For logging the start of periodic mode
+	private boolean autoBegin = false;
+	private boolean teleBegin = false;
+	private boolean testBegin = false;
+	private boolean disabled = false;
 
-    /**
-     * This function is called periodically during operator control
-     */
-    
-    public void teleopPeriodic() {
-    	RobotDriveBase.getInstance().runTeleop();
-    }
-  
-    @Override
-	public void disabledPeriodic() {
-		// TODO Auto-generated method stub
-		super.disabledPeriodic();
+	/**
+	 * This function is run when the robot is first started up and should be
+	 * used for any initialization code.
+	 */
+
+	public void robotInit()
+	{
+		try
+		{
+			RobotDriveBase.getInstance().initRobotDrive();
+			RobotLogger.getInstance().sendToConsole("Robot Successfully Started.");
+		}
+		catch (Exception ex)
+		{
+			RobotLogger.getInstance().writeErrorToFile("robotInit()", ex);
+		}
 	}
-    
-    public void testInit() {
-    	TestRobot.getInstance().init();
-    }
 
-    /**
-     * This function is called periodically during test mode
-     */
-    public void testPeriodic() {
-    	TestRobot.getInstance().run();
-    }
-    
+	@Override
+	public void disabledInit()
+	{
+		try
+		{
+			// TODO Auto-generated method stub
+			super.disabledInit();
+			RobotLogger.getInstance().sendToConsole("Robot Disabled.");
+		}
+		catch (Exception ex)
+		{
+			RobotLogger.getInstance().writeErrorToFile("disabledInit()", ex);
+		}
+	}
+
+	/**
+	 * This function is called periodically when robot is disabled
+	 */
+
+	@Override
+	public void disabledPeriodic()
+	{
+		try
+		{
+			if (!disabled)
+			{
+				RobotLogger.getInstance().sendToConsole("Robot Disabled Periodically.");
+				disabled = true;
+			}
+			// TODO Auto-generated method stub
+			super.disabledPeriodic();
+		}
+		catch (Exception ex)
+		{
+			RobotLogger.getInstance().writeErrorToFile("disabledPeriodic()", ex);
+		}
+	}
+
+	/**
+	 * This function is called right before autonomous
+	 */
+
+	@Override
+	public void autonomousInit()
+	{
+		try
+		{
+			// TODO Auto-generated method stub
+			super.autonomousInit();
+			autoBegin = false;
+			RobotLogger.getInstance().sendToConsole("Robot Autonomous Mode Initialized.");
+		}
+		catch (Exception ex)
+		{
+			RobotLogger.getInstance().writeErrorToFile("autonomousInit()", ex);
+		}
+	}
+
+	/**
+	 * This function is called periodically during autonomous
+	 */
+
+	public void autonomousPeriodic()
+	{
+		try
+		{
+			if (!autoBegin)
+			{
+				RobotLogger.getInstance().sendToConsole("Robot Autonomous Mode Begin.");
+				autoBegin = true;
+			}
+		}
+		catch (Exception ex)
+		{
+    		RobotLogger.getInstance().writeErrorToFile("autonomousPeriodic()", ex);
+    	}
+	}
+
+	/**
+	 * This function is called right before operator control
+	 */
+
+	public void teleopInit()
+	{
+		try
+		{
+			RobotDriveBase.getInstance().initTeleop();
+			teleBegin = false;
+			RobotLogger.getInstance().sendToConsole("Robot Teleop Mode Initialized.");
+		}
+		catch (Exception ex)
+		{
+    		RobotLogger.getInstance().writeErrorToFile("teleopInit()", ex);
+    	}
+	}
+
+	/**
+	 * This function is called periodically during operator control
+	 */
+
+	public void teleopPeriodic()
+	{
+		try
+		{
+			if (!teleBegin)
+			{
+				RobotLogger.getInstance().sendToConsole("Robot Teleop Mode Begin.");
+				teleBegin = true;
+			}
+			RobotDriveBase.getInstance().runTeleop();
+		}
+		catch (Exception ex)
+		{
+    		RobotLogger.getInstance().writeErrorToFile("teleopPeriodic()", ex);
+    	}
+	}
+
+	/**
+	 * This function is called right before test mode
+	 */
+
+	public void testInit()
+	{
+		try
+		{
+			TestRobot.getInstance().init();
+			RobotLogger.getInstance().sendToConsole("Robot Test Mode Initialized.");
+		}
+		catch (Exception ex)
+		{
+    		RobotLogger.getInstance().writeErrorToFile("testInit()", ex);
+    	}
+	}
+
+	/**
+	 * This function is called periodically during test mode
+	 */
+	public void testPeriodic()
+	{
+		try
+		{
+			if (!testBegin)
+			{
+				RobotLogger.getInstance().sendToConsole("Robot Test Mode Begin.");
+				testBegin = true;
+			}
+			TestRobot.getInstance().run();
+		}
+		catch (Exception ex)
+		{
+    		RobotLogger.getInstance().writeErrorToFile("testPeriodic()", ex);
+    	}
+	}
 }

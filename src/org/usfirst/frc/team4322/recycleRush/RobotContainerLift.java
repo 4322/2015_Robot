@@ -5,19 +5,19 @@ package org.usfirst.frc.team4322.recycleRush;
 * @author FRC4322
 */
 
-public class RobotContainerElevator {
+public class RobotContainerLift {
 
 	// Instance for the Singleton Class
-    static private RobotContainerElevator _instance = null;
+    private static RobotContainerLift _instance = null;
     
     // This is the static getInstance() method that provides easy access to the RobotContainerElevator singleton class.
-    public static RobotContainerElevator getInstance()
+    public static RobotContainerLift getInstance()
     {
         // Look to see if the instance has already been created...
         if(_instance == null)
         {
             // If the instance does not yet exist, create it.
-            _instance = new RobotContainerElevator();
+            _instance = new RobotContainerLift();
         }
         // Return the singleton instance to the caller.
         return _instance;
