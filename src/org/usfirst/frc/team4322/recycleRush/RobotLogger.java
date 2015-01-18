@@ -35,9 +35,6 @@ public class RobotLogger
 	private File oldLog = null;
 	private boolean closed = true;
 
-	// Instance for Java Logging Class (in case this logger is bad)
-	
-	
 	// Instances for ZIP File
 	private FileInputStream in = null;
 	private FileOutputStream out = null;
@@ -49,8 +46,7 @@ public class RobotLogger
 
 	// Constants for file
 	private final long MAX_FILE_LENGTH = 1073741824; // 1 GiB = 1024^3 or 2^30
-	// http://highscalability.com/blog/2012/9/11/how-big-is-a-petabyte-exabyte-zettabyte-or-a-yottabyte.html
-	// <-- must visit
+	// http://highscalability.com/blog/2012/9/11/how-big-is-a-petabyte-exabyte-zettabyte-or-a-yottabyte.html <-- must visit
 	private final byte[] textFormat = ("\n [" + timeToString(true) + "] - Robot4322: ").getBytes();
 
 	 // This is the static getInstance() method that provides easy access to the RobotLogger singleton class.
@@ -122,7 +118,7 @@ public class RobotLogger
 			}
 			catch (IOException e)
 			{
-				// TODO handling
+				e.printStackTrace();
 			}
 			finally
 			{
@@ -136,7 +132,7 @@ public class RobotLogger
 				}
 				catch (IOException e)
 				{
-					// TODO handling
+					e.printStackTrace();
 				}
 			}
 		} // if the file is closed, you can't write to it
@@ -147,7 +143,7 @@ public class RobotLogger
 	{
 		if (!closed)
 		{
-			String msg = "Exception in " + method + ": " + getString(t);
+			String msg = "\nException in " + method + ": " + getString(t);
 			writeToFile(msg);
 		}
 	}
@@ -196,13 +192,14 @@ public class RobotLogger
 		}
 		catch (FileNotFoundException fnfe)
 		{
-			
+			fnfe.printStackTrace();
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
 	}
+	
 	private String timeToString(boolean date)
 	{
 		// Create a time stamp that looks like 12:34:56.999
@@ -228,6 +225,7 @@ public class RobotLogger
 		return t;
 	}
 
+	// Gets the date in yyyy-MM-dd format
 	public static String CurrentReadable_Date()
 	{
 		return sdf_.format(Calendar.getInstance().getTime());
@@ -261,6 +259,7 @@ public class RobotLogger
 			}
 			catch (IOException ignore)
 			{
+				e.printStackTrace();
 			}
 		}
 		return retValue;
