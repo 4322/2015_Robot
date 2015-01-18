@@ -21,7 +21,7 @@ public class RobotLogger {
 
     // Instances for the log file
     private FileOutputStream logfile = null;
-    private final String LOG_FILE = "var\\log\\FRC4322Log.txt"; //fix file path
+    private final String LOG_FILE = "/home/lvuser/FRC4322Log.txt"; //fix file path
     private File oldLog = null;
     private boolean closed = true;
     
@@ -29,7 +29,7 @@ public class RobotLogger {
     private FileInputStream in = null;
     private FileOutputStream out = null;
     private ZipOutputStream newZip = null;
-    private final String ZIP_FILE = "var\\log\\FRC4322Logs.zip";
+    private final String ZIP_FILE = "/home/lvuser/FRC4322Logs.zip";
     
     // Get Date Format
     private static final SimpleDateFormat sdf_ = new SimpleDateFormat("yyyy-MM-dd");
@@ -119,7 +119,6 @@ public class RobotLogger {
         } //if the file is closed, you can't write to it
     }
 
-    // Make doubly certain the file is closed
     public void close() {
         if (closed) {
             return;

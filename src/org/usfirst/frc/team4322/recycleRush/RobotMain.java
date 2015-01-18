@@ -27,7 +27,6 @@ public class RobotMain extends IterativeRobot {
 	public void disabledInit() {
 		// TODO Auto-generated method stub
 		super.disabledInit();
-		RobotLogger.getInstance().close();
 	}
     
     @Override

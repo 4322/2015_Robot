@@ -81,7 +81,7 @@ public class TestRobot {
 	
 	public void run()
 	{
-		LiveWindow.setEnabled(false); //bleh
+		LiveWindow.setEnabled(true); //bleh
 		counter++;
 		if (counter == 5) {
 //			System.out.println("Compressor Current: " + compressor.getCompressorCurrent());
@@ -94,10 +94,10 @@ public class TestRobot {
 //			boolean NC = compressor.getCompressorNotConnectedFault();
 //			System.out.println("Compressor Error: " + (highCurrent || shorted || NC));
 //			System.out.println("Compressor Sticky: " + (stickyHighCurrent || stickyShorted || stickyNC));
-			SmartDashboard.getNumber("ACCEL (X)", accelerometer.getX());
-			SmartDashboard.getNumber("ACCEL (Y)", accelerometer.getY());
-			SmartDashboard.getNumber("Gyro Angle:", gyro.getAngle());
-			SmartDashboard.getNumber("Gyro Rate:", gyro.getRate());
+			SmartDashboard.putNumber("ACCEL (X)", accelerometer.getX());
+			SmartDashboard.putNumber("ACCEL (Y)", accelerometer.getY());
+			SmartDashboard.putNumber("Gyro Angle:", gyro.getAngle());
+			SmartDashboard.putNumber("Gyro Rate:", gyro.getRate());
 			counter = 0;
 		}
 		if(PilotController.getInstance().getNorth())
