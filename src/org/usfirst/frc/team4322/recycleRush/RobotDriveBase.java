@@ -7,6 +7,7 @@
 package org.usfirst.frc.team4322.recycleRush;
 
 import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.RobotDrive.MotorType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -30,11 +31,13 @@ public class RobotDriveBase
     private Talon rightTalon = null;
     
     // Instances for slide drive
-    
     private CANJaguar slideJaguar = null;
     private DoubleSolenoid slideActuatorPiston = null;
     private Compressor compressor = null;
 
+    // Instance for Encoder
+    private Encoder driveEncoder = null;
+    
     // Class declarations for the throttle and steering RobotDrive values
     private double throttleValue = 0;
     private double lastThrottleValue = 0;
@@ -101,6 +104,12 @@ public class RobotDriveBase
 			compressor.clearAllPCMStickyFaults();
 		}
         
+        // Create Encoder if it does not exist
+        if(driveEncoder == null)
+        {
+        	driveEncoder = new Encoder(RobotMap.ENCODER_A_GPIO_PORT, RobotMap.ENCODER_B_GPIO_PORT, false, EncodingType.k4X);
+        }
+        
         // Create robotDrive if it does not exist
         if(robotDrive == null)
         {
@@ -135,7 +144,16 @@ public class RobotDriveBase
     // Initialization code for autonomous mode should go here.
     public void initAutonomous()
     {
-
+    	driveEncoder.setDistancePerPulse(RobotMap.ENCODER_DISTANCE_PER_TICK);
+    	driveEncoder.reset();
+    }
+    
+    public void runAutonomous()
+    {
+    	if(driveEncoder.getDistance() <= RobotMap.ENCODER_AUTONOMOUS_DRIVE_DISTANCE)
+    	{
+    		robotDrive.drive(RobotMap.AUTONOMOUS_DRIVE_SPEED, 0);
+    	}
     }
 
     // Initialization code for teleop mode should go here.

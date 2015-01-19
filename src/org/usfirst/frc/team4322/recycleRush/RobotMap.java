@@ -30,7 +30,14 @@ public class RobotMap {
 	public static final double THROTTLE_LIMIT = 0.8;
 	public static final double STEERING_LIMIT = 0.7;
 	public static final double STRAFE_LIMIT = 0.8;
-		
+	public static final double AUTONOMOUS_DRIVE_SPEED = 0;
+	
+	//Encoder Values
+	public static final int ENCODER_A_GPIO_PORT = 0;
+	public static final int ENCODER_B_GPIO_PORT = 1;
+	public static final double ENCODER_DISTANCE_PER_TICK = 0;
+	public static final double ENCODER_AUTONOMOUS_DRIVE_DISTANCE = 0;
+	
 	// Initialize Elevator CAN Addresses
 	public static final int TOTE_ELEVATOR_CONTROLLER_ADDRESS = 30;
 	public static final int CONTAINER_ELEVATOR_CONTROLLER_ADDRESS = 31;
