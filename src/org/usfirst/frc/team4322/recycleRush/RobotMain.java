@@ -1,6 +1,7 @@
 
 package org.usfirst.frc.team4322.recycleRush;
 
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
 
 /**
@@ -19,6 +20,9 @@ public class RobotMain extends IterativeRobot {
      */
 	
     public void robotInit() {
+    	CameraServer camera = CameraServer.getInstance();
+    	camera.setQuality(50);
+    	camera.startAutomaticCapture("cam0");
     	RobotDriveBase.getInstance().initRobotDrive();
     	RobotLogger.getInstance().sendToConsole("Robot Successfully Started.");
     }
