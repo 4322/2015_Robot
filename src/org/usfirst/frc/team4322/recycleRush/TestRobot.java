@@ -16,9 +16,7 @@ public class TestRobot {
 
 	private BuiltInAccelerometer accelerometer = null;
 	private Gyro gyro = null;
-	
-	private CameraServer camera = CameraServer.getInstance();
-	
+		
 	//Initialize PCP
 	private PowerDistributionPanel pdp = null;
 	
@@ -68,8 +66,6 @@ public class TestRobot {
 			pdp = new PowerDistributionPanel();
 			pdp.clearStickyFaults();
 		}
-		camera.setQuality(70);
-		camera.startAutomaticCapture("cam0");
 	}
 	
 	public void run()

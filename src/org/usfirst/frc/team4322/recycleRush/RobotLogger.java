@@ -1,12 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.usfirst.frc.team4322.recycleRush;
 
 import java.util.*;
-import java.util.zip.*;
 import java.io.*;
+import java.nio.file.*;
+import java.nio.file.Path;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 
 import edu.wpi.first.wpilibj.*;
@@ -26,26 +24,25 @@ public class RobotLogger
 	private DriverStation m_ds = DriverStation.getInstance();
 
 	// Instances for the log files
-	private FileOutputStream logfile = null;
-	public final String LOG_FILE = "/home/lvuser/FRC4322Log.txt",
-			Robot_Disabled_Log = "/home/lvuser/FRC4322Disabled.txt",
-			Robot_Auto_Log = "/home/lvuser/FRC4322AutoLog.txt",
-			Robot_Teleop_Log = "/home/lvuser/FRC4322TeleopLog.txt",
-			Robot_Test_Log = "/home/lvuser/FRC4322TestLog.txt";
+	public final String LOG_FILE = "/home/lvuser/logs/FRC4322InitLog.txt",
+			Robot_Disabled_Log = "/home/lvuser/logs/FRC4322DisabledLog.txt",
+			Robot_Auto_Log = "/home/lvuser/logs/FRC4322AutoLog.txt",
+			Robot_Teleop_Log = "/home/lvuser/logs/FRC4322TeleopLog.txt",
+			Robot_Test_Log = "/home/lvuser/logs/FRC4322TestLog.txt";
 	private File oldLog = null;
+	private FileWriter fw = null;
+	private BufferedWriter bw = null;
 	private boolean closed = true;
 
 	// Instances for ZIP File
-	private FileInputStream in = null;
-	private FileOutputStream out = null;
-	private ZipOutputStream newZip = null;
-	private final String LOGS_ZIP_FILE = "/home/lvuser/FRC4322Logs.zip";
+	public Map<String, String> env = new HashMap<>();
+	private final String LOGS_ZIP_FILE = "/home/lvuser/logs/FRC4322Logs.zip";
 
 	// Get Date Format
 	private static final SimpleDateFormat sdf_ = new SimpleDateFormat("yyyy-MM-dd");
 
 	// Constants for file
-	private final long MAX_FILE_LENGTH = 1073741824; // 1 GiB = 1024^3 or 2^30
+	private final long MAX_FILE_LENGTH = 1048576; // 1 MiB = 1024^2 or 2^20
 	// http://highscalability.com/blog/2012/9/11/how-big-is-a-petabyte-exabyte-zettabyte-or-a-yottabyte.html <-- must visit
 	private final byte[] textFormat = ("\n [" + timeToString(true) + "] - Robot4322: ").getBytes();
 
@@ -62,12 +59,51 @@ public class RobotLogger
         return _instance;
 	}
 
+	public void update()
+	{
+		try
+		{
+			// Get the correct file
+			String file = LOG_FILE;
+			if (m_ds.isDisabled())
+				file = Robot_Disabled_Log;
+			if (m_ds.isAutonomous())
+				file = Robot_Auto_Log;
+			if (m_ds.isOperatorControl())
+				file = Robot_Teleop_Log;
+			if (m_ds.isTest())
+				file = Robot_Test_Log;
+			// Default is initLog
+			
+			oldLog = new File(file);
+			
+			// If the file exists & the length is too long, send it to ZIP
+			if(oldLog.exists())
+			{
+				if(oldLog.length() > MAX_FILE_LENGTH)
+				{
+					addFileToZip(oldLog, LOGS_ZIP_FILE);
+					// Create a new .txt file, and rename it
+					oldLog.createNewFile();
+					File newFile = new File(file + " [" + timeToString(true) + "]");
+					oldLog.renameTo(newFile);
+				}
+			}
+			// If log file does not exist, create it
+			else
+			{
+				oldLog.createNewFile();
+			}
+		}
+		catch (IOException ex)
+		{
+			writeErrorToFile("RobotLogger.update()", ex);
+		}
+	}
 	/*
 	 * If there already is a file, write the data to it.
 	 * If there is not, create the file.
 	 * If the file is too big, add it to a ZIP file.
-	 * 
-	 * TODO If ZIP file already exists, add new file to it.
 	 */
 	public void writeToFile(final String msg)
 	{
@@ -85,55 +121,22 @@ public class RobotLogger
 					file = Robot_Teleop_Log;
 				if (m_ds.isTest())
 					file = Robot_Test_Log;
-
+				// Default is initLog
+				
 				oldLog = new File(file);
-
-				if (oldLog.exists())
-				{ // If it exists, append it. If not, create it.
-					// Get the file length in bytes
-					long fileLength = oldLog.length();
-					// If the file length is below the max, add the msg to it.
-					if (fileLength < MAX_FILE_LENGTH)
-					{
-						// Get the appendable file
-						logfile = new FileOutputStream(oldLog, true);
-					}
-					// File length is too long: add it to a zip.
-					else
-					{
-						addFileToZip(oldLog, LOGS_ZIP_FILE);
-						// Create a new txt file
-						logfile = new FileOutputStream(oldLog, false);
-					}
-				}
-				// File does not exist
-				else
+				// If file does not exist, create it.
+				if (!oldLog.exists())
 				{
-					// Create a new txt file
-					logfile = new FileOutputStream(oldLog, false);
+					oldLog.createNewFile();
 				}
-				// Write the message to the respective log
-				logfile.write(textFormat);
-				logfile.write(msg.getBytes());
+				// Write data using buffered writer; enhances IO operations
+				fw = new FileWriter(oldLog.getAbsoluteFile());
+				bw = new BufferedWriter(fw);
+				bw.write(textFormat + msg);
 			}
 			catch (IOException e)
 			{
-				e.printStackTrace();
-			}
-			finally
-			{
-				try
-				{
-					if (logfile != null)
-					{
-						logfile.close();
-						closed = true;
-					}
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
+				System.out.println("IOException caught while writing to file: " + e);
 			}
 		} // if the file is closed, you can't write to it
 	}
@@ -165,38 +168,41 @@ public class RobotLogger
 	// Adds given file to given ZIP Folder
 	public void addFileToZip(File file, String zipfile)
 	{
+		//TODO If there are more than 10 files in ZIP, delete them
 		try
 		{
-			// Open an OutputStream
-			out = new FileOutputStream(zipfile);
-			// Open a ZipOutputStream
-			newZip = new ZipOutputStream(out);
-			// Prepare a ZipEntry
-			newZip.putNextEntry(new ZipEntry(file.getName()));
-	
-			// Write the file data in chunks
-			in = new FileInputStream(file);
-			// newZip.write(Files.readAllBytes(Paths.get(oldLog)));
-			byte[] chardata = new byte[1024];
-			int bytesRead = in.read(chardata);
-			do
-			{
-				newZip.write(chardata);
-			} while (bytesRead > 0);
-			// Close the zip entry
-			newZip.closeEntry();
-			// Close the ZipOutputStream
-			newZip.close();
-			// Close the OutputStream
-			out.close();
-		}
-		catch (FileNotFoundException fnfe)
-		{
-			fnfe.printStackTrace();
+			// In Java 7, we get to use the ZipFileSystem!
+	        env.put("create", "true");
+
+	        /* Get the uniform resource identifier, &
+	         * locate file system by using the syntax
+	         * defined in java.net.JarURLConnection.
+	         */
+	        URI uri = URI.create("jar:file:" + zipfile);
+	        
+	        /* The ZipFileSystem treats jars and ZIPs as a file
+	         * system, allowing the user to manipulate the contents
+	         * in the ZIP as one would in a folder.
+	         */ 
+	        try (FileSystem zipfs = FileSystems.newFileSystem(uri, env))
+	        {
+	        	// Get the log file
+	            Path externalLogFile = Paths.get(file.getPath());
+	            // Get the path the log file will be put into
+	            Path pathInZipfile = zipfs.getPath(file.getName());
+	            // Copy the log file into the ZIP, replace if necessary
+	            Files.copy(externalLogFile, pathInZipfile, StandardCopyOption.REPLACE_EXISTING);
+	            // Delete the log file
+	            Files.delete(externalLogFile);
+	        }
+	        catch (FileSystemException e)
+	        {
+	        	writeErrorToFile("FileSystem, addFileToZip()", e);
+	        }
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			writeErrorToFile("addFileToZip()", e);
 		}
 	}
 	
@@ -259,10 +265,28 @@ public class RobotLogger
 			}
 			catch (IOException ignore)
 			{
-				e.printStackTrace();
+				System.out.println("IOException caught while closing String/Print Writer: " + ignore);
 			}
 		}
 		return retValue;
 	}
 
+	public void close()
+	{
+		if (closed)
+			return;
+		try
+		{
+			if(bw != null)
+			{
+				fw.close();
+				bw.close();
+				closed = true;
+			}
+		}
+		catch (IOException ex)
+		{
+			System.out.println("IOException caught while closing log files: " + ex);
+		}
+	}
 }
