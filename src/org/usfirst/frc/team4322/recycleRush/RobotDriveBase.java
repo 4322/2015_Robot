@@ -30,6 +30,7 @@ public class RobotDriveBase
     private Talon rightTalon = null;
     
     // Instances for slide drive
+    
     private CANJaguar slideJaguar = null;
     private DoubleSolenoid slideActuatorPiston = null;
     private Compressor compressor = null;
@@ -211,7 +212,7 @@ public class RobotDriveBase
         if(PilotController.getInstance().getLeftBumper())
         {
         	slideActuatorPiston.set(Value.kForward);
-        	slideJaguar.set(strafingValue);
+        	slideJaguar.set(strafingValue * -1);
         }
         else
         {

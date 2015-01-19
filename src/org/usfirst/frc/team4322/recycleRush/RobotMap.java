@@ -4,15 +4,15 @@ public class RobotMap {
 	
 	public static final int CANJAGUAR_SECONDARY_CONTROLLER_ADDRESS = 11;
 	
-	public static final String LAST_BUILD_TIME = "Robot4322_2015: 1/18/2015 4:49 PM";
+	public static final String LAST_BUILD_TIME = "Robot4322_2015: 1/18/2015 5:58 PM";
 	
 	// Initialize Joystick Ports
 	public static final int PILOT_CONTROLLER_JOYSTICK_PORT = 0;
 	public static final int COPILOT_CONTROLLER_JOYSTICK_PORT = 1;
 	
 	// Initialize RobotDriveBase Ports
-	public static final int TALON_LEFT_DRIVE_CHANNEL = 0;
-	public static final int TALON_RIGHT_DRIVE_CHANNEL = 1;
+	public static final int TALON_LEFT_DRIVE_CHANNEL = 1;
+	public static final int TALON_RIGHT_DRIVE_CHANNEL = 0;
 	
 	// Initialize Slide Drive CAN Address
 	public static final int CANJAGUAR_SLIDE_DRIVE_ADDRESS = 10;
