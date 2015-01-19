@@ -18,7 +18,6 @@ public class RobotMain extends IterativeRobot
 	private boolean autoBegin = false;
 	private boolean teleBegin = false;
 	private boolean testBegin = false;
-	private boolean disabled = false;
 	
 	private CameraServer camera = CameraServer.getInstance();
 
@@ -48,8 +47,8 @@ public class RobotMain extends IterativeRobot
 	{
 		try
 		{
-			RobotLogger.getInstance().update();
 			RobotLogger.getInstance().sendToConsole("Robot Disabled.");
+			RobotLogger.getInstance().close();
 		}
 		catch (Exception ex)
 		{
@@ -64,18 +63,7 @@ public class RobotMain extends IterativeRobot
 	@Override
 	public void disabledPeriodic()
 	{
-		try
-		{
-			if (!disabled)
-			{
-				RobotLogger.getInstance().sendToConsole("Robot Disabled Periodically.");
-				disabled = true;
-			}
-		}
-		catch (Exception ex)
-		{
-			RobotLogger.getInstance().writeErrorToFile("disabledPeriodic()", ex);
-		}
+		super.disabledPeriodic();
 	}
 
 	/**
