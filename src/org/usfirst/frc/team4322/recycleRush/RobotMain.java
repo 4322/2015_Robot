@@ -1,6 +1,6 @@
 package org.usfirst.frc.team4322.recycleRush;
 
-import edu.wpi.first.wpilibj.CameraServer;
+//import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
 
 /**
@@ -19,7 +19,7 @@ public class RobotMain extends IterativeRobot
 	private boolean teleBegin = false;
 	private boolean testBegin = false;
 	
-	private CameraServer camera = CameraServer.getInstance();
+//	private CameraServer camera = CameraServer.getInstance();
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -31,8 +31,8 @@ public class RobotMain extends IterativeRobot
 		try
 		{
 			RobotLogger.getInstance().update();
-			camera.setQuality(70);
-			camera.startAutomaticCapture("cam0");
+//			camera.setQuality(50);
+//			camera.startAutomaticCapture("cam0");
 			RobotDriveBase.getInstance().initRobotDrive();
 			RobotLogger.getInstance().sendToConsole("Robot Successfully Started. Last Build Time: " + RobotMap.LAST_BUILD_TIME);
 		}
@@ -63,6 +63,7 @@ public class RobotMain extends IterativeRobot
 	@Override
 	public void disabledPeriodic()
 	{
+		// TODO Auto-generated method stub
 		super.disabledPeriodic();
 	}
 
@@ -75,7 +76,9 @@ public class RobotMain extends IterativeRobot
 	{
 		try
 		{
+			super.autonomousInit();
 			RobotLogger.getInstance().update();
+			RobotDriveBase.getInstance().initAutonomous();
 			autoBegin = false;
 			RobotLogger.getInstance().sendToConsole("Robot Autonomous Mode Initialized.");
 		}
@@ -98,6 +101,7 @@ public class RobotMain extends IterativeRobot
 				RobotLogger.getInstance().sendToConsole("Robot Autonomous Mode Begin.");
 				autoBegin = true;
 			}
+			RobotDriveBase.getInstance().runAutonomous();
 		}
 		catch (Exception ex)
 		{
@@ -155,6 +159,7 @@ public class RobotMain extends IterativeRobot
 		{
 			RobotLogger.getInstance().update();
 			TestRobot.getInstance().init();
+			testBegin = false;
 			RobotLogger.getInstance().sendToConsole("Robot Test Mode Initialized.");
 		}
 		catch (Exception ex)
