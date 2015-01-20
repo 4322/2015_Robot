@@ -20,9 +20,9 @@ public class RobotMain extends IterativeRobot {
      */
 	
     public void robotInit() {
-    	CameraServer camera = CameraServer.getInstance();
-    	camera.setQuality(50);
-    	camera.startAutomaticCapture("cam0");
+//    	CameraServer camera = CameraServer.getInstance();
+//    	camera.setQuality(50);
+//    	camera.startAutomaticCapture("cam0");
     	RobotDriveBase.getInstance().initRobotDrive();
     	RobotLogger.getInstance().sendToConsole("Robot Successfully Started.");
     }
@@ -37,6 +37,7 @@ public class RobotMain extends IterativeRobot {
 	public void autonomousInit() {
 		// TODO Auto-generated method stub
 		super.autonomousInit();
+		RobotDriveBase.getInstance().initAutonomous();
 	}
     
     /**
@@ -44,7 +45,7 @@ public class RobotMain extends IterativeRobot {
      */
     
     public void autonomousPeriodic() {
-    	
+    	RobotDriveBase.getInstance().runAutonomous();
     }
 
     /**

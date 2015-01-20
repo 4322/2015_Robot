@@ -31,7 +31,8 @@ public class RobotDriveBase
     private Talon rightTalon = null;
     
     // Instances for slide drive
-    private CANJaguar slideJaguar = null;
+    private CANJaguar slideJaguar1 = null;
+    private CANJaguar slideJaguar2 = null;
     private DoubleSolenoid slideActuatorPiston = null;
     private Compressor compressor = null;
 
@@ -49,7 +50,17 @@ public class RobotDriveBase
     private double lastStrafingValue = 0;
     
     private RobotDrive robotDrive = null;
-
+    
+    // Auton gyro
+    private Gyro robotGyro = null;
+    
+    // Auton Accelerometer
+    private BuiltInAccelerometer robotAccelerometer = null;
+    
+    boolean strafeMode = false;
+    boolean strafeStart = false;
+    boolean strafePressed = false;
+    
     // This is the static getInstance() method that provides easy access to the RobotDriveBase singleton class.
     public static RobotDriveBase getInstance()
     {
@@ -85,10 +96,16 @@ public class RobotDriveBase
             rightTalon = new Talon(RobotMap.TALON_RIGHT_DRIVE_CHANNEL);
         }
 
-        // Create the slideJaguar if it does not exist.
-        if(slideJaguar == null)
+        // Create slideJaguar1 if it does not exist.
+        if(slideJaguar1 == null)
         {
-        	slideJaguar = new CANJaguar(RobotMap.CANJAGUAR_SLIDE_DRIVE_ADDRESS);
+        	slideJaguar1 = new CANJaguar(RobotMap.CANJAGUAR_SLIDE_1_DRIVE_ADDRESS);
+        }
+        
+        // Create slideJaguar2 if it does not exist.
+        if(slideJaguar2 == null)
+        {
+        	slideJaguar2 = new CANJaguar(RobotMap.CANJAGUAR_SLIDE_2_DRIVE_ADDRESS);
         }
         
         // Create the piston to actuate the slide drive if it does not exist.
@@ -108,6 +125,20 @@ public class RobotDriveBase
         if(driveEncoder == null)
         {
         	driveEncoder = new Encoder(RobotMap.ENCODER_A_GPIO_PORT, RobotMap.ENCODER_B_GPIO_PORT, false, EncodingType.k4X);
+        	driveEncoder.setDistancePerPulse(RobotMap.ENCODER_DISTANCE_PER_TICK);
+        	driveEncoder.setReverseDirection(true);
+        }
+        
+        // Create robotGyro if it does not exist
+        if(robotGyro == null)
+        {
+        	robotGyro = new Gyro(1);
+        }
+        
+        // Create robotAccelerometer if it does not exist
+        if(robotAccelerometer == null)
+        {
+        	robotAccelerometer = new BuiltInAccelerometer();
         }
         
         // Create robotDrive if it does not exist
@@ -119,6 +150,7 @@ public class RobotDriveBase
         	robotDrive.setInvertedMotor(MotorType.kRearLeft, true);
         	robotDrive.setInvertedMotor(MotorType.kRearRight, true);
         }
+        
     }
 
     // Drivebase code for disabled mode should go here.
@@ -135,25 +167,54 @@ public class RobotDriveBase
             rightTalon.set(0);
         }
         // If the slideJaguar exists, set the power to zero
-        if(slideJaguar != null)
+        if(slideJaguar1 != null)
         {
-            slideJaguar.set(0);
+            slideJaguar1.set(0);
+        }
+        
+        // If the slideJaguar exists, set the power to zero
+        if(slideJaguar2 != null)
+        {
+            slideJaguar2.set(0);
         }
     }
 
     // Initialization code for autonomous mode should go here.
     public void initAutonomous()
     {
-    	driveEncoder.setDistancePerPulse(RobotMap.ENCODER_DISTANCE_PER_TICK);
     	driveEncoder.reset();
+    	robotGyro.reset();
     }
     
     public void runAutonomous()
     {
-    	if(driveEncoder.getDistance() <= RobotMap.ENCODER_AUTONOMOUS_DRIVE_DISTANCE)
+    	double correction = -1*robotGyro.getAngle()*RobotMap.AUTONOMOUS_P_CONTROL_VALUE_GYRO;
+    	double distance = driveEncoder.getDistance();
+    	if(distance <= RobotMap.ENCODER_AUTONOMOUS_DRIVE_DISTANCE)
     	{
-    		robotDrive.drive(RobotMap.AUTONOMOUS_DRIVE_SPEED, 0);
+    		robotDrive.drive(RobotMap.AUTONOMOUS_DRIVE_SPEED, correction);
     	}
+    	else if(distance <= RobotMap.ENCODER_AUTONOMOUS_DRIVE_DISTANCE +4 && distance <= RobotMap.ENCODER_AUTONOMOUS_DRIVE_DISTANCE -4)
+    	{
+    		robotDrive.drive(0,0);
+    	}
+    	else if(distance >= RobotMap.ENCODER_AUTONOMOUS_DRIVE_DISTANCE +4)
+    	{
+    		robotDrive.drive(RobotMap.AUTONOMOUS_REVERSE_SPEED,0);
+    	}
+    	SmartDashboard.putNumber("Encoder Raw Tick Count", driveEncoder.getRaw());
+        SmartDashboard.putNumber("Encoder Distance", driveEncoder.getDistance());
+        SmartDashboard.putNumber("Gyro Angle", robotGyro.getAngle());
+        if(robotGyro.getAngle() < 0.05)
+        {
+        	SmartDashboard.putNumber("Autonomous Turning Correction Value", correction);
+        	SmartDashboard.putString("Autonomous Turning Correction", "Active");
+        }
+        else
+        {
+        	SmartDashboard.putString("Autonomous Turning Correction", "Currently Straight");
+        	SmartDashboard.putNumber("Autonomous Turning Correction Value", 0);
+        }
     }
 
     // Initialization code for teleop mode should go here.
@@ -163,6 +224,8 @@ public class RobotDriveBase
         throttleValue = 0;
         steeringValue = 0;
         strafingValue = 0;
+    	driveEncoder.reset();
+    	robotGyro.reset();
     }
 
     // Periodic code for teleop mode should go here. This method is called ~50x per second.
@@ -224,19 +287,59 @@ public class RobotDriveBase
         	}
         }
         lastStrafingValue = strafingValue;
-        
-        // Driving Actions
-        robotDrive.arcadeDrive(throttleValue, steeringValue);
-        if(PilotController.getInstance().getLeftBumper())
+    	if(PilotController.getInstance().getLeftBumper())
+    	{
+    		if(!strafePressed)
+    		{
+        		strafeMode = !strafeMode;
+        		strafePressed = true;
+    		}
+    	}
+    	else
+    	{
+    		strafePressed = false;
+    	}
+    	double gyroAngle = robotGyro.getAngle();
+        if(!strafeMode)
         {
-        	slideActuatorPiston.set(Value.kForward);
-        	slideJaguar.set(strafingValue * -1);
-        }
-        else
-        {
+        	if(strafeStart) strafeStart = false;
         	slideActuatorPiston.set(Value.kReverse);
-        	slideJaguar.set(0);
+        	slideJaguar1.set(0);
+        	slideJaguar2.set(0);
+            if(Math.abs(PilotController.getInstance().getRightJoystickXAxis()) < RobotMap.XBONE_RIGHT_X_DEADBAND)
+            {
+            	robotDrive.arcadeDrive(throttleValue, gyroAngle*RobotMap.TELEOP_P_CONTROL_VALUE_GYRO*-1);
+            }
+            else
+            {
+            	robotDrive.arcadeDrive(throttleValue, steeringValue);
+            	robotGyro.reset(); 
+            }
         }
+        else if(strafeMode)
+        {
+        	if(!strafeStart)
+        	{
+        		strafeStart = true;
+        		robotGyro.reset();
+        	}
+        	if(Math.abs(PilotController.getInstance().getRightJoystickXAxis()) < RobotMap.XBONE_RIGHT_X_DEADBAND)
+        	{
+        		robotDrive.arcadeDrive(throttleValue, gyroAngle*RobotMap.TELEOP_STRAFE_P_CONTROL_VALUE_GYRO*-1);
+        	}
+        	else
+        	{
+        		robotDrive.arcadeDrive(throttleValue, steeringValue);
+        		robotGyro.reset();
+        	}
+        	slideActuatorPiston.set(Value.kForward);
+        	slideJaguar1.set(strafingValue);
+        	slideJaguar2.set(strafingValue);
+        }
+        SmartDashboard.putNumber("Encoder Distance", driveEncoder.getDistance());
+        SmartDashboard.putNumber("Xbone Controller Right Stick X Axis", PilotController.getInstance().getRightJoystickXAxis());
+        SmartDashboard.putNumber("Gyro Angle", gyroAngle);
+    	SmartDashboard.putNumber("Teleop Turning Correction Value", gyroAngle*RobotMap.TELEOP_STRAFE_P_CONTROL_VALUE_GYRO*-1);
     }
 
     // Initialization code for test mode should go here.
