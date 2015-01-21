@@ -84,22 +84,20 @@ public class TestRobot {
 		LiveWindow.setEnabled(true); //bleh
 		counter++;
 		if (counter == 5) {
-//			System.out.println("Compressor Current: " + compressor.getCompressorCurrent());
-//			System.out.println("Compressor Switch Value LOW: " + compressor.getPressureSwitchValue());
+//			RobotLogger.getInstance().sendToConsole("Compressor Current: " + compressor.getCompressorCurrent());
+//			RobotLogger.getInstance().sendToConsole("Compressor Switch Value LOW: " + compressor.getPressureSwitchValue());
 //			boolean highCurrent = compressor.getCompressorCurrentTooHighFault();
 //			boolean stickyHighCurrent = compressor.getCompressorCurrentTooHighStickyFault();
 //			boolean stickyShorted = compressor.getCompressorShortedStickyFault();
 //			boolean shorted = compressor.getCompressorShortedFault();
 //			boolean stickyNC = compressor.getCompressorNotConnectedStickyFault();
 //			boolean NC = compressor.getCompressorNotConnectedFault();
-//			System.out.println("Compressor Error: " + (highCurrent || shorted || NC));
-//			System.out.println("Compressor Sticky: " + (stickyHighCurrent || stickyShorted || stickyNC));
-			SmartDashboard.putNumber("ACCEL (X)", accelerometer.getX());
-			SmartDashboard.putNumber("ACCEL (Y)", accelerometer.getY());
-			SmartDashboard.putNumber("Gyro Angle:", gyro.getAngle());
-			SmartDashboard.putNumber("Gyro Rate:", gyro.getRate());
+//			RobotLogger.getInstance().sendToConsole("Compressor Error: " + (highCurrent || shorted || NC));
+//			RobotLogger.getInstance().sendToConsole("Compressor Sticky: " + (stickyHighCurrent || stickyShorted || stickyNC));
 			counter = 0;
 		}
+		SmartDashboard.putNumber("Gyro Angle:", gyro.getAngle());
+		SmartDashboard.putNumber("Gyro Rate:", gyro.getRate());
 		if(PilotController.getInstance().getNorth())
 		{
 			piston.set(Value.kForward);

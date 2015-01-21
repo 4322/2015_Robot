@@ -43,8 +43,13 @@ public class RobotMap {
 	
 	// P constants for autonomous driving
 	public static final double AUTONOMOUS_P_CONTROL_VALUE_GYRO = 0.1;
-	public static final double TELEOP_P_CONTROL_VALUE_GYRO = 0.25;
-	public static final double TELEOP_STRAFE_P_CONTROL_VALUE_GYRO = 0.25;
+	public static final double TELEOP_P_CONTROL_VALUE_GYRO = 0.125; //0.25
+	public static final double TELEOP_STRAFE_P_CONTROL_VALUE_GYRO = 0.125; //0.25
+	
+	// Accelerometer Deadband values per axis
+	public static final double ACCELEROMETER_DEADBAND_X = 0.05;
+	public static final double ACCELEROMETER_DEADBAND_Y = 0.05;
+	public static final double ACCELEROMETER_DEADBAND_Z = 1; //pretty sensitive
 	
 	// Initialize Elevator CAN Addresses
 	public static final int TOTE_ELEVATOR_CONTROLLER_ADDRESS = 30;

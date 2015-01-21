@@ -53,6 +53,7 @@ public class RobotDriveBase
     
     // Auton gyro
     private Gyro robotGyro = null;
+    private boolean dirtyGyro = true;
     
     // Auton Accelerometer
     private BuiltInAccelerometer robotAccelerometer = null;
@@ -134,6 +135,12 @@ public class RobotDriveBase
         {
         	robotGyro = new Gyro(1);
         }
+        
+        // Create the BuiltInAccelerometer if it does not exist
+        if(robotAccelerometer == null)
+		{
+			robotAccelerometer = new BuiltInAccelerometer();
+		}
         
         // Create robotAccelerometer if it does not exist
         if(robotAccelerometer == null)
@@ -242,6 +249,7 @@ public class RobotDriveBase
         // Strafe motor reversal
         strafingValue *= -1; 
         
+        // Dump values to dashboard
     	SmartDashboard.getNumber("Throttle: ", throttleValue);
     	SmartDashboard.getNumber("Steering: ", steeringValue);
     	SmartDashboard.getNumber("Strafing: ", strafingValue);
@@ -287,6 +295,8 @@ public class RobotDriveBase
         	}
         }
         lastStrafingValue = strafingValue;
+        
+        // Toggle Strafe Mode
     	if(PilotController.getInstance().getLeftBumper())
     	{
     		if(!strafePressed)
@@ -299,39 +309,72 @@ public class RobotDriveBase
     	{
     		strafePressed = false;
     	}
+    	
+    	// Drive with Gyro Assist, get Angle
     	double gyroAngle = robotGyro.getAngle();
+    	
+    	// Handle DRIVING mode
         if(!strafeMode)
         {
         	if(strafeStart) strafeStart = false;
+        	
+        	// Lift the SLIDE drive and shut off slide motors
         	slideActuatorPiston.set(Value.kReverse);
         	slideJaguar1.set(0);
         	slideJaguar2.set(0);
+        	
+        	// Check to see if we are not steering and reset the gyro heading 
             if(Math.abs(PilotController.getInstance().getRightJoystickXAxis()) < RobotMap.XBONE_RIGHT_X_DEADBAND)
             {
-            	robotDrive.arcadeDrive(throttleValue, gyroAngle*RobotMap.TELEOP_P_CONTROL_VALUE_GYRO*-1);
+            	// If the Gyro is dirty, and we have stopped turning
+            	if(dirtyGyro && Math.abs(robotAccelerometer.getX()) < RobotMap.ACCELEROMETER_DEADBAND_X
+            			     && Math.abs(robotAccelerometer.getY()) < RobotMap.ACCELEROMETER_DEADBAND_Y)
+                {
+            		// Reset the Gyro ONLY ONCE per dirty 
+                	robotGyro.reset();
+                	dirtyGyro = false;
+                }
+            	// Drive STRAIGHT and use the GYRO to keep us straight
+            	robotDrive.arcadeDrive(throttleValue, gyroAngle * RobotMap.TELEOP_P_CONTROL_VALUE_GYRO * -1);
             }
+            // Here, the driver is steering and we will NOT USE the gyro
             else
             {
             	robotDrive.arcadeDrive(throttleValue, steeringValue);
-            	robotGyro.reset(); 
+            	// When steering, the gyro is always dirty
+            	//robotGyro.reset();
+            	dirtyGyro = true;
             }
         }
+        // Handle STRAFING mode
         else if(strafeMode)
         {
+        	// Reset the gyro and get a new heading when we first enter STRAFE mode
         	if(!strafeStart)
         	{
         		strafeStart = true;
         		robotGyro.reset();
         	}
+        	// Check to see if we are not steering and reset the gyro heading 
         	if(Math.abs(PilotController.getInstance().getRightJoystickXAxis()) < RobotMap.XBONE_RIGHT_X_DEADBAND)
         	{
-        		robotDrive.arcadeDrive(throttleValue, gyroAngle*RobotMap.TELEOP_STRAFE_P_CONTROL_VALUE_GYRO*-1);
+            	// If the Gyro is dirty, and we have stopped turning
+        		if(dirtyGyro && Math.abs(robotAccelerometer.getX()) < RobotMap.ACCELEROMETER_DEADBAND_X
+        				     && Math.abs(robotAccelerometer.getY()) < RobotMap.ACCELEROMETER_DEADBAND_Y)
+                {
+            		// Reset the Gyro ONLY ONCE per dirty 
+                	robotGyro.reset();
+                	dirtyGyro = false;
+                }
+            	robotDrive.arcadeDrive(throttleValue, gyroAngle * RobotMap.TELEOP_STRAFE_P_CONTROL_VALUE_GYRO * -1);
         	}
         	else
         	{
         		robotDrive.arcadeDrive(throttleValue, steeringValue);
-        		robotGyro.reset();
-        	}
+            	// When steering, the gyro is always dirty
+//        		robotGyro.reset();
+            	dirtyGyro = true;
+            }
         	slideActuatorPiston.set(Value.kForward);
         	slideJaguar1.set(strafingValue);
         	slideJaguar2.set(strafingValue);
@@ -339,7 +382,10 @@ public class RobotDriveBase
         SmartDashboard.putNumber("Encoder Distance", driveEncoder.getDistance());
         SmartDashboard.putNumber("Xbone Controller Right Stick X Axis", PilotController.getInstance().getRightJoystickXAxis());
         SmartDashboard.putNumber("Gyro Angle", gyroAngle);
-    	SmartDashboard.putNumber("Teleop Turning Correction Value", gyroAngle*RobotMap.TELEOP_STRAFE_P_CONTROL_VALUE_GYRO*-1);
+    	SmartDashboard.putNumber("Teleop Turning Correction Value", gyroAngle * RobotMap.TELEOP_STRAFE_P_CONTROL_VALUE_GYRO * -1);
+		SmartDashboard.putNumber("ACCEL (X)", robotAccelerometer.getX());
+		SmartDashboard.putNumber("ACCEL (Y)", robotAccelerometer.getY());
+		SmartDashboard.putNumber("ACCEL (Z)", robotAccelerometer.getZ());
     }
 
     // Initialization code for test mode should go here.
