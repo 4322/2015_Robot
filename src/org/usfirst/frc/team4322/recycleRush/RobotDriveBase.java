@@ -136,12 +136,6 @@ public class RobotDriveBase
         	robotGyro = new Gyro(1);
         }
         
-        // Create the BuiltInAccelerometer if it does not exist
-        if(robotAccelerometer == null)
-		{
-			robotAccelerometer = new BuiltInAccelerometer();
-		}
-        
         // Create robotAccelerometer if it does not exist
         if(robotAccelerometer == null)
         {
@@ -330,10 +324,15 @@ public class RobotDriveBase
             	if(dirtyGyro && Math.abs(robotAccelerometer.getX()) < RobotMap.ACCELEROMETER_DEADBAND_X
             			     && Math.abs(robotAccelerometer.getY()) < RobotMap.ACCELEROMETER_DEADBAND_Y)
                 {
-            		// Reset the Gyro ONLY ONCE per dirty 
+            		// Reset the Gyro ONLY ONCE per dirty
                 	robotGyro.reset();
                 	dirtyGyro = false;
                 }
+            	// If the Gyro is dirty, no auto-correcting
+            	if(dirtyGyro)
+            	{
+            		gyroAngle = 0;
+            	}
             	// Drive STRAIGHT and use the GYRO to keep us straight
             	robotDrive.arcadeDrive(throttleValue, gyroAngle * RobotMap.TELEOP_P_CONTROL_VALUE_GYRO * -1);
             }
@@ -366,6 +365,11 @@ public class RobotDriveBase
                 	robotGyro.reset();
                 	dirtyGyro = false;
                 }
+        		// If the Gyro is dirty, no auto-correcting
+            	if(dirtyGyro)
+            	{
+            		gyroAngle = 0;
+            	}
             	robotDrive.arcadeDrive(throttleValue, gyroAngle * RobotMap.TELEOP_STRAFE_P_CONTROL_VALUE_GYRO * -1);
         	}
         	else
