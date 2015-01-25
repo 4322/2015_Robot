@@ -1,167 +1,294 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.usfirst.frc.team4322.recycleRush;
 
 import java.util.*;
-import java.util.zip.*;
 import java.io.*;
+import java.nio.file.*;
+import java.nio.file.Path;
+import java.net.URI;
 import java.text.SimpleDateFormat;
+
+import edu.wpi.first.wpilibj.*;
 
 /**
  *
  * @author FRC4322
  */
 
-public class RobotLogger {
+public class RobotLogger
+{
 
-    // Instance for Singleton class
-    static private RobotLogger _instance = null;
+	// Instance for Singleton class
+	private static RobotLogger _instance = null;
 
-    // Instances for the log file
-    private FileOutputStream logfile = null;
-    private final String LOG_FILE = "/home/lvuser/FRC4322Log.txt"; //fix file path
-    private File oldLog = null;
-    private boolean closed = true;
-    
-    // Instances for Zip File
-    private FileInputStream in = null;
-    private FileOutputStream out = null;
-    private ZipOutputStream newZip = null;
-    private final String ZIP_FILE = "/home/lvuser/FRC4322Logs.zip";
-    
-    // Get Date Format
-    private static final SimpleDateFormat sdf_ = new SimpleDateFormat("yyyy-MM-dd");
-    
-    // Constants for file
-    private final long MAX_FILE_LENGTH = 1073741824; //1 GiB = 1024^3 or 2^30
-    //http://highscalability.com/blog/2012/9/11/how-big-is-a-petabyte-exabyte-zettabyte-or-a-yottabyte.html <-- must visit
-    private final byte[] textFormat = ("\n [" + timeToString(true) + "] - Robot4322: ").getBytes();
+	// Instance for Driver Station
+	private DriverStation m_ds = DriverStation.getInstance();
 
-    public static RobotLogger getInstance() {
-        if (_instance == null) {
+	// Instances for the log files
+	public final String LOG_FILE = "/home/lvuser/logs/FRC4322InitLog.txt",
+			Robot_Disabled_Log = "/home/lvuser/logs/FRC4322DisabledLog.txt",
+			Robot_Auto_Log = "/home/lvuser/logs/FRC4322AutoLog.txt",
+			Robot_Teleop_Log = "/home/lvuser/logs/FRC4322TeleopLog.txt",
+			Robot_Test_Log = "/home/lvuser/logs/FRC4322TestLog.txt";
+	private File oldLog = null;
+	private FileWriter fw = null;
+	private BufferedWriter bw = null;
+	private boolean closed = true;
+
+	// Instances for ZIP File
+	public Map<String, String> env = new HashMap<>();
+	private final String LOGS_ZIP_FILE = "/home/lvuser/logs/FRC4322Logs.zip";
+
+	// Get Date Format
+	private static final SimpleDateFormat sdf_ = new SimpleDateFormat("yyyy-MM-dd");
+
+	// Constants for file
+	private final long MAX_FILE_LENGTH = 1048576; // 1 MiB = 1024^2 or 2^20
+	// http://highscalability.com/blog/2012/9/11/how-big-is-a-petabyte-exabyte-zettabyte-or-a-yottabyte.html <-- must visit
+	private final byte[] textFormat = ("\n [" + timeToString(true) + "] - Robot4322: ").getBytes();
+
+	 // This is the static getInstance() method that provides easy access to the RobotLogger singleton class.
+	public static RobotLogger getInstance()
+	{
+		// Look to see if the instance has already been created...
+        if(_instance == null)
+        {
+            // If the instance does not yet exist, create it.
             _instance = new RobotLogger();
         }
-
+        // Return the singleton instance to the caller.
         return _instance;
-    }
+	}
 
-    /*
-     * If there already is a file, write the data to it.
-     * If there is not, create the file.
-     * If the file is too big, add it to a ZIP file.
-     *
-     * TODO If zip file already exists, add new file to it.
-     */
-    public void writeToFile(String msg) {
-        if(!closed) {
-            try {
-                // Get the default log file
-                oldLog = new File(LOG_FILE);
-                // If it exists, append it. If not, create it.
-                if (oldLog.exists()) {
-                    // Get the file length in bytes
-                    long fileLength = oldLog.length();
-                    // If the file length is below the max, add the msg to it.
-                    if (fileLength < MAX_FILE_LENGTH) {
-                        // Get the appendable file
-                        logfile = new FileOutputStream(oldLog, true);
-                        // Write the message to the log
-                        logfile.write(textFormat);
-                        logfile.write(msg.getBytes());
-                    } else { // File length is too long: add it to a zip.
-                        // Open an OutputStream
-                        out = new FileOutputStream(ZIP_FILE);
-                        // Open a ZipOutputStream
-                        newZip = new ZipOutputStream(out);
-                        // Prepare a ZipEntry
-                        newZip.putNextEntry(new ZipEntry(oldLog.getName()));
+	public void update()
+	{
+		try
+		{
+			// Get the correct file
+			String file = LOG_FILE;
+			if (m_ds.isDisabled())
+				file = Robot_Disabled_Log;
+			if (m_ds.isAutonomous())
+				file = Robot_Auto_Log;
+			if (m_ds.isOperatorControl())
+				file = Robot_Teleop_Log;
+			if (m_ds.isTest())
+				file = Robot_Test_Log;
+			// Default is initLog
+			
+			oldLog = new File(file);
+			
+			// If the file exists & the length is too long, send it to ZIP
+			if(oldLog.exists())
+			{
+				if(oldLog.length() > MAX_FILE_LENGTH)
+				{
+					addFileToZip(oldLog, LOGS_ZIP_FILE);
+					// Create a new .txt file, and rename it
+					oldLog.createNewFile();
+					File newFile = new File(file.replace(".txt", "") + " [" + timeToString(true) + "]" + ".txt");
+					oldLog.renameTo(newFile);
+				}
+			}
+			// If log file does not exist, create it
+			else
+			{
+				if(!oldLog.createNewFile()) throw new IOException();
+			}
+		}
+		catch (IOException ex)
+		{
+			writeErrorToFile("RobotLogger.update()", ex);
+		}
+	}
+	/*
+	 * If there already is a file, write the data to it.
+	 * If there is not, create the file.
+	 * If the file is too big, add it to a ZIP file.
+	 */
+	public void writeToFile(final String msg)
+	{
+			try
+			{
+				if (closed)
+				{
+				// Get the correct file
+				String file = LOG_FILE;
+				if (m_ds.isDisabled())
+					file = Robot_Disabled_Log;
+				if (m_ds.isAutonomous())
+					file = Robot_Auto_Log;
+				if (m_ds.isOperatorControl())
+					file = Robot_Teleop_Log;
+				if (m_ds.isTest())
+					file = Robot_Test_Log;
+				// Default is initLog
+				
+				oldLog = new File(file);
+				// If file does not exist, create it.
+				if (!oldLog.exists())
+				{
+					oldLog.createNewFile();
+				}
+				// Write data using buffered writer; enhances IO operations
+				fw = new FileWriter(oldLog.getAbsoluteFile());
+				bw = new BufferedWriter(fw);
+				} // if the file is closed, open it
+				bw.write(textFormat + msg);
+				if(closed) closed = false;
+			}
+			catch (IOException e)
+			{
+				System.out.println("IOException caught while writing to file: " + e);
+			}
+	}
 
-                        // Write the file data in chunks
-                        in = new FileInputStream(oldLog);
-                        //newZip.write(Files.readAllBytes(Paths.get("/var/log/FRC4322Log.txt")));
-                        byte[] chardata = new byte[1024];
-                        int bytesRead = in.read(chardata);
-                        do {
-                            newZip.write(chardata);
-                        } while (bytesRead > 0);
-                        // Close the zip entry
-                        newZip.closeEntry();
-                        // Close the ZipOutputStream
-                        newZip.close();
-                        // Close the OutputStream
-                        out.close();
+	// Writes the throwable error to the .txt log file
+	public void writeErrorToFile(final String method, final Throwable t)
+	{
+		if (!closed)
+		{
+			String msg = "\nException in " + method + ": " + getString(t);
+			writeToFile(msg);
+		}
+	}
 
-                        // Create a new txt file
-                        logfile = new FileOutputStream(oldLog, false);
-                        // Write the message to the log
-                        logfile.write(textFormat);
-                        logfile.write(msg.getBytes());
-                    }
-                } else {
-                    // Create a new txt file
-                    logfile = new FileOutputStream(oldLog, false);
-                    // Write the message to the log
-                    logfile.write(textFormat);
-                    logfile.write(msg.getBytes());
-                }
-            } catch (IOException e) {
-            } finally {
-                try {
-                    if (logfile != null) {
-                        logfile.close();
-                        closed = true;
-                    }
-                } catch (IOException e) {
-                }
-            }
-        } //if the file is closed, you can't write to it
-    }
+	// Sends message to console and .txt log file
+	public void sendToConsole(String thisMessage)
+	{
+		// Prevent different threads from interrupting log entries
+		synchronized (System.out)
+		{
+			// Output logging messages to the console with a standard format
+			System.out.println(timeToString(true) + " - Robot4322: " + thisMessage);
+			// Output logging messages to a .txt log file
+			writeToFile(thisMessage);
+		}
+	}
 
-    public void close() {
-        if (closed) {
-            return;
-        }
-        try {
-            logfile.close();
-            closed = true;
-        } catch (IOException e) {
-        }
-    }
+	// Adds given file to given ZIP Folder
+	public void addFileToZip(File file, String zipfile)
+	{
+		//TODO If there are more than 10 files in ZIP, delete them
+		try
+		{
+			// In Java 7, we get to use the ZipFileSystem!
+	        env.put("create", "true");
 
-    public void sendToConsole(String thisMessage) {
-        // Prevent different threads from interrupting log entries
-        synchronized (System.out) {
-            // Output logging messages to the console with a standard format
-            System.out.println(timeToString(true) + " - Robot4322: " + thisMessage);
-            // Output logging messages to a .txt log file
-            closed = false;
-            writeToFile(thisMessage);
-        }
-    }
+	        /* Get the uniform resource identifier, &
+	         * locate file system by using the syntax
+	         * defined in java.net.JarURLConnection.
+	         */
+	        URI uri = URI.create("jar:file:" + zipfile);
+	        
+	        /* The ZipFileSystem treats jars and ZIPs as a file
+	         * system, allowing the user to manipulate the contents
+	         * in the ZIP as one would in a folder.
+	         */ 
+	        try (FileSystem zipfs = FileSystems.newFileSystem(uri, env))
+	        {
+	        	// Get the log file
+	            Path externalLogFile = Paths.get(file.getPath());
+	            // Get the path the log file will be put into
+	            Path pathInZipfile = zipfs.getPath(file.getName());
+	            // Copy the log file into the ZIP, replace if necessary
+	            Files.copy(externalLogFile, pathInZipfile, StandardCopyOption.REPLACE_EXISTING);
+	            // Delete the log file
+	            Files.delete(externalLogFile);
+	        }
+	        catch (FileSystemException e)
+	        {
+	        	writeErrorToFile("FileSystem, addFileToZip()", e);
+	        }
+		}
+		catch (IOException e)
+		{
+			writeErrorToFile("addFileToZip()", e);
+		}
+	}
+	
+	private String timeToString(boolean date)
+	{
+		// Create a time stamp that looks like 12:34:56.999
+		Calendar c = Calendar.getInstance();
+		c.setTime(new Date());
+		int h = c.get(Calendar.HOUR_OF_DAY);
+		int m = c.get(Calendar.MINUTE);
+		int s = c.get(Calendar.SECOND);
+		int ms = c.get(Calendar.MILLISECOND);
+		String msFormat = Integer.toString(ms);
+		if (ms < 10)
+		{
+			msFormat = "00" + msFormat;
+		}
+		else if (ms < 100)
+		{
+			msFormat = "0" + msFormat;
+		}
+		// If the user wants a date, format is yyyy-MM-dd
+		String t = (date ? "<" + CurrentReadable_Date() + "> " : "") +
+				// Time stamp
+				(h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s + "." + msFormat;
+		return t;
+	}
 
-    private String timeToString(boolean date) {
-        // Create a time stamp that looks like 12:34:56.999
-        Calendar c = Calendar.getInstance();
-        c.setTime(new Date());
-        int h = c.get(Calendar.HOUR_OF_DAY);
-        int m = c.get(Calendar.MINUTE);
-        int s = c.get(Calendar.SECOND);
-        int ms = c.get(Calendar.MILLISECOND);
-        String msFormat = Integer.toString(ms);
-        if (ms < 10) {
-            msFormat = "00" + msFormat;
-        } else if (ms < 100) {
-            msFormat = "0" + msFormat;
-        }
-        // If the user wants a date, format is yyyy-MM-dd
-        String t = (date ? "<" + CurrentReadable_Date() + "> " : "") + (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s + "." + msFormat;
-        return t;
-    }
-    
-    public static String CurrentReadable_Date() {
-        return sdf_.format(Calendar.getInstance().getTime());
-    }
-    
+	// Gets the date in yyyy-MM-dd format
+	public static String CurrentReadable_Date()
+	{
+		return sdf_.format(Calendar.getInstance().getTime());
+	}
+
+	// Creates a string out of a throwable
+	public static String getString(final Throwable e)
+	{
+		String retValue = null;
+		StringWriter sw = null;
+		PrintWriter pw = null;
+		try
+		{
+			sw = new StringWriter();
+			pw = new PrintWriter(sw);
+			e.printStackTrace(pw);
+			retValue = sw.toString();
+		}
+		finally
+		{
+			try
+			{
+				if (pw != null)
+				{
+					pw.close();
+				}
+				if (sw != null)
+				{
+					sw.close();
+				}
+			}
+			catch (IOException ignore)
+			{
+				System.out.println("IOException caught while closing String/Print Writer: " + ignore);
+			}
+		}
+		return retValue;
+	}
+
+	public void close()
+	{
+		if (closed)
+			return;
+		try
+		{
+			if(bw != null)
+			{
+				fw.flush();
+				bw.flush();
+				fw.close();
+				bw.close();
+				closed = true;
+			}
+		}
+		catch (IOException ex)
+		{
+			System.out.println("IOException caught while closing log files: " + ex);
+		}
+	}
 }

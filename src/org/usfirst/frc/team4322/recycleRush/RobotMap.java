@@ -4,15 +4,15 @@ public class RobotMap {
 	
 	public static final int CANJAGUAR_SECONDARY_CONTROLLER_ADDRESS = 11;
 	
-	public static final String LAST_BUILD_TIME = "Robot4322_2015: 1/18/2015 5:58 PM";
+	public static final String LAST_BUILD_TIME = "Robot4322_2015: 1/24/2015 7:20 PM";
 	
 	// Initialize Joystick Ports
 	public static final int PILOT_CONTROLLER_JOYSTICK_PORT = 0;
 	public static final int COPILOT_CONTROLLER_JOYSTICK_PORT = 1;
 	
 	// Initialize RobotDriveBase Ports
-	public static final int TALON_LEFT_DRIVE_CHANNEL = 1;
-	public static final int TALON_RIGHT_DRIVE_CHANNEL = 0;
+	public static final int TALON_LEFT_DRIVE_CHANNEL = 0;
+	public static final int TALON_RIGHT_DRIVE_CHANNEL = 1;
 	
 	// Initialize Slide Drive CAN Address
 	public static final int CANJAGUAR_SLIDE_2_DRIVE_ADDRESS = 10;
@@ -39,16 +39,16 @@ public class RobotMap {
 	public static final int ENCODER_A_GPIO_PORT = 1;
 	public static final int ENCODER_B_GPIO_PORT = 0;
 	public static final double ENCODER_DISTANCE_PER_TICK = 0.07539822368615503772310344119871;
-	public static final double ENCODER_AUTONOMOUS_DRIVE_DISTANCE = 132;
+	public static final double ENCODER_AUTONOMOUS_DRIVE_DISTANCE = 40; //132
 	
 	// P constants for autonomous driving
 	public static final double AUTONOMOUS_P_CONTROL_VALUE_GYRO = 0.1;
-	public static final double TELEOP_P_CONTROL_VALUE_GYRO = 0.125; //0.25
-	public static final double TELEOP_STRAFE_P_CONTROL_VALUE_GYRO = 0.125; //0.25
+	public static final double TELEOP_P_CONTROL_VALUE_GYRO = 0.25;
+	public static final double TELEOP_STRAFE_P_CONTROL_VALUE_GYRO = 0.25;
 	
 	// Accelerometer Deadband values per axis
-	public static final double ACCELEROMETER_DEADBAND_X = 0.05;
-	public static final double ACCELEROMETER_DEADBAND_Y = 0.05;
+	public static final double ACCELEROMETER_DEADBAND_X = 1.0; //0.05;
+	public static final double ACCELEROMETER_DEADBAND_Y = 1.0; //0.05;
 	public static final double ACCELEROMETER_DEADBAND_Z = 1; //pretty sensitive
 	
 	// Initialize Elevator CAN Addresses
