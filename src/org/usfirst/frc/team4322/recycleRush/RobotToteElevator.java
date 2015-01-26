@@ -1,5 +1,7 @@
 package org.usfirst.frc.team4322.recycleRush;
 
+import edu.wpi.first.wpilibj.CANTalon;
+
 /**
  *
  * @author FRC4322
@@ -9,6 +11,9 @@ public class RobotToteElevator {
 
 	// Instance for the Singleton Class
     static private RobotToteElevator _instance = null;
+    
+    // Instance for tote lifting motor.
+    private CANTalon toteMotor = null;
     
     // This is the static getInstance() method that provides easy access to the RobotToteElevator singleton class.
     public static RobotToteElevator getInstance()
@@ -26,7 +31,11 @@ public class RobotToteElevator {
     // Main elevator initialization code should go here.
     public void initRobotToteElevator()
     {
-    	
+    	// Create toteMotor
+    	if(toteMotor == null)
+    	{
+    		toteMotor = new CANTalon(RobotMap.TOTE_ELEVATOR_CONTROLLER_ADDRESS);
+    	}
     }
     
     // Tote elevator code for disabled mode should go here.
@@ -44,13 +53,24 @@ public class RobotToteElevator {
     // Initialization code for teleop mode should go here.
     public void initTeleop()
     {
-
+    	
     }
 
     // Periodic code for teleop mode should go here. This method is called ~50x per second.
     public void runTeleop()
     {
-    	
+    	if(CoPilotController.getInstance().getYButton())
+    	{
+    		toteMotor.set(RobotMap.TOTE_LIFT_MOTOR_SPEED);
+    	}
+    	else if(CoPilotController.getInstance().getAButton())
+    	{
+    		toteMotor.set(RobotMap.TOTE_STACK_MOTOR_SPEED);
+    	}
+    	else
+    	{
+    		toteMotor.set(0);
+    	}
     }
     
     // Initialization code for test mode should go here.
@@ -64,4 +84,7 @@ public class RobotToteElevator {
     {
     	
     }
+    
+    // Elevator PID Class
+    
 }

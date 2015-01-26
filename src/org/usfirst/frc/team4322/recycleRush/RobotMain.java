@@ -40,6 +40,7 @@ public class RobotMain extends IterativeRobot
     {
 	    try
 	    {
+	    	RobotLogger.getInstance().close();
 	    	// Open and update the RobotLogger in case log files are too large
 	    	RobotLogger.getInstance().update();
 
@@ -58,11 +59,12 @@ public class RobotMain extends IterativeRobot
 	    	// Initiate each system on the robot
 	    	RobotDriveBase.getInstance().initRobotDrive();
 	    	
-	    	// Create the Sendable Choosers on the SmartDashboard
-	    	autoChooser = new SendableChooser();
-	    	autoChooser.addDefault("DriveForward (Auto 1)", new DriveForward());
-	    	autoChooser.addObject("DriveBackward (Auto 2)", new DriveBackward());
-	    	SmartDashboard.putData("Auto Mode Chooser", autoChooser);
+
+	    	// Create the Sendable Choosers on the SmartDashboard (does not work with new sfx currently)
+//	    	autoChooser = new SendableChooser();
+//	    	autoChooser.addDefault("DriveForward (Auto 1)", new DriveForward());
+//	    	autoChooser.addObject("DriveBackward (Auto 2)", new DriveBackward());
+//	    	SmartDashboard.putData("Auto Mode Chooser", autoChooser);
 	    	
 	    	// Send success and last build time to log file
 	    	RobotLogger.getInstance().sendToConsole("Robot Successfully Started. Last Build Time: " + RobotMap.LAST_BUILD_TIME);
@@ -78,11 +80,10 @@ public class RobotMain extends IterativeRobot
     {
     	try
 		{
+    		RobotLogger.getInstance().close();
     		// Restart disabled
 			disabledBegin = false;
 			RobotLogger.getInstance().sendToConsole("Robot Disabled.");
-    		// Flush & close the FileWriter and BufferWriter
-			RobotLogger.getInstance().close();
 		}
 		catch (Exception ex)
 		{
@@ -102,7 +103,7 @@ public class RobotMain extends IterativeRobot
 			// Log initiation only once
  			if (!disabledBegin)
 			{
-				RobotLogger.getInstance().sendToConsole("Robot Autonomous Mode Begin.");
+				RobotLogger.getInstance().sendToConsole("Robot Disabled Mode Begin.");
 				disabledBegin = true;
 			}
  			if(PilotController.getInstance().getYButton())
@@ -120,6 +121,7 @@ public class RobotMain extends IterativeRobot
  					autoMode = 2; //Max mode #
  			}
  			SmartDashboard.putNumber("Autonomous Mode", autoMode);
+ 	        SmartDashboard.putNumber("Xbone Controller Right Stick X Axis", PilotController.getInstance().getRightJoystickXAxis());
 		}
 		catch (Exception ex)
 		{
@@ -136,15 +138,16 @@ public class RobotMain extends IterativeRobot
     {
     	try
 		{
+    		RobotLogger.getInstance().close();
     		// Open and update the RobotLogger in case log files are too large
 	    	RobotLogger.getInstance().update();
 	    	
-//			RobotDriveBase.getInstance().initAutonomous();
-//			autoBegin = false;
+			RobotDriveBase.getInstance().initAutonomous();
+			autoBegin = false;
 	    	
-	    	// Get the selected command and schedule it
-			autoCommand = (Command) autoChooser.getSelected();
-			autoCommand.start();
+	    	// Get the selected command and schedule it (sfx currently does not support SendableChoosers)
+//			autoCommand = (Command) autoChooser.getSelected();
+//			autoCommand.start();
 			
 			RobotLogger.getInstance().sendToConsole("Robot Autonomous Mode Initialized.");
 		}
@@ -168,14 +171,14 @@ public class RobotMain extends IterativeRobot
 				RobotLogger.getInstance().sendToConsole("Robot Autonomous Mode Begin.");
 				autoBegin = true;
 			}
-//			RobotDriveBase.getInstance().runAutonomous(autoMode);
+			RobotDriveBase.getInstance().runAutonomous(autoMode);
 			
 			/**
 			 * RobotBuilder will generate code automatically that runs the
 			 * scheduler every driver station update period (about every 20ms).
 			 * This will cause the selected autonomous command to run.
 			 */
-			Scheduler.getInstance().run();
+//			Scheduler.getInstance().run();
 		}
 		catch (Exception ex)
 		{
@@ -191,6 +194,7 @@ public class RobotMain extends IterativeRobot
     {
     	try
 		{
+    		RobotLogger.getInstance().close();
 			RobotLogger.getInstance().update();
 			RobotDriveBase.getInstance().initTeleop();
 			teleBegin = false;
@@ -217,6 +221,7 @@ public class RobotMain extends IterativeRobot
 				teleBegin = true;
 			}
 			RobotDriveBase.getInstance().runTeleop();
+			RobotToteElevator.getInstance().runTeleop();
 		}
 		catch (Exception ex)
 		{
@@ -228,6 +233,7 @@ public class RobotMain extends IterativeRobot
     {
     	try
 		{
+    		RobotLogger.getInstance().close();
 			RobotLogger.getInstance().update();
 			TestRobot.getInstance().init();
 			testBegin = false;

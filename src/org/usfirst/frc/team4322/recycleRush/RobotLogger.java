@@ -39,12 +39,12 @@ public class RobotLogger
 	private final String LOGS_ZIP_FILE = "/home/lvuser/logs/FRC4322Logs.zip";
 
 	// Get Date Format
-	private static final SimpleDateFormat sdf_ = new SimpleDateFormat("yyyy-MM-dd");
+	private static final SimpleDateFormat sdf_ = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+	
 
 	// Constants for file
 	private final long MAX_FILE_LENGTH = 1048576; // 1 MiB = 1024^2 or 2^20
 	// http://highscalability.com/blog/2012/9/11/how-big-is-a-petabyte-exabyte-zettabyte-or-a-yottabyte.html <-- must visit
-	private final byte[] textFormat = ("\n [" + timeToString(true) + "] - Robot4322: ").getBytes();
 
 	 // This is the static getInstance() method that provides easy access to the RobotLogger singleton class.
 	public static RobotLogger getInstance()
@@ -85,14 +85,15 @@ public class RobotLogger
 					addFileToZip(oldLog, LOGS_ZIP_FILE);
 					// Create a new .txt file, and rename it
 					oldLog.createNewFile();
-					File newFile = new File(file.replace(".txt", "") + " [" + timeToString(true) + "]" + ".txt");
+					File newFile = new File(file.replace(".txt", "") + " [" + CurrentReadable_DateTime() + "]" + ".txt");
 					oldLog.renameTo(newFile);
 				}
 			}
 			// If log file does not exist, create it
 			else
 			{
-				if(!oldLog.createNewFile()) throw new IOException();
+				if(!oldLog.createNewFile())
+					System.out.println("****************ERROR IN CREATING FILE: " + oldLog + " ***********");
 			}
 		}
 		catch (IOException ex)
@@ -105,12 +106,12 @@ public class RobotLogger
 	 * If there is not, create the file.
 	 * If the file is too big, add it to a ZIP file.
 	 */
-	public void writeToFile(final String msg)
+	private void writeToFile(final String msg)
 	{
-			try
+		try
+		{
+			if (closed)
 			{
-				if (closed)
-				{
 				// Get the correct file
 				String file = LOG_FILE;
 				if (m_ds.isDisabled())
@@ -128,18 +129,34 @@ public class RobotLogger
 				if (!oldLog.exists())
 				{
 					oldLog.createNewFile();
+					System.out.println("Creating new file: " + file);
 				}
 				// Write data using buffered writer; enhances IO operations
-				fw = new FileWriter(oldLog.getAbsoluteFile());
+				fw = new FileWriter(oldLog, true);
 				bw = new BufferedWriter(fw);
-				} // if the file is closed, open it
-				bw.write(textFormat + msg);
-				if(closed) closed = false;
-			}
-			catch (IOException e)
+			} // if the file is closed, open it
+			bw.write(msg);
+			if(closed) closed = false;
+		}
+		catch (IOException e)
+		{
+			System.out.println("IOException caught while writing to file: " + e);
+		}
+		finally
+		{
+			try
 			{
-				System.out.println("IOException caught while writing to file: " + e);
+				if(bw != null)
+				{
+					fw.flush();
+					bw.flush();
+				}				
 			}
+			catch (IOException ex)
+			{
+				System.out.println("IOException caught while flushing file: " + ex);
+			}
+		}
 	}
 
 	// Writes the throwable error to the .txt log file
@@ -148,6 +165,7 @@ public class RobotLogger
 		if (!closed)
 		{
 			String msg = "\nException in " + method + ": " + getString(t);
+			System.out.println(msg);
 			writeToFile(msg);
 		}
 	}
@@ -159,9 +177,10 @@ public class RobotLogger
 		synchronized (System.out)
 		{
 			// Output logging messages to the console with a standard format
-			System.out.println(timeToString(true) + " - Robot4322: " + thisMessage);
+			String datetimeFormat = "\n [" + CurrentReadable_DateTime() + "] - Robot4322: ";
+			System.out.println(datetimeFormat + thisMessage);
 			// Output logging messages to a .txt log file
-			writeToFile(thisMessage);
+			writeToFile(datetimeFormat + thisMessage);
 		}
 	}
 
@@ -205,34 +224,9 @@ public class RobotLogger
 			writeErrorToFile("addFileToZip()", e);
 		}
 	}
-	
-	private String timeToString(boolean date)
-	{
-		// Create a time stamp that looks like 12:34:56.999
-		Calendar c = Calendar.getInstance();
-		c.setTime(new Date());
-		int h = c.get(Calendar.HOUR_OF_DAY);
-		int m = c.get(Calendar.MINUTE);
-		int s = c.get(Calendar.SECOND);
-		int ms = c.get(Calendar.MILLISECOND);
-		String msFormat = Integer.toString(ms);
-		if (ms < 10)
-		{
-			msFormat = "00" + msFormat;
-		}
-		else if (ms < 100)
-		{
-			msFormat = "0" + msFormat;
-		}
-		// If the user wants a date, format is yyyy-MM-dd
-		String t = (date ? "<" + CurrentReadable_Date() + "> " : "") +
-				// Time stamp
-				(h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s + "." + msFormat;
-		return t;
-	}
 
 	// Gets the date in yyyy-MM-dd format
-	public static String CurrentReadable_Date()
+	public static String CurrentReadable_DateTime()
 	{
 		return sdf_.format(Calendar.getInstance().getTime());
 	}

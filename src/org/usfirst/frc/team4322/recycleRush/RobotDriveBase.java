@@ -125,7 +125,7 @@ public class RobotDriveBase
         // Create Encoder if it does not exist
         if(driveEncoder == null)
         {
-        	driveEncoder = new Encoder(RobotMap.ENCODER_A_GPIO_PORT, RobotMap.ENCODER_B_GPIO_PORT, false, EncodingType.k4X);
+        	driveEncoder = new Encoder(RobotMap.DRIVE_ENCODER_A_GPIO_PORT, RobotMap.DRIVE_ENCODER_B_GPIO_PORT, false, EncodingType.k4X);
         	driveEncoder.setDistancePerPulse(RobotMap.ENCODER_DISTANCE_PER_TICK);
         	driveEncoder.setReverseDirection(true);
         }
@@ -133,7 +133,9 @@ public class RobotDriveBase
         // Create robotGyro if it does not exist
         if(robotGyro == null)
         {
-        	robotGyro = new Gyro(1);
+        	RobotLogger.getInstance().sendToConsole("robotGyro initializing...");
+        	robotGyro = new Gyro(RobotMap.DRIVE_GYRO_ANALOG_PORT);
+        	RobotLogger.getInstance().sendToConsole("robotGyro initialization complete.");
         }
         
         // Create robotAccelerometer if it does not exist
@@ -334,7 +336,9 @@ public class RobotDriveBase
             		gyroAngle = 0;
             	}
             	// Drive STRAIGHT and use the GYRO to keep us straight
-            	robotDrive.arcadeDrive(throttleValue, gyroAngle * RobotMap.TELEOP_P_CONTROL_VALUE_GYRO * -1);
+            	double compensatedSteeringValue = gyroAngle * RobotMap.TELEOP_P_CONTROL_VALUE_GYRO * -1;            	
+            	//RobotLogger.getInstance().sendToConsole("Gyro Compensation Value: " + compensatedSteeringValue);
+            	robotDrive.arcadeDrive(throttleValue, compensatedSteeringValue);
             }
             // Here, the driver is steering and we will NOT USE the gyro
             else
@@ -370,14 +374,16 @@ public class RobotDriveBase
             	{
             		gyroAngle = 0;
             	}
-            	robotDrive.arcadeDrive(throttleValue, gyroAngle * RobotMap.TELEOP_STRAFE_P_CONTROL_VALUE_GYRO * -1);
+            	double compensatedSteeringValue = gyroAngle * RobotMap.TELEOP_STRAFE_P_CONTROL_VALUE_GYRO * -1;            	
+            	//RobotLogger.getInstance().sendToConsole("Gyro Compensation Value: " + compensatedSteeringValue);
+            	robotDrive.arcadeDrive(throttleValue, compensatedSteeringValue);
         	}
         	else
         	{
         		robotDrive.arcadeDrive(throttleValue, steeringValue);
             	// When steering, the gyro is always dirty
-//        		robotGyro.reset();
-//            	dirtyGyro = true;  **** WAIT UNTIL ROBORIO LAYS FLAT
+        		robotGyro.reset();
+            	dirtyGyro = true;
             }
         	slideActuatorPiston.set(Value.kForward);
         	slideJaguar1.set(strafingValue*-1);
