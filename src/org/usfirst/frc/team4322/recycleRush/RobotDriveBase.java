@@ -37,7 +37,7 @@ public class RobotDriveBase
     private Compressor compressor = null;
 
     // Instance for Encoder
-    private Encoder driveEncoder = null;
+    public Encoder driveEncoder = null;
     
     // Class declarations for the throttle and steering RobotDrive values
     private double throttleValue = 0;
@@ -49,15 +49,16 @@ public class RobotDriveBase
     private double strafingValue = 0;
     private double lastStrafingValue = 0;
     
-    private RobotDrive robotDrive = null;
+    public RobotDrive robotDrive = null;
     
     // Auton gyro
-    private Gyro robotGyro = null;
+    public Gyro robotGyro = null;
+    private boolean dirtyGyro = false; //true; <-- WAIT UNTIL ROBORIO LAYS FLAT
     
     // Auton Accelerometer
     private BuiltInAccelerometer robotAccelerometer = null;
     
-    boolean strafeMode = false;
+    boolean strafeMode = true; // false; <-- Lets start in strafe mode, driver preference.
     boolean strafeStart = false;
     boolean strafePressed = false;
     
@@ -124,7 +125,7 @@ public class RobotDriveBase
         // Create Encoder if it does not exist
         if(driveEncoder == null)
         {
-        	driveEncoder = new Encoder(RobotMap.ENCODER_A_GPIO_PORT, RobotMap.ENCODER_B_GPIO_PORT, false, EncodingType.k4X);
+        	driveEncoder = new Encoder(RobotMap.DRIVE_ENCODER_A_GPIO_PORT, RobotMap.DRIVE_ENCODER_B_GPIO_PORT, false, EncodingType.k4X);
         	driveEncoder.setDistancePerPulse(RobotMap.ENCODER_DISTANCE_PER_TICK);
         	driveEncoder.setReverseDirection(true);
         }
@@ -132,7 +133,9 @@ public class RobotDriveBase
         // Create robotGyro if it does not exist
         if(robotGyro == null)
         {
-        	robotGyro = new Gyro(RobotMap.GYRO_ANALOG_INPUT_PORT);
+        	RobotLogger.getInstance().sendToConsole("robotGyro initializing...");
+        	robotGyro = new Gyro(RobotMap.DRIVE_GYRO_ANALOG_PORT);
+        	RobotLogger.getInstance().sendToConsole("robotGyro initialization complete.");
         }
         
         // Create robotAccelerometer if it does not exist
@@ -186,35 +189,35 @@ public class RobotDriveBase
     	robotGyro.reset();
     }
     
-    public void runAutonomous()
+    public void runAutonomous(int mode)
     {
-    	double correction = -1*robotGyro.getAngle()*RobotMap.AUTONOMOUS_P_CONTROL_VALUE_GYRO;
-    	double distance = driveEncoder.getDistance();
-    	if(distance <= RobotMap.ENCODER_AUTONOMOUS_DRIVE_DISTANCE)
-    	{
-    		robotDrive.drive(RobotMap.AUTONOMOUS_DRIVE_SPEED, correction);
-    	}
-    	else if(distance <= RobotMap.ENCODER_AUTONOMOUS_DRIVE_DISTANCE +4 && distance <= RobotMap.ENCODER_AUTONOMOUS_DRIVE_DISTANCE -4)
-    	{
-    		robotDrive.drive(0,0);
-    	}
-    	else if(distance >= RobotMap.ENCODER_AUTONOMOUS_DRIVE_DISTANCE +4)
-    	{
-    		robotDrive.drive(RobotMap.AUTONOMOUS_REVERSE_SPEED,0);
-    	}
-    	SmartDashboard.putNumber("Encoder Raw Tick Count", driveEncoder.getRaw());
-        SmartDashboard.putNumber("Encoder Distance", driveEncoder.getDistance());
-        SmartDashboard.putNumber("Gyro Angle", robotGyro.getAngle());
-        if(robotGyro.getAngle() < 0.05)
-        {
-        	SmartDashboard.putNumber("Autonomous Turning Correction Value", correction);
-        	SmartDashboard.putString("Autonomous Turning Correction", "Active");
-        }
-        else
-        {
-        	SmartDashboard.putString("Autonomous Turning Correction", "Currently Straight");
-        	SmartDashboard.putNumber("Autonomous Turning Correction Value", 0);
-        }
+	    double correction = -1 * robotGyro.getAngle() * RobotMap.AUTONOMOUS_P_CONTROL_VALUE_GYRO;
+	    double distance = driveEncoder.getDistance();
+	    if(distance <= RobotMap.ENCODER_AUTONOMOUS_DRIVE_DISTANCE)
+	    {
+	    	robotDrive.drive((mode == 1) ? RobotMap.AUTONOMOUS_DRIVE_SPEED : -RobotMap.AUTONOMOUS_DRIVE_SPEED, correction);
+	    }
+	    else if(distance <= RobotMap.ENCODER_AUTONOMOUS_DRIVE_DISTANCE + 4 && distance >= RobotMap.ENCODER_AUTONOMOUS_DRIVE_DISTANCE - 4)
+	    {
+	    	robotDrive.drive(0, 0);
+	    }
+	    else if(distance >= RobotMap.ENCODER_AUTONOMOUS_DRIVE_DISTANCE + 4)
+	    {
+	    	robotDrive.drive((mode == 1) ? RobotMap.AUTONOMOUS_REVERSE_SPEED : -RobotMap.AUTONOMOUS_REVERSE_SPEED, 0);
+	    }
+	    SmartDashboard.putNumber("Encoder Raw Tick Count", driveEncoder.getRaw());
+	    SmartDashboard.putNumber("Encoder Distance", driveEncoder.getDistance());
+	    SmartDashboard.putNumber("Gyro Angle", robotGyro.getAngle());
+	    if(robotGyro.getAngle() < 0.05)
+	    {
+	       	SmartDashboard.putNumber("Autonomous Turning Correction Value", correction);
+	     	SmartDashboard.putString("Autonomous Turning Correction", "Active");
+	    }
+	    else
+	    {
+	       	SmartDashboard.putString("Autonomous Turning Correction", "Currently Straight");
+	       	SmartDashboard.putNumber("Autonomous Turning Correction Value", 0);
+	    }
     }
 
     // Initialization code for teleop mode should go here.
@@ -242,6 +245,7 @@ public class RobotDriveBase
         // Strafe motor reversal
         strafingValue *= -1; 
         
+        // Dump values to dashboard
     	SmartDashboard.getNumber("Throttle: ", throttleValue);
     	SmartDashboard.getNumber("Steering: ", steeringValue);
     	SmartDashboard.getNumber("Strafing: ", strafingValue);
@@ -287,6 +291,8 @@ public class RobotDriveBase
         	}
         }
         lastStrafingValue = strafingValue;
+        
+        // Toggle Strafe Mode
     	if(PilotController.getInstance().getLeftBumper())
     	{
     		if(!strafePressed)
@@ -299,47 +305,97 @@ public class RobotDriveBase
     	{
     		strafePressed = false;
     	}
+    	
+    	// Drive with Gyro Assist, get Angle
     	double gyroAngle = robotGyro.getAngle();
+    	
+    	// Handle DRIVING mode
         if(!strafeMode)
         {
         	if(strafeStart) strafeStart = false;
+        	
+        	// Lift the SLIDE drive and shut off slide motors
         	slideActuatorPiston.set(Value.kReverse);
         	slideJaguar1.set(0);
         	slideJaguar2.set(0);
+        	
+        	// Check to see if we are not steering and reset the gyro heading 
             if(Math.abs(PilotController.getInstance().getRightJoystickXAxis()) < RobotMap.XBONE_RIGHT_X_DEADBAND)
             {
-            	robotDrive.arcadeDrive(throttleValue, gyroAngle*RobotMap.TELEOP_P_CONTROL_VALUE_GYRO*-1);
+            	// If the Gyro is dirty, and we have stopped turning
+            	if(dirtyGyro && Math.abs(robotAccelerometer.getX()) < RobotMap.ACCELEROMETER_DEADBAND_X
+            			     && Math.abs(robotAccelerometer.getY()) < RobotMap.ACCELEROMETER_DEADBAND_Y)
+                {
+            		// Reset the Gyro ONLY ONCE per dirty
+                	robotGyro.reset();
+                	dirtyGyro = false;
+                }
+            	// If the Gyro is dirty, no auto-correcting
+            	if(dirtyGyro)
+            	{
+            		gyroAngle = 0;
+            	}
+            	// Drive STRAIGHT and use the GYRO to keep us straight
+            	double compensatedSteeringValue = gyroAngle * RobotMap.TELEOP_P_CONTROL_VALUE_GYRO * -1;            	
+            	//RobotLogger.getInstance().sendToConsole("Gyro Compensation Value: " + compensatedSteeringValue);
+            	robotDrive.arcadeDrive(throttleValue, compensatedSteeringValue);
             }
+            // Here, the driver is steering and we will NOT USE the gyro
             else
             {
             	robotDrive.arcadeDrive(throttleValue, steeringValue);
-            	robotGyro.reset(); 
+            	// When steering, the gyro is always dirty
+            	//robotGyro.reset();
+//            	dirtyGyro = true;  **** WAIT UNTIL ROBORIO LAYS FLAT
             }
         }
+        // Handle STRAFING mode
         else if(strafeMode)
         {
+        	// Reset the gyro and get a new heading when we first enter STRAFE mode
         	if(!strafeStart)
         	{
         		strafeStart = true;
         		robotGyro.reset();
         	}
+        	// Check to see if we are not steering and reset the gyro heading 
         	if(Math.abs(PilotController.getInstance().getRightJoystickXAxis()) < RobotMap.XBONE_RIGHT_X_DEADBAND)
         	{
-        		robotDrive.arcadeDrive(throttleValue, gyroAngle*RobotMap.TELEOP_STRAFE_P_CONTROL_VALUE_GYRO*-1);
+            	// If the Gyro is dirty, and we have stopped turning
+        		if(dirtyGyro && Math.abs(robotAccelerometer.getX()) < RobotMap.ACCELEROMETER_DEADBAND_X
+        				     && Math.abs(robotAccelerometer.getY()) < RobotMap.ACCELEROMETER_DEADBAND_Y)
+                {
+            		// Reset the Gyro ONLY ONCE per dirty 
+                	robotGyro.reset();
+                	dirtyGyro = false;
+                }
+        		// If the Gyro is dirty, no auto-correcting
+            	if(dirtyGyro)
+            	{
+            		gyroAngle = 0;
+            	}
+            	double compensatedSteeringValue = gyroAngle * RobotMap.TELEOP_STRAFE_P_CONTROL_VALUE_GYRO * -1;            	
+            	//RobotLogger.getInstance().sendToConsole("Gyro Compensation Value: " + compensatedSteeringValue);
+            	robotDrive.arcadeDrive(throttleValue, compensatedSteeringValue);
         	}
         	else
         	{
         		robotDrive.arcadeDrive(throttleValue, steeringValue);
+            	// When steering, the gyro is always dirty
         		robotGyro.reset();
-        	}
+            	dirtyGyro = true;
+            }
         	slideActuatorPiston.set(Value.kForward);
-        	slideJaguar1.set(strafingValue);
-        	slideJaguar2.set(strafingValue);
+        	slideJaguar1.set(strafingValue*-1);
+        	slideJaguar2.set(strafingValue*-1);
         }
         SmartDashboard.putNumber("Encoder Distance", driveEncoder.getDistance());
         SmartDashboard.putNumber("Xbone Controller Right Stick X Axis", PilotController.getInstance().getRightJoystickXAxis());
         SmartDashboard.putNumber("Gyro Angle", gyroAngle);
-    	SmartDashboard.putNumber("Teleop Turning Correction Value", gyroAngle*RobotMap.TELEOP_STRAFE_P_CONTROL_VALUE_GYRO*-1);
+    	SmartDashboard.putNumber("Teleop Turning Correction Value", gyroAngle * RobotMap.TELEOP_STRAFE_P_CONTROL_VALUE_GYRO * -1);
+		SmartDashboard.putNumber("ACCEL (X)", robotAccelerometer.getX());
+		SmartDashboard.putNumber("ACCEL (Y)", robotAccelerometer.getY());
+		SmartDashboard.putNumber("ACCEL (Z)", robotAccelerometer.getZ());
     }
 
     // Initialization code for test mode should go here.
