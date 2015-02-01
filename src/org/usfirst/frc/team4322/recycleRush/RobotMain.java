@@ -40,24 +40,24 @@ public class RobotMain extends IterativeRobot
     {
 	    try
 	    {
+	    	RobotDriveBase.getInstance().initRobotDrive();
+	    	RobotToteElevator.getInstance().initRobotToteElevator();
 	    	RobotLogger.getInstance().close();
 	    	// Open and update the RobotLogger in case log files are too large
 	    	RobotLogger.getInstance().update();
 
 	    	// Turn on the camera and trap any exceptions if it is not available
-		    try
-		    {
-		    	CameraServer camera = CameraServer.getInstance();
-		    	camera.setQuality(50);
-		    	camera.startAutomaticCapture("cam0");
-			}
-			catch (Exception ex)
-			{
-				RobotLogger.getInstance().writeErrorToFile("robotInit() Camera Server Startup: ", ex);
-			}
-	    	
+//		    try
+//		    {
+//		    	CameraServer camera = CameraServer.getInstance();
+//		    	camera.setQuality(50);
+//		    	camera.startAutomaticCapture("cam0");
+//			}
+//			catch (Exception ex)
+//			{
+//				RobotLogger.getInstance().writeErrorToFile("robotInit() Camera Server Startup: ", ex);
+//			}
 	    	// Initiate each system on the robot
-	    	RobotDriveBase.getInstance().initRobotDrive();
 	    	
 
 	    	// Create the Sendable Choosers on the SmartDashboard (does not work with new sfx currently)
@@ -194,9 +194,10 @@ public class RobotMain extends IterativeRobot
     {
     	try
 		{
+			RobotDriveBase.getInstance().initTeleop();
+			RobotToteElevator.getInstance().initTeleop();
     		RobotLogger.getInstance().close();
 			RobotLogger.getInstance().update();
-			RobotDriveBase.getInstance().initTeleop();
 			teleBegin = false;
 			RobotLogger.getInstance().sendToConsole("Robot Teleop Mode Initialized.");
 		}

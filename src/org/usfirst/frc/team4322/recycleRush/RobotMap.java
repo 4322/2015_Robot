@@ -2,9 +2,7 @@ package org.usfirst.frc.team4322.recycleRush;
 
 public class RobotMap {
 	
-	public static final int CANJAGUAR_SECONDARY_CONTROLLER_ADDRESS = 11;
-	
-	public static final String LAST_BUILD_TIME = "Robot4322_2015: 1/25/2015 11:30 AM";
+	public static final String LAST_BUILD_TIME = "Robot4322_2015: 1/29/2015 4:55 PM";
 	
 	// Initialize Joystick Ports
 	public static final int PILOT_CONTROLLER_JOYSTICK_PORT = 0;
@@ -20,8 +18,8 @@ public class RobotMap {
 
 	
 	// Initialize Pneumatic Control Module Solenoid Ports
-	public static final int PISTON_FORWARD_PORT = 1;
-	public static final int PISTON_REVERSE_PORT = 2;
+	public static final int SLIDE_PISTON_FORWARD_PORT = 1;
+	public static final int SLIDE_PISTON_REVERSE_PORT = 2;
 	
 	// Acceleration Ramps
 	public static final double THROTTLE_RAMP = 0.03;
@@ -37,7 +35,7 @@ public class RobotMap {
 	public static final double XBONE_RIGHT_X_DEADBAND = 0.17; //0.04
 	
 	// Drive Gyro Port
-	public static final int DRIVE_GYRO_ANALOG_PORT = 1;
+	public static final int DRIVE_GYRO_ANALOG_PORT = 0;
 	
 	// Drive Encoder Values
 	public static final int DRIVE_ENCODER_A_GPIO_PORT = 1;
@@ -47,25 +45,39 @@ public class RobotMap {
 	
 	// P constants for autonomous driving
 	public static final double AUTONOMOUS_P_CONTROL_VALUE_GYRO = 0.1;
-	public static final double TELEOP_P_CONTROL_VALUE_GYRO = 0.125;
-	public static final double TELEOP_STRAFE_P_CONTROL_VALUE_GYRO = 0.125;
+	public static final double TELEOP_P_CONTROL_VALUE_GYRO = 0.09375;
+	public static final double TELEOP_STRAFE_P_CONTROL_VALUE_GYRO = 0.09375;
 	
 	// Accelerometer Deadband values per axis
-	public static final double ACCELEROMETER_DEADBAND_X = 1.0; //0.05;
-	public static final double ACCELEROMETER_DEADBAND_Y = 1.0; //0.05;
+	public static final double ACCELEROMETER_DEADBAND_X = 0.15;
+	public static final double ACCELEROMETER_DEADBAND_Y = 0.15;
 	public static final double ACCELEROMETER_DEADBAND_Z = 1; //pretty sensitive
 	
 	// Initialize Elevator CAN Addresses
-	public static final int TOTE_ELEVATOR_CONTROLLER_ADDRESS = 30;
+	public static final int TOTE_ELEVATOR_CONTROLLER_ADDRESS = 12;
 	public static final int CONTAINER_ELEVATOR_CONTROLLER_ADDRESS = 31;
 	
-	// Tote Motor Speeds
-	public static final double TOTE_LIFT_MOTOR_SPEED = 0.7;
-	public static final double TOTE_STACK_MOTOR_SPEED = -0.7;
+	// Initialize Pneumatic Control Module Solenoid Ports
+	public static final int ELEVATOR_PISTON_FORWARD_PORT = 4;
+	public static final int ELEVATOR_PISTON_REVERSE_PORT = 5;
 	
 	// Tote Encoder Values
-	public static final int TOTE_ENCODER_A_GPIO_PORT = 2;
-	public static final int TOTE_ENCODER_B_GPIO_PORT = 3;
-	public static final int PULSES_PER_TOTE_SPROCKET_REVOLUTION = 7; //gearbox:24T:60T:120T - 
-	public static final int DISTANCE_BETWEEN_TOTE_ARMS = 10; //test: needs change
+	public static final int PULSES_PER_MOTOR_REVOLUTION = 7;
+	public static final double ELEVATOR_INITIAL_SEEK_SPEED = -0.5;
+	
+	//Tote Elevator states
+	public static final int ELEVATOR_STATE_INIT = 0;
+	public static final int ELEVATOR_STATE_GOTO_TARGET = 1;
+	public static final int ELEVATOR_STATE_STOPPED = 2;
+	
+	//Tote Elevator PID Constants
+	public static final double ELEVATOR_P_VALUE = 0.1;
+	public static final double ELEVATOR_I_VALUE = 0.1;
+	public static final double ELEVATOR_D_VALUE = 0.1;
+	
+	//Tote Elevator positions
+	public static final double ELEVATOR_POSITION_1 = 0;
+	public static final double ELEVATOR_POSITION_2 = 0;
+	public static final double ELEVATOR_POSITION_3 = 0;
+	public static final double ELEVATOR_POSITION_4 = 0;
 }
