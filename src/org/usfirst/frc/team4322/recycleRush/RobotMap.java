@@ -2,7 +2,7 @@ package org.usfirst.frc.team4322.recycleRush;
 
 public class RobotMap {
 	
-	public static final String LAST_BUILD_TIME = "Robot4322_2015: 1/29/2015 4:55 PM";
+	public static final String LAST_BUILD_TIME = "Robot4322_2015: 2/03/2015 5:16 PM";
 	
 	// Initialize Joystick Ports
 	public static final int PILOT_CONTROLLER_JOYSTICK_PORT = 0;
@@ -54,8 +54,8 @@ public class RobotMap {
 	public static final double ACCELEROMETER_DEADBAND_Z = 1; //pretty sensitive
 	
 	// Initialize Elevator CAN Addresses
-	public static final int TOTE_ELEVATOR_CONTROLLER_ADDRESS = 12;
-	public static final int CONTAINER_ELEVATOR_CONTROLLER_ADDRESS = 31;
+	public static final int TOTE_ELEVATOR_CONTROLLER_ADDRESS = 31; //12;
+	public static final int CONTAINER_ELEVATOR_CONTROLLER_ADDRESS = 30; //31;
 	
 	// Initialize Pneumatic Control Module Solenoid Ports
 	public static final int ELEVATOR_PISTON_FORWARD_PORT = 4;

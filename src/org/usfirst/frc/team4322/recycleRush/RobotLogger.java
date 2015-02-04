@@ -10,6 +10,19 @@ import java.text.SimpleDateFormat;
 import edu.wpi.first.wpilibj.*;
 
 /**
+ * @NOTE: The following methods are used in this class:
+ * 		getInstance() - gets the instance for the class (Singleton method)
+ * 		update() - opens and updates the file system [FileWriter and BufferedWriter] ONLY when the system is initially closed, then sets closed to false
+ * 		writeToFile(String) - writes message to log file ONLY when the system is open
+ * 		writeErrorToFile(String, Throwable) - writes exception to log file
+ * 		sendToConsole(String) - writes message to system output (Riolog) AND to the log file
+ * 		addFileToZip(File, String) - sends a file to a zip folder
+ * 		CurrentReadable_DateTime() - gets the current date and time
+ * 		getString(Throwable) - gets a string out of a throwable
+ * 		close() - closes the FileWriter and BufferedWriter
+ */
+
+/**
  *
  * @author FRC4322
  */
@@ -43,7 +56,7 @@ public class RobotLogger
 	
 
 	// Constants for file
-	private final long MAX_FILE_LENGTH = 1048576; // 1 MiB = 1024^2 or 2^20
+	private final long MAX_FILE_LENGTH = 10485760; //10MB, 1 MiB = 1024^2 or 2^20
 	// http://highscalability.com/blog/2012/9/11/how-big-is-a-petabyte-exabyte-zettabyte-or-a-yottabyte.html <-- must visit
 
 	 // This is the static getInstance() method that provides easy access to the RobotLogger singleton class.
@@ -59,46 +72,65 @@ public class RobotLogger
         return _instance;
 	}
 
-	public void update()
+	private String getProperLogFile()
 	{
-		try
+		String file = LOG_FILE;
+		if (m_ds.isDisabled())
+			file = Robot_Disabled_Log;
+		if (m_ds.isAutonomous())
+			file = Robot_Auto_Log;
+		if (m_ds.isOperatorControl())
+			file = Robot_Teleop_Log;
+		if (m_ds.isTest())
+			file = Robot_Test_Log;
+		// Default is initLog
+		return file;
+	}
+	
+	public void update(boolean zip)
+	{
+		if(closed)
 		{
-			// Get the correct file
-			String file = LOG_FILE;
-			if (m_ds.isDisabled())
-				file = Robot_Disabled_Log;
-			if (m_ds.isAutonomous())
-				file = Robot_Auto_Log;
-			if (m_ds.isOperatorControl())
-				file = Robot_Teleop_Log;
-			if (m_ds.isTest())
-				file = Robot_Test_Log;
-			// Default is initLog
-			
-			oldLog = new File(file);
-			
-			// If the file exists & the length is too long, send it to ZIP
-			if(oldLog.exists())
+			try
 			{
-				if(oldLog.length() > MAX_FILE_LENGTH)
+				// Get the correct file
+				oldLog = new File(getProperLogFile());
+				
+				// Get the directory
+				if(!oldLog.getParentFile().exists())
 				{
-					addFileToZip(oldLog, LOGS_ZIP_FILE);
-					// Create a new .txt file, and rename it
-					oldLog.createNewFile();
-					File newFile = new File(file.replace(".txt", "") + " [" + CurrentReadable_DateTime() + "]" + ".txt");
-					oldLog.renameTo(newFile);
+					oldLog.getParentFile().mkdirs();
 				}
+				
+				// If the file exists & the length is too long, send it to ZIP
+				if(oldLog.exists())
+				{
+					if(oldLog.length() > MAX_FILE_LENGTH && zip)
+					{
+						//addFileToZip(oldLog, LOGS_ZIP_FILE);
+						// Create a new .txt file, and rename it
+						oldLog.createNewFile();
+						File newFile = new File(getProperLogFile().replace(".txt", "") + " [" + CurrentReadable_DateTime() + "]" + ".txt");
+						oldLog.renameTo(newFile);
+					}
+				}
+				// If log file does not exist, create it
+				else
+				{
+					//oldLog.createNewFile();
+					if(!oldLog.createNewFile()) 
+						System.out.println("****************ERROR IN CREATING FILE: " + oldLog + " ***********");
+				}
+				closed = false;
 			}
-			// If log file does not exist, create it
-			else
+			catch (IOException ex)
 			{
-				if(!oldLog.createNewFile())
-					System.out.println("****************ERROR IN CREATING FILE: " + oldLog + " ***********");
+				writeErrorToFile("RobotLogger.update()", ex);
 			}
 		}
-		catch (IOException ex)
+		else
 		{
-			writeErrorToFile("RobotLogger.update()", ex);
+			System.out.println("Failed to update file system.");
 		}
 	}
 	/*
@@ -110,33 +142,22 @@ public class RobotLogger
 	{
 		try
 		{
-			if (closed)
+			if (!closed)
 			{
 				// Get the correct file
-				String file = LOG_FILE;
-				if (m_ds.isDisabled())
-					file = Robot_Disabled_Log;
-				if (m_ds.isAutonomous())
-					file = Robot_Auto_Log;
-				if (m_ds.isOperatorControl())
-					file = Robot_Teleop_Log;
-				if (m_ds.isTest())
-					file = Robot_Test_Log;
-				// Default is initLog
+				oldLog = new File(getProperLogFile());
 				
-				oldLog = new File(file);
 				// If file does not exist, create it.
 				if (!oldLog.exists())
 				{
 					oldLog.createNewFile();
-					System.out.println("Creating new file: " + file);
+					System.out.println("Creating new file: " + getProperLogFile());
 				}
 				// Write data using buffered writer; enhances IO operations
 				fw = new FileWriter(oldLog, true);
 				bw = new BufferedWriter(fw);
-			} // if the file is closed, open it
+			}
 			bw.write(msg);
-			if(closed) closed = false;
 		}
 		catch (IOException e)
 		{
@@ -162,12 +183,13 @@ public class RobotLogger
 	// Writes the throwable error to the .txt log file
 	public void writeErrorToFile(final String method, final Throwable t)
 	{
-		if (!closed)
+		if (closed)
 		{
-			String msg = "\nException in " + method + ": " + getString(t);
-			System.out.println(msg);
-			writeToFile(msg);
+			update(false);
 		}
+		String msg = "\nException in " + method + ": " + getString(t);
+		System.out.println(msg);
+		writeToFile(msg);
 	}
 
 	// Sends message to console and .txt log file

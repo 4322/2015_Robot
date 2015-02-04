@@ -122,7 +122,7 @@ public class RobotDriveBase
 	        if(compressor == null)
 			{
 				compressor = new Compressor(); //assuming PCM ID = 0
-				//compressor.clearAllPCMStickyFaults();
+				compressor.clearAllPCMStickyFaults();
 			}
 	        
 	        // Create Encoder if it does not exist
@@ -138,13 +138,13 @@ public class RobotDriveBase
 	        {
 	        	try
 	        	{
-		        	RobotLogger.getInstance().sendToConsole("robotGyro initializing...");
+		        	//RobotLogger.getInstance().sendToConsole("robotGyro initializing...");
 		        	robotGyro = new Gyro(RobotMap.DRIVE_GYRO_ANALOG_PORT);
-		        	RobotLogger.getInstance().sendToConsole("robotGyro initialization complete.");
+		        	//RobotLogger.getInstance().sendToConsole("robotGyro initialization complete.");
 	        	}
 	        	catch (Exception ex)
 	        	{
-	        		RobotLogger.getInstance().writeErrorToFile("Exception caught in initRobotDrive() Gyro Instanciation", ex);
+	        		//RobotLogger.getInstance().writeErrorToFile("Exception caught in initRobotDrive() Gyro Instanciation", ex);
 	        	}
 	        }
 	        
@@ -166,7 +166,7 @@ public class RobotDriveBase
     	}
     	catch (Exception ex)
     	{
-    		RobotLogger.getInstance().writeErrorToFile("Exception caught in initRobotDrive()", ex);
+    		//RobotLogger.getInstance().writeErrorToFile("Exception caught in initRobotDrive()", ex);
     	}
     }
 
@@ -199,7 +199,7 @@ public class RobotDriveBase
     	}
     	catch (Exception ex)
     	{
-    		RobotLogger.getInstance().writeErrorToFile("Exception caught in shutdownRobotDrive()", ex);
+    		//RobotLogger.getInstance().writeErrorToFile("Exception caught in shutdownRobotDrive()", ex);
     	}
     }
 
@@ -213,7 +213,7 @@ public class RobotDriveBase
     	}
     	catch (Exception ex)
     	{
-    		RobotLogger.getInstance().writeErrorToFile("Exception caught in RobotDriveBase.initAutonomous()", ex);
+    		//RobotLogger.getInstance().writeErrorToFile("Exception caught in RobotDriveBase.initAutonomous()", ex);
     	}
     }
     
@@ -251,7 +251,7 @@ public class RobotDriveBase
     	}
     	catch (Exception ex)
     	{
-    		RobotLogger.getInstance().writeErrorToFile("Exception caught in RobotDriveBase.runAutonomous()", ex);
+    		//RobotLogger.getInstance().writeErrorToFile("Exception caught in RobotDriveBase.runAutonomous()", ex);
     	}
     }
 
@@ -266,6 +266,7 @@ public class RobotDriveBase
 	        strafingValue = 0;
 	    	driveEncoder.reset();
 	    	robotGyro.reset();
+    		RobotLogger.getInstance().sendToConsole("RobotDriveBase.initTeleop() successfully run.");
     	}
     	catch (Exception ex)
     	{
@@ -353,10 +354,10 @@ public class RobotDriveBase
 	    	double gyroAngle = 0;
 	    	try
 	    	{
-		    	//RobotLogger.getInstance().sendToConsole("Getting gyroAngle.");
+		    	RobotLogger.getInstance().sendToConsole("Getting gyroAngle.");
 		    	// Drive with Gyro Assist, get Angle
 		    	gyroAngle = robotGyro.getAngle();
-		    	//RobotLogger.getInstance().sendToConsole("gyroAngle = " + gyroAngle);
+		    	RobotLogger.getInstance().sendToConsole("gyroAngle = " + gyroAngle);
 	    	}
 	    	catch (Exception ex)
 	    	{
@@ -394,7 +395,7 @@ public class RobotDriveBase
 	            	{
 	            		// Drive STRAIGHT and use the GYRO to keep us straight
 		            	double compensatedSteeringValue = gyroAngle * RobotMap.TELEOP_P_CONTROL_VALUE_GYRO * -1;            	
-		            	//RobotLogger.getInstance().sendToConsole("Gyro Compensation Value: " + compensatedSteeringValue);
+		            	RobotLogger.getInstance().sendToConsole("Gyro Compensation Value: " + compensatedSteeringValue);
 		            	robotDrive.arcadeDrive(throttleValue, compensatedSteeringValue);
 	            	}
 	            	catch (Exception ex)
@@ -428,7 +429,7 @@ public class RobotDriveBase
 	        		if(dirtyGyro && Math.abs(robotAccelerometer.getX()) < RobotMap.ACCELEROMETER_DEADBAND_X
 	        				     && Math.abs(robotAccelerometer.getY()) < RobotMap.ACCELEROMETER_DEADBAND_Y)
 	                {
-	        			RobotLogger.getInstance().sendToConsole("ACCELEROMETER WITHIN DEADBAND");
+	        			//RobotLogger.getInstance().sendToConsole("ACCELEROMETER WITHIN DEADBAND");
 	            		// Reset the Gyro ONLY ONCE per dirty 
 	                	robotGyro.reset();
 	                	dirtyGyro = false;

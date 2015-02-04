@@ -57,6 +57,10 @@ public class CoPilotController {
 	{
 		return controller.getBumper(Hand.kLeft);
 	}
+	public boolean getRightBumper()
+	{
+		return controller.getBumper(Hand.kRight);
+	}
 	public boolean getStartButton()
 	{
 		return controller.getStart();

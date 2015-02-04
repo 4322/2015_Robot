@@ -1,8 +1,7 @@
 
 package org.usfirst.frc.team4322.recycleRush;
 
-import edu.wpi.first.wpilibj.CameraServer;
-import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -42,21 +41,19 @@ public class RobotMain extends IterativeRobot
 	    {
 	    	RobotDriveBase.getInstance().initRobotDrive();
 	    	RobotToteElevator.getInstance().initRobotToteElevator();
-	    	RobotLogger.getInstance().close();
 	    	// Open and update the RobotLogger in case log files are too large
-	    	RobotLogger.getInstance().update();
-
+	    	RobotLogger.getInstance().update(true);
 	    	// Turn on the camera and trap any exceptions if it is not available
-//		    try
-//		    {
-//		    	CameraServer camera = CameraServer.getInstance();
-//		    	camera.setQuality(50);
-//		    	camera.startAutomaticCapture("cam0");
-//			}
-//			catch (Exception ex)
-//			{
-//				RobotLogger.getInstance().writeErrorToFile("robotInit() Camera Server Startup: ", ex);
-//			}
+		    try
+		    {
+		    	CameraServer camera = CameraServer.getInstance();
+		    	camera.setQuality(50);
+		    	camera.startAutomaticCapture("cam0");
+			}
+			catch (Exception ex)
+			{
+				RobotLogger.getInstance().writeErrorToFile("robotInit() Camera Server Startup: ", ex);
+			}
 	    	// Initiate each system on the robot
 	    	
 
@@ -68,7 +65,8 @@ public class RobotMain extends IterativeRobot
 	    	
 	    	// Send success and last build time to log file
 	    	RobotLogger.getInstance().sendToConsole("Robot Successfully Started. Last Build Time: " + RobotMap.LAST_BUILD_TIME);
-		}
+	    	SmartDashboard.putString("Last Robot Build Time", RobotMap.LAST_BUILD_TIME);
+	    }
 		catch (Exception ex)
 		{
 			RobotLogger.getInstance().writeErrorToFile("robotInit()", ex);
@@ -81,9 +79,10 @@ public class RobotMain extends IterativeRobot
     	try
 		{
     		RobotLogger.getInstance().close();
+    		RobotLogger.getInstance().update(false);
+    		RobotLogger.getInstance().sendToConsole("Robot Disabled.");
     		// Restart disabled
-			disabledBegin = false;
-			RobotLogger.getInstance().sendToConsole("Robot Disabled.");
+			disabledBegin = false;			
 		}
 		catch (Exception ex)
 		{
@@ -105,6 +104,7 @@ public class RobotMain extends IterativeRobot
 			{
 				RobotLogger.getInstance().sendToConsole("Robot Disabled Mode Begin.");
 				disabledBegin = true;
+	    		RobotLogger.getInstance().close();
 			}
  			if(PilotController.getInstance().getYButton())
  			{
@@ -120,12 +120,16 @@ public class RobotMain extends IterativeRobot
  				else
  					autoMode = 2; //Max mode #
  			}
+ 			if(PilotController.getInstance().getAButton())
+ 			{ //Reinitialize!
+ 				RobotDriveBase.getInstance().robotGyro = new Gyro(RobotMap.DRIVE_GYRO_ANALOG_PORT);
+ 			}
  			SmartDashboard.putNumber("Autonomous Mode", autoMode);
  	        SmartDashboard.putNumber("Xbone Controller Right Stick X Axis", PilotController.getInstance().getRightJoystickXAxis());
 		}
 		catch (Exception ex)
 		{
-			RobotLogger.getInstance().writeErrorToFile("autonomousInit()", ex);
+			RobotLogger.getInstance().writeErrorToFile("disabledPeriodic()", ex);
 		}
 	}
 
@@ -138,9 +142,9 @@ public class RobotMain extends IterativeRobot
     {
     	try
 		{
-    		RobotLogger.getInstance().close();
     		// Open and update the RobotLogger in case log files are too large
-	    	RobotLogger.getInstance().update();
+    		RobotLogger.getInstance().close();
+	    	RobotLogger.getInstance().update(false);
 	    	
 			RobotDriveBase.getInstance().initAutonomous();
 			autoBegin = false;
@@ -194,10 +198,10 @@ public class RobotMain extends IterativeRobot
     {
     	try
 		{
+    		RobotLogger.getInstance().close();
+			RobotLogger.getInstance().update(false);
 			RobotDriveBase.getInstance().initTeleop();
 			RobotToteElevator.getInstance().initTeleop();
-    		RobotLogger.getInstance().close();
-			RobotLogger.getInstance().update();
 			teleBegin = false;
 			RobotLogger.getInstance().sendToConsole("Robot Teleop Mode Initialized.");
 		}
@@ -218,7 +222,7 @@ public class RobotMain extends IterativeRobot
     		// Log initiation only once
 			if (!teleBegin)
 			{
-				RobotLogger.getInstance().sendToConsole("Robot Teleop Mode Begin.");
+				//RobotLogger.getInstance().sendToConsole("Robot Teleop Mode Begin.");
 				teleBegin = true;
 			}
 			RobotDriveBase.getInstance().runTeleop();
@@ -226,7 +230,7 @@ public class RobotMain extends IterativeRobot
 		}
 		catch (Exception ex)
 		{
-    		RobotLogger.getInstance().writeErrorToFile("teleopPeriodic()", ex);
+    		//RobotLogger.getInstance().writeErrorToFile("teleopPeriodic()", ex);
     	}
     }
   
@@ -234,15 +238,15 @@ public class RobotMain extends IterativeRobot
     {
     	try
 		{
-    		RobotLogger.getInstance().close();
-			RobotLogger.getInstance().update();
+    		//RobotLogger.getInstance().close();
+			//RobotLogger.getInstance().update();
 			TestRobot.getInstance().init();
 			testBegin = false;
-			RobotLogger.getInstance().sendToConsole("Robot Test Mode Initialized.");
+			//RobotLogger.getInstance().sendToConsole("Robot Test Mode Initialized.");
 		}
 		catch (Exception ex)
 		{
-    		RobotLogger.getInstance().writeErrorToFile("testInit()", ex);
+    		//RobotLogger.getInstance().writeErrorToFile("testInit()", ex);
     	}
     }
 
