@@ -104,12 +104,14 @@ public class RobotDriveBase
 	        if(slideJaguar1 == null)
 	        {
 	        	slideJaguar1 = new CANJaguar(RobotMap.CANJAGUAR_SLIDE_1_DRIVE_ADDRESS);
+	        	RobotLogger.getInstance().sendToConsole("CANJaguar Firmware Version: " + slideJaguar1.getFirmwareVersion());
 	        }
 	        
 	        // Create slideJaguar2 if it does not exist.
 	        if(slideJaguar2 == null)
 	        {
 	        	slideJaguar2 = new CANJaguar(RobotMap.CANJAGUAR_SLIDE_2_DRIVE_ADDRESS);
+	        	RobotLogger.getInstance().sendToConsole("CANJaguar Firmware Version: " + slideJaguar2.getFirmwareVersion());
 	        }
 	        
 	        // Create the piston to actuate the slide drive if it does not exist.
@@ -163,6 +165,7 @@ public class RobotDriveBase
 	        	robotDrive.setInvertedMotor(MotorType.kRearLeft, true);
 	        	robotDrive.setInvertedMotor(MotorType.kRearRight, true);
 	        }
+	        RobotLogger.getInstance().sendToConsole("Successfully started initRobotDriveBase().");
     	}
     	catch (Exception ex)
     	{

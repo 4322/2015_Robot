@@ -45,24 +45,33 @@ public class RobotToteElevator {
     // Main elevator initialization code should go here.
     public void initRobotToteElevator()
     {
-    	// Create toteMotor
-    	if(toteMotor == null)
+    	try
+	    {
+	    	// Create toteMotor
+	    	if(toteMotor == null)
+	    	{
+	//    		toteMotor = new CANJaguar(RobotMap.TOTE_ELEVATOR_CONTROLLER_ADDRESS);
+	//    		toteMotor.configEncoderCodesPerRev(RobotMap.PULSES_PER_MOTOR_REVOLUTION);
+	//    		toteMotor.configNeutralMode(NeutralMode.Coast);
+	    		
+	    		toteMotor = new CANTalon(RobotMap.TOTE_ELEVATOR_CONTROLLER_ADDRESS);
+	    		toteMotor.changeControlMode(CANTalon.ControlMode.PercentVbus);
+	    		toteMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
+	    		toteMotor.enableBrakeMode(false);
+	    		toteMotor.enableLimitSwitch(false, false);
+	    		RobotLogger.getInstance().sendToConsole("Elevator TalonSRX Firmware Version: " + toteMotor.GetFirmwareVersion());
+	    	}
+	    	if(brakeSolenoid == null)
+	    	{
+	    		brakeSolenoid = new DoubleSolenoid(RobotMap.ELEVATOR_PISTON_FORWARD_PORT,RobotMap.ELEVATOR_PISTON_REVERSE_PORT);
+	    		// Value.kForward <-- BRAKE RELEASED
+	    		// Value.kReverse <-- BRAKE ENGAGED
+	    	}
+	    	RobotLogger.getInstance().sendToConsole("Successfully started initRobotToteElevator().");
+	    }
+    	catch (Exception ex)
     	{
-//    		toteMotor = new CANJaguar(RobotMap.TOTE_ELEVATOR_CONTROLLER_ADDRESS);
-//    		toteMotor.configEncoderCodesPerRev(RobotMap.PULSES_PER_MOTOR_REVOLUTION);
-//    		toteMotor.configNeutralMode(NeutralMode.Coast);
-    		
-    		toteMotor = new CANTalon(RobotMap.TOTE_ELEVATOR_CONTROLLER_ADDRESS);
-    		toteMotor.changeControlMode(CANTalon.ControlMode.PercentVbus);
-    		toteMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
-    		toteMotor.enableBrakeMode(false);
-    		toteMotor.enableLimitSwitch(false, false);
-    	}
-    	if(brakeSolenoid == null)
-    	{
-    		brakeSolenoid = new DoubleSolenoid(RobotMap.ELEVATOR_PISTON_FORWARD_PORT,RobotMap.ELEVATOR_PISTON_REVERSE_PORT);
-    		// Value.kForward <-- BRAKE RELEASED
-    		// Value.kReverse <-- BRAKE ENGAGED
+    		RobotLogger.getInstance().writeErrorToFile("Exception caught in initRobotToteElevator()", ex);
     	}
     }
     

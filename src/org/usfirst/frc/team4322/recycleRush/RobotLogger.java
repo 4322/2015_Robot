@@ -3,7 +3,6 @@ package org.usfirst.frc.team4322.recycleRush;
 import java.util.*;
 import java.io.*;
 import java.nio.file.*;
-import java.nio.file.Path;
 import java.net.URI;
 import java.text.SimpleDateFormat;
 
@@ -72,11 +71,13 @@ public class RobotLogger
         return _instance;
 	}
 
+	
+	
 	private String getProperLogFile()
 	{
 		String file = LOG_FILE;
 		if (m_ds.isDisabled())
-			file = Robot_Disabled_Log;
+			return file = Robot_Disabled_Log;
 		if (m_ds.isAutonomous())
 			file = Robot_Auto_Log;
 		if (m_ds.isOperatorControl())
@@ -107,7 +108,7 @@ public class RobotLogger
 				{
 					if(oldLog.length() > MAX_FILE_LENGTH && zip)
 					{
-						//addFileToZip(oldLog, LOGS_ZIP_FILE);
+						addFileToZip(oldLog, LOGS_ZIP_FILE);
 						// Create a new .txt file, and rename it
 						oldLog.createNewFile();
 						File newFile = new File(getProperLogFile().replace(".txt", "") + " [" + CurrentReadable_DateTime() + "]" + ".txt");
@@ -127,6 +128,7 @@ public class RobotLogger
 			{
 				writeErrorToFile("RobotLogger.update()", ex);
 			}
+			sendToConsole("Successfully updated logging file system.");
 		}
 		else
 		{
@@ -228,7 +230,7 @@ public class RobotLogger
 	        try (FileSystem zipfs = FileSystems.newFileSystem(uri, env))
 	        {
 	        	// Get the log file
-	            Path externalLogFile = Paths.get(file.getPath());
+	            Path externalLogFile = Paths.get(file.getPath().replace(".txt", "") + " [" + CurrentReadable_DateTime() + "]" + ".txt" );
 	            // Get the path the log file will be put into
 	            Path pathInZipfile = zipfs.getPath(file.getName());
 	            // Copy the log file into the ZIP, replace if necessary
