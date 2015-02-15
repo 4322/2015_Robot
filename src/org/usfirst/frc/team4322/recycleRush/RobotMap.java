@@ -45,7 +45,7 @@ public class RobotMap {
 	
 	// P constants for autonomous driving
 	public static double AUTONOMOUS_P_CONTROL_VALUE_GYRO = 0.1;
-	public static double TELEOP_P_CONTROL_VALUE_GYRO = 0.09375;
+	public static double TELEOP_P_CONTROL_VALUE_GYRO = 0.07375;
 	public static double TELEOP_STRAFE_P_CONTROL_VALUE_GYRO = 0.09375;
 	
 	// Accelerometer Deadband values per axis
@@ -65,15 +65,14 @@ public class RobotMap {
 	public static int PULSES_PER_MOTOR_REVOLUTION = 7;
 	public static double ELEVATOR_INITIAL_SEEK_SPEED = -0.5;
 	
-	//Tote Elevator states
-	public static int ELEVATOR_STATE_INITAL = 0;
-	public static int ELEVATOR_STATE_GOTO_TARGET = 1;
-	public static int ELEVATOR_STATE_STOPPED = 2;
-	
 	//Tote Elevator PID Constants
 	public static double ELEVATOR_P_VALUE = 0.1;
 	public static double ELEVATOR_I_VALUE = 0.1;
 	public static double ELEVATOR_D_VALUE = 0.1;
+	public static double ELEVATOR_F_VALUE = 0;
+	public static int ELEVATOR_IZONE_VALUE = 0;
+	public static int ELEVATOR_RAMPRATE_VALUE = 0;
+	
 	
 	//Tote Elevator positions
 	public static double ELEVATOR_POSITION_1 = 0;

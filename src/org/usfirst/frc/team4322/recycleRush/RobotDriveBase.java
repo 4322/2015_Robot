@@ -57,7 +57,7 @@ public class RobotDriveBase
     private boolean dirtyGyro = false; //true; <-- WAIT UNTIL ROBORIO LAYS FLAT
     
     // Auton Accelerometer
-    private ADXL345_I2C robotAccelerometer = null;
+    private BuiltInAccelerometer robotAccelerometer = null;
     
     boolean strafeMode = true; // false; <-- Lets start in strafe mode, driver preference.
     boolean strafeStart = false;
@@ -153,7 +153,7 @@ public class RobotDriveBase
 	        // Create robotAccelerometer if it does not exist
 	        if(robotAccelerometer == null)
 	        {
-	        	robotAccelerometer = new ADXL345_I2C(I2C.Port.kOnboard, Range.k2G);
+	        	robotAccelerometer = new BuiltInAccelerometer();
 	        }
 	        
 	        // Create robotDrive if it does not exist

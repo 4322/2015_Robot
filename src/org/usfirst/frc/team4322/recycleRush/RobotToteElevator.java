@@ -1,7 +1,10 @@
 package org.usfirst.frc.team4322.recycleRush;
 
 import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.CANTalon.ControlMode;
+import edu.wpi.first.wpilibj.CANTalon.FeedbackDevice;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -22,12 +25,10 @@ public class RobotToteElevator {
     private DoubleSolenoid brakeSolenoid = null;
     
 	boolean pressed = false;
-	
-	boolean stopped = false;
-	
-	int elevatorState = 0;
-	
-	int elevatorPosition = 0;
+	boolean auto = false;
+	boolean switchPressed = false;
+	boolean controlModeV = true; 
+	int currentSetpoint = 0;
 
     // This is the static getInstance() method that provides easy access to the RobotToteElevator singleton class.
     public static RobotToteElevator getInstance()
@@ -50,15 +51,12 @@ public class RobotToteElevator {
 	    	// Create toteMotor
 	    	if(toteMotor == null)
 	    	{
-	//    		toteMotor = new CANJaguar(RobotMap.TOTE_ELEVATOR_CONTROLLER_ADDRESS);
-	//    		toteMotor.configEncoderCodesPerRev(RobotMap.PULSES_PER_MOTOR_REVOLUTION);
-	//    		toteMotor.configNeutralMode(NeutralMode.Coast);
 	    		
 	    		toteMotor = new CANTalon(RobotMap.TOTE_ELEVATOR_CONTROLLER_ADDRESS);
-	    		toteMotor.changeControlMode(CANTalon.ControlMode.PercentVbus);
-	    		toteMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
-	    		toteMotor.enableBrakeMode(false);
-	    		toteMotor.enableLimitSwitch(false, false);
+	    		toteMotor.setFeedbackDevice(FeedbackDevice.QuadEncoder);
+	    		toteMotor.setPID( RobotMap.ELEVATOR_P_VALUE, RobotMap.ELEVATOR_I_VALUE,RobotMap.ELEVATOR_D_VALUE, RobotMap.ELEVATOR_F_VALUE,RobotMap.ELEVATOR_IZONE_VALUE, RobotMap.ELEVATOR_RAMPRATE_VALUE, 0);
+	    		toteMotor.ClearIaccum();
+	    		toteMotor.enableControl();
 	    		RobotLogger.getInstance().sendToConsole("Elevator TalonSRX Firmware Version: " + toteMotor.GetFirmwareVersion());
 	    	}
 	    	if(brakeSolenoid == null)
@@ -93,8 +91,10 @@ public class RobotToteElevator {
     	try
     	{
 	    	brakeSolenoid.set(Value.kForward);
+	    	toteMotor.clearStickyFaults();
+	    	toteMotor.ClearIaccum();
 	    	toteMotor.setPosition(0);
-	    	RobotLogger.getInstance().sendToConsole("RobotDriveBase.initTeleop() successfully run.");
+	    	RobotLogger.getInstance().sendToConsole("RobotToteElevator.initTeleop() successfully run.");
     	}
     	catch (Exception ex)
     	{
@@ -107,99 +107,58 @@ public class RobotToteElevator {
     {
     	try
     	{
-//	    	switch(elevatorState)
-//	    	{
-//	    	case RobotMap.ELEVATOR_STATE_INIT:
-//	    		if(!toteMotor.getReverseLimitOK())
-//	    		{
-//	    			toteMotor.set(RobotMap.ELEVATOR_INITIAL_SEEK_SPEED);
-//	    		}
-//	    		else
-//	    		{
-//	    			toteMotor.disableControl();
-//	    			toteMotor.setPositionMode(CANJaguar.kQuadEncoder, 7, RobotMap.ELEVATOR_P_VALUE, RobotMap.ELEVATOR_I_VALUE, RobotMap.ELEVATOR_D_VALUE);
-//	    			toteMotor.enableControl();
-//	    			elevatorState = RobotMap.ELEVATOR_STATE_STOPPED;
-//	    		}
-//	    		break;
-//	    	case RobotMap.ELEVATOR_STATE_GOTO_TARGET:
-//	    		if(elevatorPosition == 0)
-//	    		{
-//	        		toteMotor.set(RobotMap.ELEVATOR_POSITION_1);
-//	        		if(Math.abs(toteMotor.getPosition() - RobotMap.ELEVATOR_POSITION_1) < 1) elevatorState = RobotMap.ELEVATOR_STATE_STOPPED;
-//	    		}
-//	    		else if(elevatorPosition == 1)
-//	    		{
-//	        		toteMotor.set(RobotMap.ELEVATOR_POSITION_2);
-//	        		if(Math.abs(toteMotor.getPosition() - RobotMap.ELEVATOR_POSITION_2) < 1) elevatorState = RobotMap.ELEVATOR_STATE_STOPPED;
-//	    		}
-//	    		else if(elevatorPosition == 2)
-//	    		{
-//	    			toteMotor.set(RobotMap.ELEVATOR_POSITION_3);
-//	    			if(Math.abs(toteMotor.getPosition() - RobotMap.ELEVATOR_POSITION_3) < 1) elevatorState = RobotMap.ELEVATOR_STATE_STOPPED;
-//	    		}
-//	       		else if(elevatorPosition == 3)
-//	    		{
-//	    			toteMotor.set(RobotMap.ELEVATOR_POSITION_4);
-//	    			if(Math.abs(toteMotor.getPosition() - RobotMap.ELEVATOR_POSITION_4) < 1) elevatorState = RobotMap.ELEVATOR_STATE_STOPPED;
-//	    		}
-//	    		break;
-//	    	case RobotMap.ELEVATOR_STATE_STOPPED:
-//	    		if(!stopped)
-//	    		{
-//	    			toteMotor.disableControl();
-//	    			brakeSolenoid.set(Value.kReverse);
-//	    			stopped = true;
-//	    		}
-//	    		break;
-//	    	}
-//	    	if(CoPilotController.getInstance().getAButton())
-//	    	{
-//	    		if(!pressed)
-//	    		{
-//	    			pressed = true;
-//	    			elevatorState = RobotMap.ELEVATOR_STATE_GOTO_TARGET;
-//	    			if(elevatorPosition < 3) elevatorPosition++;
-//	    			else elevatorPosition = 0;
-//	    		}
-//	    	}
-//	    	SmartDashboard.putNumber("Tote Lift Jaguar Position:", toteMotor.getPosition());
-//	    	SmartDashboard.putBoolean("Tote Lift Jaguar Forward Limit OK:", toteMotor.getForwardLimitOK());
-//	    	SmartDashboard.putBoolean("Tote Lift Jaguar Reverse Limit OK:", toteMotor.getReverseLimitOK());
-	    	SmartDashboard.putNumber("Tote Lift Encoder Position:", toteMotor.getPosition());
-	    	SmartDashboard.putBoolean("Tote Lift Forward Limit Closed:", toteMotor.isFwdLimitSwitchClosed());
-	    	SmartDashboard.putBoolean("Tote Lift Reverse Limit Closed:", toteMotor.isRevLimitSwitchClosed());
-	    	RobotLogger.getInstance().sendToConsole("Tote Lift Encoder Position: " + toteMotor.getPosition());
-	    	
-	    	double totePower = CoPilotController.getInstance().getLeftJoystickYAxis();
-	    	
-	    	// Check for Raising Totes (Power is Negative to raise the elevator)
-	    	if(totePower < 0)
-	    	{
-	    		if(toteMotor.isFwdLimitSwitchClosed()) totePower = 0;
-	    	}
-	
-	    	// Check for Lowering Totes (Power is Positive to lower the elevator)
-	    	if(totePower > 0)
-	    	{
-	    		if(toteMotor.isRevLimitSwitchClosed()) totePower = 0;
-	    	}
-	
-	    	// Check for Left Joystick Y deadband
-	        if(Math.abs(totePower) < .2) totePower = 0;
-	
-	    	
-	    	SmartDashboard.putNumber("Tote Lift Power:", totePower);
-	    	toteMotor.set(totePower);
-	    	
-	    	if(totePower == 0)
-	    	{
-	    		brakeSolenoid.set(Value.kReverse); // ENGAGE BRAKE
-	    	}
-	    	else
-	    	{
-	    		brakeSolenoid.set(Value.kForward);  // DISENGAGE BRAKE
-	    	}
+    		if(!switchPressed)
+        	{
+        		if(CoPilotController.getInstance().getStartButton())
+        		{
+        			auto = !auto;
+        			switchPressed = true;
+        		}
+        	}
+        	else
+        	{
+        		if(!CoPilotController.getInstance().getStartButton())
+        		{
+        			switchPressed = false;
+        		}
+        	}
+        	if(auto)
+        	{
+        		if(controlModeV)
+        		{
+        			toteMotor.disableControl();
+            		toteMotor.changeControlMode(ControlMode.Position);
+            		toteMotor.setFeedbackDevice(FeedbackDevice.QuadEncoder);
+            		toteMotor.enableControl();
+            		controlModeV = false;
+        		}
+        		autoDrive();
+        	}
+        	else
+        	{
+        		if(!controlModeV)
+        		{
+        			toteMotor.disableControl();
+        			toteMotor.changeControlMode(ControlMode.PercentVbus);
+        			toteMotor.setFeedbackDevice(FeedbackDevice.QuadEncoder);
+        			toteMotor.enableControl();
+        			controlModeV = true;
+        		}
+        		toteMotor.set(-1*CoPilotController.getInstance().getLeftJoystickYAxis());
+        		if(CoPilotController.getInstance().getLeftJoystickYAxis() < .1)
+        		{
+        			brakeSolenoid.set(Value.kForward);
+        		}
+        	}
+        	SmartDashboard.putBoolean("Auto Mode:", auto);
+        	SmartDashboard.putNumber("Target Value:",toteMotor.getSetpoint());
+        	SmartDashboard.putNumber("Error Value:",toteMotor.getClosedLoopError());
+        	SmartDashboard.putBoolean("Tote Lift Forward Limit Closed:", toteMotor.isFwdLimitSwitchClosed());
+        	SmartDashboard.putBoolean("Tote Lift Reverse Limit Closed:", toteMotor.isRevLimitSwitchClosed());
+        	SmartDashboard.putNumber("Joystick Value",CoPilotController.getInstance().getLeftJoystickYAxis());
+        	SmartDashboard.putNumber("Drive Value",-1*CoPilotController.getInstance().getLeftJoystickYAxis());
+        	SmartDashboard.putNumber("Current Position From Talon", toteMotor.getEncPosition());
+        	SmartDashboard.putNumber("Talon Iaccum:", toteMotor.GetIaccum());
     	}
     	catch (Exception ex)
     	{
@@ -218,5 +177,43 @@ public class RobotToteElevator {
     {
     	
     }
-    
+    public void autoDrive()
+    {
+    	if(!pressed)
+    	{
+    		if(CoPilotController.getInstance().getAButton())
+    		{
+    			if(currentSetpoint != 0) currentSetpoint--;
+    			pressed = true;
+    		}
+    		else if(CoPilotController.getInstance().getYButton())
+    		{
+    			if(currentSetpoint != 3) currentSetpoint++;
+    			pressed = true;
+    		}
+    	}
+    	switch(currentSetpoint)
+    	{
+    	case 0:
+    		toteMotor.set(RobotMap.ELEVATOR_POSITION_1);
+    	case 1:
+    		toteMotor.set(RobotMap.ELEVATOR_POSITION_2);
+    	case 2:
+    		toteMotor.set(RobotMap.ELEVATOR_POSITION_3);
+    	case 3:
+    		toteMotor.set(RobotMap.ELEVATOR_POSITION_4);
+    	}
+    	if(pressed)
+    	{
+    		if(!CoPilotController.getInstance().getBButton() && !CoPilotController.getInstance().getXButton() && !CoPilotController.getInstance().getYButton()) pressed = false;
+    	}
+    	if(Math.abs(toteMotor.getClosedLoopError()) < 2)
+    	{
+    		brakeSolenoid.set(Value.kForward);
+    	}
+    	else
+    	{
+    		brakeSolenoid.set(Value.kReverse);
+    	}
+    }
 }
