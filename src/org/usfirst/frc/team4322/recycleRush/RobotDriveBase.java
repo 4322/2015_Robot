@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.RobotDrive.MotorType;
-import edu.wpi.first.wpilibj.interfaces.Accelerometer.Range;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -84,7 +83,7 @@ public class RobotDriveBase
 	    	// Create the Power Distribution Panel if it does not exist, simply to clear sticky faults
 	    	if(pdp == null)
 	    	{
-	    		pdp = new PowerDistributionPanel(); //assuming PCM ID = 0
+	    		pdp = new PowerDistributionPanel(); //assuming PDP ID = 0
 	    		pdp.clearStickyFaults();
 	    	}
 	    	
@@ -140,13 +139,13 @@ public class RobotDriveBase
 	        {
 	        	try
 	        	{
-		        	//RobotLogger.getInstance().sendToConsole("robotGyro initializing...");
+		        	RobotLogger.getInstance().sendToConsole("robotGyro initializing...");
 		        	robotGyro = new Gyro(RobotMap.DRIVE_GYRO_ANALOG_PORT);
-		        	//RobotLogger.getInstance().sendToConsole("robotGyro initialization complete.");
+		        	RobotLogger.getInstance().sendToConsole("robotGyro initialization complete.");
 	        	}
 	        	catch (Exception ex)
 	        	{
-	        		//RobotLogger.getInstance().writeErrorToFile("Exception caught in initRobotDrive() Gyro Instanciation", ex);
+	        		RobotLogger.getInstance().writeErrorToFile("Exception caught in initRobotDrive() Gyro Instanciation", ex);
 	        	}
 	        }
 	        
@@ -169,7 +168,7 @@ public class RobotDriveBase
     	}
     	catch (Exception ex)
     	{
-    		//RobotLogger.getInstance().writeErrorToFile("Exception caught in initRobotDrive()", ex);
+    		RobotLogger.getInstance().writeErrorToFile("Exception caught in initRobotDrive()", ex);
     	}
     }
 
@@ -464,7 +463,7 @@ public class RobotDriveBase
 //			SmartDashboard.putNumber("ACCEL (X)", robotAccelerometer.getX());
 //			SmartDashboard.putNumber("ACCEL (Y)", robotAccelerometer.getY());
 //			SmartDashboard.putNumber("ACCEL (Z)", robotAccelerometer.getZ());
-			SmartDashboard.putBoolean("Pressure Low:", compressor.getPressureSwitchValue());
+//			SmartDashboard.putBoolean("Pressure Low:", compressor.getPressureSwitchValue());
     	}
     	catch (Exception ex)
     	{

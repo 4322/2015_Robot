@@ -39,10 +39,10 @@ public class RobotMain extends IterativeRobot
     {
 	    try
 	    {
-	    	RobotDriveBase.getInstance().initRobotDrive();
-	    	RobotToteElevator.getInstance().initRobotToteElevator();
 	    	// Open and update the RobotLogger in case log files are too large
 	    	RobotLogger.getInstance().update(true);
+	    	RobotDriveBase.getInstance().initRobotDrive();
+	    	RobotToteElevator.getInstance().initRobotToteElevator();
 	    	// Turn on the camera and trap any exceptions if it is not available
 		    try
 		    {

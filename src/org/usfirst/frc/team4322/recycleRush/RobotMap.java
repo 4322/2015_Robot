@@ -18,8 +18,8 @@ public class RobotMap {
 
 	
 	// Initialize Pneumatic Control Module Solenoid Ports
-	public static int SLIDE_PISTON_FORWARD_PORT = 1;
-	public static int SLIDE_PISTON_REVERSE_PORT = 2;
+	public static int SLIDE_PISTON_FORWARD_PORT = 4;
+	public static int SLIDE_PISTON_REVERSE_PORT = 5;
 	
 	// Acceleration Ramps
 	public static double THROTTLE_RAMP = 0.08; //.03
@@ -58,23 +58,23 @@ public class RobotMap {
 	public static int CONTAINER_ELEVATOR_CONTROLLER_ADDRESS = 30; //31;
 	
 	// Initialize Pneumatic Control Module Solenoid Ports
-	public static int ELEVATOR_PISTON_FORWARD_PORT = 4;
-	public static int ELEVATOR_PISTON_REVERSE_PORT = 5;
+	public static int ELEVATOR_PISTON_FORWARD_PORT = 0;
+	public static int ELEVATOR_PISTON_REVERSE_PORT = 1;
 	
 	// Tote Encoder Values
 	public static int PULSES_PER_MOTOR_REVOLUTION = 7;
 	public static double ELEVATOR_INITIAL_SEEK_SPEED = -0.5;
 	
-	//Tote Elevator PID Constants
-	public static double ELEVATOR_P_VALUE = 0.1;
-	public static double ELEVATOR_I_VALUE = 0.1;
-	public static double ELEVATOR_D_VALUE = 0.1;
+	// Tote Elevator PID Constants
+	public static double ELEVATOR_P_VALUE = 0.6;
+	public static double ELEVATOR_I_VALUE = 0.0006;
+	public static double ELEVATOR_D_VALUE = 0.3;
 	public static double ELEVATOR_F_VALUE = 0;
-	public static int ELEVATOR_IZONE_VALUE = 0;
+	public static int ELEVATOR_IZONE_VALUE = 100;
 	public static int ELEVATOR_RAMPRATE_VALUE = 0;
 	
-	
-	//Tote Elevator positions
+	// Tote Elevator positions
+	public static double ELEVATOR_JOYSTICK_DEADBAND = 0.1;
 	public static double ELEVATOR_POSITION_1 = 0;
 	public static double ELEVATOR_POSITION_2 = 0;
 	public static double ELEVATOR_POSITION_3 = 0;

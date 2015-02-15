@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.CANTalon.ControlMode;
 import edu.wpi.first.wpilibj.CANTalon.FeedbackDevice;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -90,10 +89,11 @@ public class RobotToteElevator {
     {
     	try
     	{
-	    	brakeSolenoid.set(Value.kForward);
+	    	brakeSolenoid.set(Value.kReverse);
 	    	toteMotor.clearStickyFaults();
 	    	toteMotor.ClearIaccum();
 	    	toteMotor.setPosition(0);
+	    	auto = false;
 	    	RobotLogger.getInstance().sendToConsole("RobotToteElevator.initTeleop() successfully run.");
     	}
     	catch (Exception ex)
@@ -107,10 +107,13 @@ public class RobotToteElevator {
     {
     	try
     	{
+    		// Check if the switch is pressed
     		if(!switchPressed)
         	{
+    			// Switch to PID mode
         		if(CoPilotController.getInstance().getStartButton())
         		{
+        			// Toggle PID on/off
         			auto = !auto;
         			switchPressed = true;
         		}
@@ -122,30 +125,44 @@ public class RobotToteElevator {
         			switchPressed = false;
         		}
         	}
+    		// PID Control
         	if(auto)
         	{
+        		// Switch from voltage control (manual) to position control (automatic)
         		if(controlModeV)
         		{
+        			// Disable voltage control
         			toteMotor.disableControl();
+        			// Change to position mode
             		toteMotor.changeControlMode(ControlMode.Position);
             		toteMotor.setFeedbackDevice(FeedbackDevice.QuadEncoder);
             		toteMotor.enableControl();
             		controlModeV = false;
         		}
+        		// Run PID control
         		autoDrive();
         	}
         	else
         	{
+        		// Switch from position to voltage control
         		if(!controlModeV)
         		{
+        			// Disable position control
         			toteMotor.disableControl();
+        			// Change to voltage mode
         			toteMotor.changeControlMode(ControlMode.PercentVbus);
         			toteMotor.setFeedbackDevice(FeedbackDevice.QuadEncoder);
         			toteMotor.enableControl();
         			controlModeV = true;
         		}
-        		toteMotor.set(-1*CoPilotController.getInstance().getLeftJoystickYAxis());
-        		if(CoPilotController.getInstance().getLeftJoystickYAxis() < .1)
+        		toteMotor.set(-CoPilotController.getInstance().getLeftJoystickYAxis());
+        		// Default state of the disk brake
+        		if(CoPilotController.getInstance().getLeftJoystickYAxis() < RobotMap.ELEVATOR_JOYSTICK_DEADBAND)
+        		{
+        			brakeSolenoid.set(Value.kReverse);
+        		}
+        		// Open the disk brake so we can move the elevator
+        		else
         		{
         			brakeSolenoid.set(Value.kForward);
         		}
@@ -177,43 +194,55 @@ public class RobotToteElevator {
     {
     	
     }
+    
     public void autoDrive()
     {
+    	// Check for the setpoint buttons
     	if(!pressed)
     	{
     		if(CoPilotController.getInstance().getAButton())
     		{
+    			// Decrement the set point
     			if(currentSetpoint != 0) currentSetpoint--;
     			pressed = true;
     		}
     		else if(CoPilotController.getInstance().getYButton())
     		{
+    			// Increment the set point
     			if(currentSetpoint != 3) currentSetpoint++;
     			pressed = true;
     		}
     	}
     	switch(currentSetpoint)
-    	{
-    	case 0:
-    		toteMotor.set(RobotMap.ELEVATOR_POSITION_1);
-    	case 1:
-    		toteMotor.set(RobotMap.ELEVATOR_POSITION_2);
-    	case 2:
-    		toteMotor.set(RobotMap.ELEVATOR_POSITION_3);
-    	case 3:
-    		toteMotor.set(RobotMap.ELEVATOR_POSITION_4);
-    	}
+	    {
+	    	case 0:
+	    		toteMotor.set(RobotMap.ELEVATOR_POSITION_1);
+	    	case 1:
+	    		toteMotor.set(RobotMap.ELEVATOR_POSITION_2);
+	    	case 2:
+	    		toteMotor.set(RobotMap.ELEVATOR_POSITION_3);
+	    	case 3:
+	    		toteMotor.set(RobotMap.ELEVATOR_POSITION_4);
+	    		
+	    }
+    	// Making sure button pressing is handled correctly
     	if(pressed)
     	{
-    		if(!CoPilotController.getInstance().getBButton() && !CoPilotController.getInstance().getXButton() && !CoPilotController.getInstance().getYButton()) pressed = false;
+    		if(!CoPilotController.getInstance().getBButton()
+    				&& !CoPilotController.getInstance().getXButton()
+    				&& !CoPilotController.getInstance().getYButton())
+    			pressed = false;
     	}
+    	// If we're within the error range on PID, close the disk brake
     	if(Math.abs(toteMotor.getClosedLoopError()) < 2)
     	{
-    		brakeSolenoid.set(Value.kForward);
+    		brakeSolenoid.set(Value.kReverse);
+    		auto = false;
     	}
+    	// If PID is running, the disk brake should be open
     	else
     	{
-    		brakeSolenoid.set(Value.kReverse);
+    		brakeSolenoid.set(Value.kForward);
     	}
     }
 }
