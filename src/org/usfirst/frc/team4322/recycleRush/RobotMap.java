@@ -2,7 +2,7 @@ package org.usfirst.frc.team4322.recycleRush;
 
 public class RobotMap {
 	
-	public static String LAST_BUILD_TIME = "Robot4322_2015: 2/06/2015 3:15 PM";
+	public static String LAST_BUILD_TIME = "Robot4322_2015: 2/15/2015 6:04 PM";
 	
 	// Initialize Joystick Ports
 	public static int PILOT_CONTROLLER_JOYSTICK_PORT = 0;
@@ -32,15 +32,16 @@ public class RobotMap {
 	public static double STRAFE_LIMIT = 0.8;
 	public static double AUTONOMOUS_DRIVE_SPEED = -0.4;
 	public static double AUTONOMOUS_REVERSE_SPEED = .25;
-	public static double XBONE_RIGHT_X_DEADBAND = 0.17; //0.04
+	public static double XBONE_RIGHT_X_DEADBAND = 0.17; //0.04`
 	
 	// Drive Gyro Port
 	public static int DRIVE_GYRO_ANALOG_PORT = 0;
 	
 	// Drive Encoder Values
+	//TODO: Talon Drive encoder count: 250, Slide Drive encoder count: 360
 	public static int DRIVE_ENCODER_A_GPIO_PORT = 1;
 	public static int DRIVE_ENCODER_B_GPIO_PORT = 0;
-	public static double ENCODER_DISTANCE_PER_TICK = 0.07539822368615503772310344119871;
+	public static double ENCODER_DISTANCE_PER_TICK = 0.07539822368615503772310344119871; //inches
 	public static double ENCODER_AUTONOMOUS_DRIVE_DISTANCE = 40; //132
 	
 	// P constants for autonomous driving
@@ -58,19 +59,22 @@ public class RobotMap {
 	public static int CONTAINER_ELEVATOR_CONTROLLER_ADDRESS = 30; //31;
 	
 	// Initialize Pneumatic Control Module Solenoid Ports
-	public static int ELEVATOR_PISTON_FORWARD_PORT = 0;
-	public static int ELEVATOR_PISTON_REVERSE_PORT = 1;
+	public static int BRAKE_PISTON_FORWARD_PORT = 0;
+	public static int BRAKE_PISTON_REVERSE_PORT = 1;
+	
+	public static int TILT_PISTON_FORWARD_PORT = 2;
+	public static int TILT_PISTON_REVERSE_PORT = 3;
 	
 	// Tote Encoder Values
 	public static int PULSES_PER_MOTOR_REVOLUTION = 7;
 	public static double ELEVATOR_INITIAL_SEEK_SPEED = -0.5;
 	
 	// Tote Elevator PID Constants
-	public static double ELEVATOR_P_VALUE = 0.6;
-	public static double ELEVATOR_I_VALUE = 0.0006;
-	public static double ELEVATOR_D_VALUE = 0.3;
+	public static double ELEVATOR_P_VALUE = 0.9;
+	public static double ELEVATOR_I_VALUE = 0.0025;
+	public static double ELEVATOR_D_VALUE = 0.4;
 	public static double ELEVATOR_F_VALUE = 0;
-	public static int ELEVATOR_IZONE_VALUE = 100;
+	public static int ELEVATOR_IZONE_VALUE = 800;
 	public static int ELEVATOR_RAMPRATE_VALUE = 0;
 	
 	// Tote Elevator positions

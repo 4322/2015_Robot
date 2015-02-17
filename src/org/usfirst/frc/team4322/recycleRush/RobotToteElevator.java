@@ -28,7 +28,12 @@ public class RobotToteElevator {
 	boolean switchPressed = false;
 	boolean controlModeV = true; 
 	int currentSetpoint = 0;
-
+	
+	// Instance for Tilt Solenoid
+	private DoubleSolenoid tiltActuatorPiston = null;
+    boolean tiltPressed = false;
+    boolean tiltMode = true; // false; <-- Lets start in elevator not tilted mode
+    
     // This is the static getInstance() method that provides easy access to the RobotToteElevator singleton class.
     public static RobotToteElevator getInstance()
     {
@@ -60,11 +65,16 @@ public class RobotToteElevator {
 	    	}
 	    	if(brakeSolenoid == null)
 	    	{
-	    		brakeSolenoid = new DoubleSolenoid(RobotMap.ELEVATOR_PISTON_FORWARD_PORT,RobotMap.ELEVATOR_PISTON_REVERSE_PORT);
+	    		brakeSolenoid = new DoubleSolenoid(RobotMap.BRAKE_PISTON_FORWARD_PORT,RobotMap.BRAKE_PISTON_REVERSE_PORT);
 	    		// Value.kForward <-- BRAKE RELEASED
 	    		// Value.kReverse <-- BRAKE ENGAGED
 	    	}
-	    	RobotLogger.getInstance().sendToConsole("Successfully started initRobotToteElevator().");
+	        // Create the piston to actuate the slide drive if it does not exist.
+	        if(tiltActuatorPiston == null)
+	        {
+	        	tiltActuatorPiston = new DoubleSolenoid(RobotMap.TILT_PISTON_FORWARD_PORT, RobotMap.TILT_PISTON_REVERSE_PORT);
+	        }
+	        RobotLogger.getInstance().sendToConsole("Successfully started initRobotToteElevator().");
 	    }
     	catch (Exception ex)
     	{
@@ -94,6 +104,7 @@ public class RobotToteElevator {
 	    	toteMotor.ClearIaccum();
 	    	toteMotor.setPosition(0);
 	    	auto = false;
+	    	tiltMode = false;
 	    	RobotLogger.getInstance().sendToConsole("RobotToteElevator.initTeleop() successfully run.");
     	}
     	catch (Exception ex)
@@ -125,6 +136,30 @@ public class RobotToteElevator {
         			switchPressed = false;
         		}
         	}
+    		
+	        // Toggle Tilt Mode
+	    	if(CoPilotController.getInstance().getLeftBumper())
+	    	{
+	    		if(!tiltPressed)
+	    		{
+	        		tiltMode = !tiltMode;
+	        		tiltPressed = true;
+	    		}
+	    	}
+	    	else
+	    	{
+	    		tiltPressed = false;
+	    	}
+	    	// Tilt the Piston
+	    	if (tiltMode)
+	    	{
+	    		tiltActuatorPiston.set(Value.kReverse);
+	    	}
+	    	else
+	    	{
+	    		tiltActuatorPiston.set(Value.kForward);
+	    	}
+	    	
     		// PID Control
         	if(auto)
         	{
@@ -157,7 +192,7 @@ public class RobotToteElevator {
         		}
         		toteMotor.set(-CoPilotController.getInstance().getLeftJoystickYAxis());
         		// Default state of the disk brake
-        		if(CoPilotController.getInstance().getLeftJoystickYAxis() < RobotMap.ELEVATOR_JOYSTICK_DEADBAND)
+        		if(Math.abs(CoPilotController.getInstance().getLeftJoystickYAxis()) < RobotMap.ELEVATOR_JOYSTICK_DEADBAND)
         		{
         			brakeSolenoid.set(Value.kReverse);
         		}
@@ -172,8 +207,8 @@ public class RobotToteElevator {
         	SmartDashboard.putNumber("Error Value:",toteMotor.getClosedLoopError());
         	SmartDashboard.putBoolean("Tote Lift Forward Limit Closed:", toteMotor.isFwdLimitSwitchClosed());
         	SmartDashboard.putBoolean("Tote Lift Reverse Limit Closed:", toteMotor.isRevLimitSwitchClosed());
-        	SmartDashboard.putNumber("Joystick Value",CoPilotController.getInstance().getLeftJoystickYAxis());
-        	SmartDashboard.putNumber("Drive Value",-1*CoPilotController.getInstance().getLeftJoystickYAxis());
+        	SmartDashboard.putNumber("Elevator Joystick Value",CoPilotController.getInstance().getLeftJoystickYAxis());
+        	SmartDashboard.putNumber("Elevator Drive Value",-1*CoPilotController.getInstance().getLeftJoystickYAxis());
         	SmartDashboard.putNumber("Current Position From Talon", toteMotor.getEncPosition());
         	SmartDashboard.putNumber("Talon Iaccum:", toteMotor.GetIaccum());
     	}
@@ -234,7 +269,7 @@ public class RobotToteElevator {
     			pressed = false;
     	}
     	// If we're within the error range on PID, close the disk brake
-    	if(Math.abs(toteMotor.getClosedLoopError()) < 2)
+    	if(Math.abs(toteMotor.getClosedLoopError()) < 25)
     	{
     		brakeSolenoid.set(Value.kReverse);
     		auto = false;
@@ -245,4 +280,5 @@ public class RobotToteElevator {
     		brakeSolenoid.set(Value.kForward);
     	}
     }
+    
 }

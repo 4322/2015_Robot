@@ -445,6 +445,13 @@ public class RobotDriveBase
 	            	//RobotLogger.getInstance().sendToConsole("Gyro Compensation Value: " + compensatedSteeringValue);
 	            	robotDrive.arcadeDrive(throttleValue, compensatedSteeringValue);
 	        	}
+	        	else if(Math.abs(PilotController.getInstance().getLeftJoystickXAxis()) < RobotMap.XBONE_RIGHT_X_DEADBAND && Math.abs(PilotController.getInstance().getLeftJoystickYAxis()) < RobotMap.XBONE_RIGHT_X_DEADBAND)
+	        	{
+	        		robotDrive.arcadeDrive(throttleValue, steeringValue);
+	            	// When steering, the gyro is always dirty
+	        		robotGyro.reset();
+	            	dirtyGyro = true;
+	        	}
 	        	else
 	        	{
 	        		robotDrive.arcadeDrive(throttleValue, steeringValue);
