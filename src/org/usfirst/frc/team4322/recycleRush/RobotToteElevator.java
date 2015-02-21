@@ -23,8 +23,8 @@ public class RobotToteElevator {
     //Instance for Brake Solenoid
     private DoubleSolenoid brakeSolenoid = null;
     
-	boolean pressed = false;
-	boolean auto = false;
+	boolean setPointSelectButtonPressed = false;
+	boolean autoDriveMode = false;
 	boolean switchPressed = false;
 	boolean controlModeV = true; 
 	int currentSetpoint = 0;
@@ -103,7 +103,8 @@ public class RobotToteElevator {
 	    	toteMotor.clearStickyFaults();
 	    	toteMotor.ClearIaccum();
 	    	toteMotor.setPosition(0);
-	    	auto = false;
+	    	autoDriveMode = false;
+	    	currentSetpoint = 0;
 	    	tiltMode = false;
 	    	RobotLogger.getInstance().sendToConsole("RobotToteElevator.initTeleop() successfully run.");
     	}
@@ -118,27 +119,38 @@ public class RobotToteElevator {
     {
     	try
     	{
-    		// Check if the switch is pressed
-    		if(!switchPressed)
+    		//Check if auto mode
+    		if(autoDriveMode)
         	{
-    			// Switch to PID mode
-        		if(CoPilotController.getInstance().getStartButton())
+    			// Check for emergency off button
+        		if(CoPilotController.getInstance().getAutoEmergencyOff())
         		{
-        			// Toggle PID on/off
-        			auto = !auto;
-        			switchPressed = true;
-        		}
-        	}
-        	else
-        	{
-        		if(!CoPilotController.getInstance().getStartButton())
-        		{
-        			switchPressed = false;
+        			// Turn PID off
+        			autoDriveMode = false;
         		}
         	}
     		
+        	// Check for the setpoint buttons
+        	if(!setPointSelectButtonPressed)
+        	{
+        		if(CoPilotController.getInstance().getElevatorSetPointUpButton())
+        		{
+        			// Decrement the set point
+        			if(currentSetpoint != 0) currentSetpoint--;
+        			setPointSelectButtonPressed = true;
+        			autoDriveMode = true;
+        		}
+        		else if(CoPilotController.getInstance().getElevatorSetPointDownButton())
+        		{
+        			// Increment the set point
+        			if(currentSetpoint != 3) currentSetpoint++;
+        			setPointSelectButtonPressed = true;
+        			autoDriveMode = true;
+        		}
+        	}
+        	
 	        // Toggle Tilt Mode
-	    	if(CoPilotController.getInstance().getLeftBumper())
+	    	if(CoPilotController.getInstance().getElevatorTiltButton())
 	    	{
 	    		if(!tiltPressed)
 	    		{
@@ -161,7 +173,7 @@ public class RobotToteElevator {
 	    	}
 	    	
     		// PID Control
-        	if(auto)
+        	if(autoDriveMode)
         	{
         		// Switch from voltage control (manual) to position control (automatic)
         		if(controlModeV)
@@ -190,9 +202,9 @@ public class RobotToteElevator {
         			toteMotor.enableControl();
         			controlModeV = true;
         		}
-        		toteMotor.set(-CoPilotController.getInstance().getLeftJoystickYAxis());
+        		toteMotor.set(-CoPilotController.getInstance().getElevatorDriveStick());
         		// Default state of the disk brake
-        		if(Math.abs(CoPilotController.getInstance().getLeftJoystickYAxis()) < RobotMap.ELEVATOR_JOYSTICK_DEADBAND)
+        		if(Math.abs(CoPilotController.getInstance().getElevatorDriveStick()) < RobotMap.ELEVATOR_JOYSTICK_DEADBAND)
         		{
         			brakeSolenoid.set(Value.kReverse);
         		}
@@ -202,13 +214,13 @@ public class RobotToteElevator {
         			brakeSolenoid.set(Value.kForward);
         		}
         	}
-        	SmartDashboard.putBoolean("Auto Mode:", auto);
+        	SmartDashboard.putBoolean("Auto Mode:", autoDriveMode);
         	SmartDashboard.putNumber("Target Value:",toteMotor.getSetpoint());
         	SmartDashboard.putNumber("Error Value:",toteMotor.getClosedLoopError());
         	SmartDashboard.putBoolean("Tote Lift Forward Limit Closed:", toteMotor.isFwdLimitSwitchClosed());
         	SmartDashboard.putBoolean("Tote Lift Reverse Limit Closed:", toteMotor.isRevLimitSwitchClosed());
-        	SmartDashboard.putNumber("Elevator Joystick Value",CoPilotController.getInstance().getLeftJoystickYAxis());
-        	SmartDashboard.putNumber("Elevator Drive Value",-1*CoPilotController.getInstance().getLeftJoystickYAxis());
+        	SmartDashboard.putNumber("Elevator Joystick Value",CoPilotController.getInstance().getElevatorDriveStick());
+        	SmartDashboard.putNumber("Elevator Drive Value",-1*CoPilotController.getInstance().getElevatorDriveStick());
         	SmartDashboard.putNumber("Current Position From Talon", toteMotor.getEncPosition());
         	SmartDashboard.putNumber("Talon Iaccum:", toteMotor.GetIaccum());
     	}
@@ -232,22 +244,22 @@ public class RobotToteElevator {
     
     public void autoDrive()
     {
-    	// Check for the setpoint buttons
-    	if(!pressed)
-    	{
-    		if(CoPilotController.getInstance().getAButton())
-    		{
-    			// Decrement the set point
-    			if(currentSetpoint != 0) currentSetpoint--;
-    			pressed = true;
-    		}
-    		else if(CoPilotController.getInstance().getYButton())
-    		{
-    			// Increment the set point
-    			if(currentSetpoint != 3) currentSetpoint++;
-    			pressed = true;
-    		}
-    	}
+//    	// Check for the setpoint buttons
+//    	if(!pressed)
+//    	{
+//    		if(CoPilotController.getInstance().getElevatorSetPointUpButton())
+//    		{
+//    			// Decrement the set point
+//    			if(currentSetpoint != 0) currentSetpoint--;
+//    			pressed = true;
+//    		}
+//    		else if(CoPilotController.getInstance().getElevatorSetPointDownButton())
+//    		{
+//    			// Increment the set point
+//    			if(currentSetpoint != 3) currentSetpoint++;
+//    			pressed = true;
+//    		}
+//    	}
     	switch(currentSetpoint)
 	    {
 	    	case 0:
@@ -261,18 +273,19 @@ public class RobotToteElevator {
 	    		
 	    }
     	// Making sure button pressing is handled correctly
-    	if(pressed)
+    	if(setPointSelectButtonPressed)
     	{
-    		if(!CoPilotController.getInstance().getBButton()
-    				&& !CoPilotController.getInstance().getXButton()
-    				&& !CoPilotController.getInstance().getYButton())
-    			pressed = false;
+    		if(!CoPilotController.getInstance().getElevatorSetPointUpButton()
+    		&& !CoPilotController.getInstance().getElevatorSetPointDownButton())
+    		{
+    			setPointSelectButtonPressed = false;
+    		}
     	}
     	// If we're within the error range on PID, close the disk brake
-    	if(Math.abs(toteMotor.getClosedLoopError()) < 25)
+    	if(autoDriveMode && Math.abs(toteMotor.getClosedLoopError()) < 25)
     	{
     		brakeSolenoid.set(Value.kReverse);
-    		auto = false;
+    		autoDriveMode = false;
     	}
     	// If PID is running, the disk brake should be open
     	else
@@ -280,5 +293,4 @@ public class RobotToteElevator {
     		brakeSolenoid.set(Value.kForward);
     	}
     }
-    
 }

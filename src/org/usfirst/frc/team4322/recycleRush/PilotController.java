@@ -17,88 +17,40 @@ public class PilotController {
 		return _instance;
 	}
 	
-	public boolean getAButton()
+	public boolean getResetGyroButton()
 	{
 		return controller.getAButton();
 	}
-	public boolean getBButton()
-	{
-		return controller.getBButton();
-	}
-	public boolean getXButton()
+	public boolean getAutoModeSelectDown()
 	{
 		return controller.getXButton();
 	}
-	public boolean getYButton()
+	public boolean getAutoModeSelectUp()
 	{
 		return controller.getYButton();
 	}
-	public double getLeftJoystickXAxis()
+	public double getDriveBaseStrafingStick()
 	{
 		return controller.getX(Hand.kLeft);
 	}
-	public double getRightJoystickXAxis()
+	public double getDriveBaseSteeringStick()
 	{
 		return controller.getX(Hand.kRight);
 	}
-	public double getLeftJoystickYAxis()
+	public double getDriveBaseThrottleStick()
 	{
 		return controller.getY(Hand.kLeft);
 	}
-	public double getRightJoystickYAxis()
-	{
-		return controller.getY(Hand.kRight);
-	}
-	public double getDPadAxis()
-	{
-		return controller.getTwist();
-	}
-	public boolean getLeftBumper()
+	public boolean getSlideDriveLiftButton()
 	{
 		return controller.getBumper(Hand.kLeft);
-	}
-	public boolean getStartButton()
-	{
-		return controller.getStart();
-	}
-	public boolean getBackButton()
-	{
-		return controller.getBack();
-	}
-	public int getPOV()
-	{
-		return controller.getPOV();
 	}
 	public boolean getNorth()
 	{
 		return controller.getNorth();
 	}
-	public boolean getNortheast()
-	{
-		return controller.getNortheast();
-	}
-	public boolean getEast()
-	{
-		return controller.getEast();
-	}
-	public boolean getSoutheast()
-	{
-		return controller.getSoutheast();
-	}
-	public boolean getSouth()
+		public boolean getSouth()
 	{
 		return controller.getSouth();
-	}
-	public boolean getSouthwest()
-	{
-		return controller.getSouthwest();
-	}
-	public boolean getWest()
-	{
-		return controller.getWest();
-	}
-	public boolean getNorthwest()
-	{
-		return controller.getNorthwest();
 	}
 }

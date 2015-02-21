@@ -17,92 +17,24 @@ public class CoPilotController {
 		return _instance;
 	}
 	
-	public boolean getAButton()
+	public boolean getElevatorSetPointUpButton()
 	{
 		return controller.getAButton();
 	}
-	public boolean getBButton()
-	{
-		return controller.getBButton();
-	}
-	public boolean getXButton()
-	{
-		return controller.getXButton();
-	}
-	public boolean getYButton()
+	public boolean getElevatorSetPointDownButton()
 	{
 		return controller.getYButton();
 	}
-	public double getLeftJoystickXAxis()
-	{
-		return controller.getX(Hand.kLeft);
-	}
-	public double getRightJoystickXAxis()
-	{
-		return controller.getX(Hand.kRight);
-	}
-	public double getLeftJoystickYAxis()
+	public double getElevatorDriveStick()
 	{
 		return controller.getY(Hand.kLeft);
 	}
-	public double getRightJoystickYAxis()
-	{
-		return controller.getY(Hand.kRight);
-	}
-	public double getDPadAxis()
-	{
-		return controller.getTwist();
-	}
-	public boolean getLeftBumper()
+	public boolean getElevatorTiltButton()
 	{
 		return controller.getBumper(Hand.kLeft);
 	}
-	public boolean getRightBumper()
-	{
-		return controller.getBumper(Hand.kRight);
-	}
-	public boolean getStartButton()
+	public boolean getAutoEmergencyOff()
 	{
 		return controller.getStart();
-	}
-	public boolean getBackButton()
-	{
-		return controller.getBack();
-	}
-	public int getPOV()
-	{
-		return controller.getPOV();
-	}
-	public boolean getNorth()
-	{
-		return controller.getNorth();
-	}
-	public boolean getNortheast()
-	{
-		return controller.getNortheast();
-	}
-	public boolean getEast()
-	{
-		return controller.getEast();
-	}
-	public boolean getSoutheast()
-	{
-		return controller.getSoutheast();
-	}
-	public boolean getSouth()
-	{
-		return controller.getSouth();
-	}
-	public boolean getSouthwest()
-	{
-		return controller.getSouthwest();
-	}
-	public boolean getWest()
-	{
-		return controller.getWest();
-	}
-	public boolean getNorthwest()
-	{
-		return controller.getNorthwest();
 	}
 }

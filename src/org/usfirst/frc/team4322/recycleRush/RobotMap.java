@@ -2,7 +2,7 @@ package org.usfirst.frc.team4322.recycleRush;
 
 public class RobotMap {
 	
-	public static String LAST_BUILD_TIME = "Robot4322_2015: 2/15/2015 6:04 PM";
+	public static String LAST_BUILD_TIME = "Robot4322_2015: 2/17/2015 9:03 PM";
 	
 	// Initialize Joystick Ports
 	public static int PILOT_CONTROLLER_JOYSTICK_PORT = 0;
@@ -50,8 +50,8 @@ public class RobotMap {
 	public static double TELEOP_STRAFE_P_CONTROL_VALUE_GYRO = 0.09375;
 	
 	// Accelerometer Deadband values per axis
-	public static double ACCELEROMETER_DEADBAND_X = 0.15;
-	public static double ACCELEROMETER_DEADBAND_Y = 0.15;
+	public static double ACCELEROMETER_DEADBAND_X = 0.4; //0.15
+	public static double ACCELEROMETER_DEADBAND_Y = 0.4; //0.15
 	public static double ACCELEROMETER_DEADBAND_Z = 1; //pretty sensitive
 	
 	// Initialize Elevator CAN Addresses
