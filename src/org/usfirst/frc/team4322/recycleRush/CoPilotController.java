@@ -19,11 +19,11 @@ public class CoPilotController {
 	
 	public boolean getElevatorSetPointUpButton()
 	{
-		return controller.getAButton();
+		return controller.getYButton();
 	}
 	public boolean getElevatorSetPointDownButton()
 	{
-		return controller.getYButton();
+		return controller.getAButton();
 	}
 	public double getElevatorDriveStick()
 	{

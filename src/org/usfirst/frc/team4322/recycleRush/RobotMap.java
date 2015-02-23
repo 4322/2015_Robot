@@ -2,7 +2,7 @@ package org.usfirst.frc.team4322.recycleRush;
 
 public class RobotMap {
 	
-	public static String LAST_BUILD_TIME = "Robot4322_2015: 2/17/2015 9:03 PM";
+	public static String LAST_BUILD_TIME = "Robot4322_2015: 2/22/2015 3:00 PM";
 	
 	// Initialize Joystick Ports
 	public static int PILOT_CONTROLLER_JOYSTICK_PORT = 0;
@@ -80,7 +80,9 @@ public class RobotMap {
 	// Tote Elevator positions
 	public static double ELEVATOR_JOYSTICK_DEADBAND = 0.1;
 	public static double ELEVATOR_POSITION_1 = 0;
-	public static double ELEVATOR_POSITION_2 = 0;
-	public static double ELEVATOR_POSITION_3 = 0;
-	public static double ELEVATOR_POSITION_4 = 0;
+	public static double ELEVATOR_POSITION_2 = 3385;
+	public static double ELEVATOR_POSITION_3 = 6435;
+	public static double ELEVATOR_POSITION_4 = 9776;
+	public static double ELEVATOR_POSITION_5 = 11245;
+	public static double ELEVATOR_POSITION_6 = 8420;
 }
