@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.RobotDrive.MotorType;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -21,7 +22,7 @@ public class RobotDriveBase
 {
 
     // Instance for the Singleton Class
-    static private RobotDriveBase _instance = null;
+    private static RobotDriveBase _instance = null;
     
 	// Instance for Power Distribution Panel
 	private PowerDistributionPanel pdp = null;
@@ -29,7 +30,8 @@ public class RobotDriveBase
     // Instances for Talon motor controllers
     private Talon leftTalon = null; 
     private Talon rightTalon = null;
-    
+    private SendableChooser driverProfile = null;
+   
     // Instances for slide drive
     private CANJaguar slideJaguar1 = null;
     private CANJaguar slideJaguar2 = null;
@@ -61,7 +63,7 @@ public class RobotDriveBase
     boolean strafeMode = true; // false; <-- Lets start in strafe mode, driver preference.
     boolean strafeStart = false;
     boolean strafePressed = false;
-    
+    boolean duelMode = false;
     // This is the static getInstance() method that provides easy access to the RobotDriveBase singleton class.
     public static RobotDriveBase getInstance()
     {
@@ -155,6 +157,13 @@ public class RobotDriveBase
 	        	robotAccelerometer = new BuiltInAccelerometer();
 	        }
 	        
+	        // Create driverProfile if it doesnt exist
+	        if(driverProfile == null)
+	        {
+	        	driverProfile = new SendableChooser();
+	        	driverProfile.addDefault("Default Profile", false);
+	        	driverProfile.addObject("Alternate Profile", true);
+	        }
 	        // Create robotDrive if it does not exist
 	        if(robotDrive == null)
 	        {
@@ -281,14 +290,16 @@ public class RobotDriveBase
     {
     	try
     	{
+    		//PilotController.getInstance().setUseAlternateDriveProfile((boolean)driverProfile.getSelected());
+    		duelMode = PilotController.getInstance().getDuelButton();
 	        // Get the current throttle value from the Pilot Controller
-	        throttleValue = PilotController.getInstance().getDriveBaseThrottleStick() * RobotMap.THROTTLE_LIMIT;
+	        throttleValue = PilotController.getInstance().getDriveBaseThrottleStick();
 	        
 	        // Get the current steering value from the Pilot Controller
-	        steeringValue = PilotController.getInstance().getDriveBaseSteeringStick() * RobotMap.STEERING_LIMIT;
+	        steeringValue = PilotController.getInstance().getDriveBaseSteeringStick();
 	        
 	        // Get the current strafing value from the Pilot Controller
-	        strafingValue = PilotController.getInstance().getDriveBaseStrafingStick() * RobotMap.STRAFE_LIMIT;
+	        strafingValue = PilotController.getInstance().getDriveBaseStrafingStick();
 	        // Strafe motor reversal
 	        strafingValue *= -1; 
 	        
@@ -296,7 +307,7 @@ public class RobotDriveBase
 	    	SmartDashboard.putNumber("Throttle: ", throttleValue);
 	    	SmartDashboard.putNumber("Steering: ", steeringValue);
 	    	SmartDashboard.putNumber("Strafing: ", strafingValue);
-	
+
 	        // Ramping Drive Values
 	        if((Math.abs(throttleValue) - Math.abs(lastThrottleValue)) > RobotMap.THROTTLE_RAMP)
 	        {
@@ -338,7 +349,10 @@ public class RobotDriveBase
 	        	}
 	        }
 	        lastStrafingValue = strafingValue;
-	        
+	        //Scale Values
+	        throttleValue = (throttleValue * RobotMap.THROTTLE_LIMIT)  / (duelMode ? 2 : 1);
+	        steeringValue  = (steeringValue * RobotMap.STEERING_LIMIT) / (duelMode ? 2 : 1);
+	        strafingValue = (strafingValue * RobotMap.STRAFE_LIMIT) / (duelMode ? 1.625 : 1);
 	        // Toggle Strafe Mode
 	    	if(PilotController.getInstance().getSlideDriveLiftButton())
 	    	{
@@ -375,7 +389,7 @@ public class RobotDriveBase
 	        	slideJaguar2.set(0);
 	        	
 	        	// Check to see if we are not steering and reset the gyro heading 
-	            if(Math.abs(PilotController.getInstance().getDriveBaseSteeringStick()) < RobotMap.XBONE_RIGHT_X_DEADBAND)
+	            if(Math.abs(PilotController.getInstance().getDriveBaseSteeringStick()) < RobotMap.STEERING_DEADBAND)
 	            {
 	            	// If the Gyro is dirty, and we have stopped turning
 	            	if(dirtyGyro && Math.abs(robotAccelerometer.getX()) < RobotMap.ACCELEROMETER_DEADBAND_X
@@ -385,17 +399,18 @@ public class RobotDriveBase
 	                	robotGyro.reset();
 	                	dirtyGyro = false;
 	                }
+	            	
 	            	// If the Gyro is dirty, no auto-correcting
 	            	if(dirtyGyro)
 	            	{
 	            		gyroAngle = 0;
 	            	}
-	            	
-	            	try
+
+	    	        try
 	            	{
 	            		// Drive STRAIGHT and use the GYRO to keep us straight
 		            	double compensatedSteeringValue = gyroAngle * RobotMap.TELEOP_P_CONTROL_VALUE_GYRO * -1;            	
-		            	RobotLogger.getInstance().sendToConsole("Gyro Compensation Value: " + compensatedSteeringValue);
+//		            	RobotLogger.getInstance().sendToConsole("Gyro Compensation Value: " + compensatedSteeringValue);
 		            	robotDrive.arcadeDrive(throttleValue, compensatedSteeringValue);
 	            	}
 	            	catch (Exception ex)
@@ -423,7 +438,7 @@ public class RobotDriveBase
 	        		robotGyro.reset();
 	        	}
 	        	// Check to see if we are not steering and reset the gyro heading 
-	        	if(Math.abs(PilotController.getInstance().getDriveBaseSteeringStick()) < RobotMap.XBONE_RIGHT_X_DEADBAND)
+	        	if(Math.abs(PilotController.getInstance().getDriveBaseSteeringStick()) < RobotMap.STEERING_DEADBAND)
 	        	{
 	            	// If the Gyro is dirty, and we have stopped turning
 	        		if(dirtyGyro && Math.abs(robotAccelerometer.getX()) < RobotMap.ACCELEROMETER_DEADBAND_X
@@ -439,10 +454,11 @@ public class RobotDriveBase
 	            	{
 	            		gyroAngle = 0;
 	            	}
+	    	           	        
 	            	double compensatedSteeringValue = gyroAngle * RobotMap.TELEOP_STRAFE_P_CONTROL_VALUE_GYRO * -1;            	
 	            	robotDrive.arcadeDrive(throttleValue, compensatedSteeringValue);
 	        	}
-	        	else if(Math.abs(PilotController.getInstance().getDriveBaseStrafingStick()) < RobotMap.XBONE_RIGHT_X_DEADBAND && Math.abs(PilotController.getInstance().getDriveBaseThrottleStick()) < RobotMap.XBONE_RIGHT_X_DEADBAND)
+	        	else if(Math.abs(PilotController.getInstance().getDriveBaseStrafingStick()) < RobotMap.STEERING_DEADBAND && Math.abs(PilotController.getInstance().getDriveBaseThrottleStick()) < RobotMap.THROTTLE_DEADBAND)
 	        	{
 	        		robotDrive.arcadeDrive(throttleValue, steeringValue);
 	            	// When steering, the gyro is always dirty
@@ -460,14 +476,16 @@ public class RobotDriveBase
 	        	slideJaguar1.set(strafingValue*-1);
 	        	slideJaguar2.set(strafingValue*-1);
 	        }
-	        SmartDashboard.putNumber("Encoder Distance", driveEncoder.getDistance());
-	        SmartDashboard.putNumber("Xbone Controller Right Stick X Axis", PilotController.getInstance().getDriveBaseSteeringStick());
+
+//	        SmartDashboard.putNumber("Encoder Distance", driveEncoder.getDistance());
+//	        SmartDashboard.putNumber("Steering actual value:", PilotController.getInstance().getDriveBaseSteeringStick());
+//	        SmartDashboard.putNumber("Throttle actual value:", PilotController.getInstance().getDriveBaseThrottleStick());
 	        SmartDashboard.putNumber("Gyro Angle", gyroAngle);
-	    	SmartDashboard.putNumber("Teleop Turning Correction Value", gyroAngle * RobotMap.TELEOP_STRAFE_P_CONTROL_VALUE_GYRO * -1);
+//	    	SmartDashboard.putNumber("Teleop Turning Correction Value", gyroAngle * RobotMap.TELEOP_STRAFE_P_CONTROL_VALUE_GYRO * -1);
 			SmartDashboard.putNumber("ACCEL (X)", robotAccelerometer.getX());
 			SmartDashboard.putNumber("ACCEL (Y)", robotAccelerometer.getY());
 			SmartDashboard.putNumber("ACCEL (Z)", robotAccelerometer.getZ());
-			SmartDashboard.putBoolean("Pressure Low:", compressor.getPressureSwitchValue());
+//			SmartDashboard.putBoolean("Pressure Low:", compressor.getPressureSwitchValue());
     	}
     	catch (Exception ex)
     	{

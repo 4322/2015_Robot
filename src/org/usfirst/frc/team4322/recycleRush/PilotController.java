@@ -6,6 +6,13 @@ public class PilotController {
 
 	private static PilotController _instance = null;
 	private XboxController controller = null;
+	
+	// The Alternate Drive Profile swaps driving sticks
+	// * Steering will be left stick X axis
+	// * Throttle will be right stick Y axis
+	// * Strafing will be right stick X axis
+	// This value could be selected in a configuration file or using a SmartDashboard selector
+	private boolean useAlternateDriveProfile = true;
     
 	static PilotController getInstance()
 	{
@@ -31,15 +38,36 @@ public class PilotController {
 	}
 	public double getDriveBaseStrafingStick()
 	{
-		return controller.getX(Hand.kLeft);
+		if(useAlternateDriveProfile)
+		{
+			return controller.getX(Hand.kRight);
+		}
+		else
+		{
+			return controller.getX(Hand.kLeft);
+		}
 	}
 	public double getDriveBaseSteeringStick()
 	{
-		return controller.getX(Hand.kRight);
+		if(useAlternateDriveProfile)
+		{
+			return controller.getX(Hand.kLeft);
+		}
+		else
+		{
+			return controller.getX(Hand.kRight);
+		}
 	}
 	public double getDriveBaseThrottleStick()
 	{
-		return controller.getY(Hand.kLeft);
+		if(useAlternateDriveProfile)
+		{
+			return controller.getY(Hand.kRight);
+		}
+		else
+		{
+			return controller.getY(Hand.kLeft);
+		}
 	}
 	public boolean getSlideDriveLiftButton()
 	{
@@ -49,8 +77,17 @@ public class PilotController {
 	{
 		return controller.getNorth();
 	}
-		public boolean getSouth()
+	public boolean getSouth()
 	{
 		return controller.getSouth();
+	}
+	public boolean getDuelButton()
+	{
+		return controller.getBumper(Hand.kRight);
+	}
+
+	public void setUseAlternateDriveProfile(boolean useAlternateDriveProfile)
+	{
+		this.useAlternateDriveProfile = useAlternateDriveProfile;
 	}
 }

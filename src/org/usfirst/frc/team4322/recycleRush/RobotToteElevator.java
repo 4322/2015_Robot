@@ -13,6 +13,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class RobotToteElevator {
 
+	private enum setPointChange
+	{
+		NONE, UP, DOWN
+	};
 	// Instance for the Singleton Class
     static private RobotToteElevator _instance = null;
     
@@ -27,12 +31,17 @@ public class RobotToteElevator {
 	boolean autoDriveMode = false;
 	boolean switchPressed = false;
 	boolean controlModeV = true; 
-	int currentSetpoint = 0;
+	boolean newSetpoint =false;
+	setPointChange setPointDelta = setPointChange.NONE;
+	long currentPosition = 0;
+	int targetIndex = 0;
 	
 	// Instance for Tilt Solenoid
 	private DoubleSolenoid tiltActuatorPiston = null;
     boolean tiltPressed = false;
-    boolean tiltMode = true; // false; <-- Lets start in elevator not tilted mode
+    // Set tiltMode = true for elevator tilted back
+    boolean tiltMode = true; // <-- Lets start in elevator tilted mode
+    
     // This is the static getInstance() method that provides easy access to the RobotToteElevator singleton class.
     public static RobotToteElevator getInstance()
     {
@@ -103,8 +112,9 @@ public class RobotToteElevator {
 	    	toteMotor.ClearIaccum();
 	    	toteMotor.setPosition(0);
 	    	autoDriveMode = false;
-	    	currentSetpoint = 0;
-	    	tiltMode = false;
+	    	currentPosition = 0;
+	    	setPointDelta = setPointChange.NONE;
+	    	tiltMode = true; // We want the elevator to be tilted at startup
 	    	RobotLogger.getInstance().sendToConsole("RobotToteElevator.initTeleop() successfully run.");
     	}
     	catch (Exception ex)
@@ -118,6 +128,7 @@ public class RobotToteElevator {
     {
     	try
     	{
+    		currentPosition = toteMotor.getEncPosition();
     		//Check if auto mode
     		if(autoDriveMode)
         	{
@@ -135,27 +146,22 @@ public class RobotToteElevator {
         		if(CoPilotController.getInstance().getElevatorSetPointDownButton())
         		{
         			// Decrement the set point
-        			if(currentSetpoint > 0)
-        			{
-        				currentSetpoint--;
-        			}
+        			setPointDelta = setPointChange.DOWN;
+        			newSetpoint = true;
         			setPointSelectButtonPressed = true;
         			if(autoDriveMode) controlModeV = true;
         			autoDriveMode = true;
-        			RobotLogger.getInstance().sendToConsole("Entered AutoDriveMode.");
+        			RobotLogger.getInstance().sendToConsole("Decreased PID index to " + currentPosition);
         			brakeSolenoid.set(Value.kForward);
         		}
         		else if(CoPilotController.getInstance().getElevatorSetPointUpButton())
         		{
-        			// Increment the set point
-        			if(currentSetpoint < 5)
-        			{
-        				currentSetpoint++;
-        			}
+        			setPointDelta = setPointChange.UP;
+        			newSetpoint = true;
         			setPointSelectButtonPressed = true;
         			if(autoDriveMode) controlModeV = true;
         			autoDriveMode = true;
-        			RobotLogger.getInstance().sendToConsole("Entered AutoDriveMode.");
+        			RobotLogger.getInstance().sendToConsole("Increased PID index to " + currentPosition);
         			brakeSolenoid.set(Value.kForward);
         		}
         	}
@@ -166,6 +172,7 @@ public class RobotToteElevator {
         		&& !CoPilotController.getInstance().getElevatorSetPointDownButton())
         		{
         			setPointSelectButtonPressed = false;
+        			RobotLogger.getInstance().sendToConsole("Setpoint buttons released");
         		}
         	}
 	        // Toggle Tilt Mode
@@ -196,6 +203,7 @@ public class RobotToteElevator {
         		// Switch from voltage control (manual) to position control (automatic)
         		if(controlModeV)
         		{
+        			RobotLogger.getInstance().sendToConsole("Changing to PID position mode");
         			// Disable voltage control
         			toteMotor.disableControl();
         			// Change to position mode
@@ -212,6 +220,7 @@ public class RobotToteElevator {
         		// Switch from position to voltage control
         		if(!controlModeV)
         		{
+        			RobotLogger.getInstance().sendToConsole("Changing to PID voltage percent mode");
         			// Disable position control
         			toteMotor.disableControl();
         			// Change to voltage mode
@@ -233,16 +242,15 @@ public class RobotToteElevator {
         		}
         	}
         	SmartDashboard.putBoolean("Auto Mode:", autoDriveMode);
-        	SmartDashboard.putNumber("Target Value:",toteMotor.getSetpoint());
-        	SmartDashboard.putNumber("Error Value:",toteMotor.getClosedLoopError());
+        	SmartDashboard.putNumber("Target Encoder Value:",toteMotor.getSetpoint());
+//        	SmartDashboard.putNumber("Error Value:",toteMotor.getClosedLoopError());
         	SmartDashboard.putBoolean("Tote Lift Forward Limit Closed:", toteMotor.isFwdLimitSwitchClosed());
         	SmartDashboard.putBoolean("Tote Lift Reverse Limit Closed:", toteMotor.isRevLimitSwitchClosed());
-        	SmartDashboard.putNumber("Elevator Joystick Value",CoPilotController.getInstance().getElevatorDriveStick());
-        	SmartDashboard.putNumber("Elevator Drive Value",-1*CoPilotController.getInstance().getElevatorDriveStick());
+//        	SmartDashboard.putNumber("Elevator Joystick Value",CoPilotController.getInstance().getElevatorDriveStick());
+//        	SmartDashboard.putNumber("Elevator Drive Value",-1*CoPilotController.getInstance().getElevatorDriveStick());
         	SmartDashboard.putNumber("Current Encoder Value", toteMotor.getEncPosition());
-        	SmartDashboard.putNumber("Talon Iaccum:", toteMotor.GetIaccum());
-        	SmartDashboard.putNumber("Target Setpoint", currentSetpoint);
-        	SmartDashboard.putNumber("Target Encoder Value", autoDriveMode ? toteMotor.get() : 0);
+//        	SmartDashboard.putNumber("Talon Iaccum:", toteMotor.GetIaccum());
+//        	SmartDashboard.putNumber("Target Encoder Value", autoDriveMode ? toteMotor.get() : 0);
     	}
     	catch (Exception ex)
     	{
@@ -280,33 +288,47 @@ public class RobotToteElevator {
 //    			pressed = true;
 //    		}
 //    	}
-    	switch(currentSetpoint)
-	    {
-	    	case 0:
-	    		if(toteMotor.get() !=RobotMap.ELEVATOR_POSITION_1) RobotLogger.getInstance().sendToConsole("Set Talon to setpoint 1.");
-	    		toteMotor.set(RobotMap.ELEVATOR_POSITION_1);
-	    		break;
-	    	case 1:
-	    		if(toteMotor.get() !=RobotMap.ELEVATOR_POSITION_2) RobotLogger.getInstance().sendToConsole("Set Talon to setpoint 2.");
-	    		toteMotor.set(RobotMap.ELEVATOR_POSITION_2);
-	    		break;
-	    	case 2:
-	    		if(toteMotor.get() !=RobotMap.ELEVATOR_POSITION_3) RobotLogger.getInstance().sendToConsole("Set Talon to setpoint 3.");
-	    		toteMotor.set(RobotMap.ELEVATOR_POSITION_3);
-	    		break;
-	    	case 3:
-	    		if(toteMotor.get() !=RobotMap.ELEVATOR_POSITION_4) RobotLogger.getInstance().sendToConsole("Set Talon to setpoint 4.");
-	    		toteMotor.set(RobotMap.ELEVATOR_POSITION_4);
-	    		break;
-	    	case 4:
-	    		if(toteMotor.get() !=RobotMap.ELEVATOR_POSITION_5) RobotLogger.getInstance().sendToConsole("Set Talon to setpoint 5.");
-	    		toteMotor.set(RobotMap.ELEVATOR_POSITION_5);
-	    		break;
-	    	case 5:
-	    		if(toteMotor.get() !=RobotMap.ELEVATOR_POSITION_6) RobotLogger.getInstance().sendToConsole("Set Talon to setpoint 6.");
-	    		toteMotor.set(RobotMap.ELEVATOR_POSITION_6);
-	    		break;
-	    }
+    	//Ensure brake is open
+		brakeSolenoid.set(Value.kForward);
+//    	switch(currentSetpoint)
+//	    {
+//	    	case 0:
+//	    		if(toteMotor.get() !=RobotMap.ELEVATOR_POSITION_1) RobotLogger.getInstance().sendToConsole("Set Talon to setpoint 1.");
+//	    		toteMotor.set(RobotMap.ELEVATOR_POSITION_1);
+//	    		break;
+//	    	case 1:
+//	    		if(toteMotor.getSetpoint() !=RobotMap.ELEVATOR_POSITION_2) RobotLogger.getInstance().sendToConsole("Set Talon to setpoint 2.");
+//	    		toteMotor.set(RobotMap.ELEVATOR_POSITION_2);
+//	    		break;
+//	    	case 2:
+//	    		if(toteMotor.getSetpoint() !=RobotMap.ELEVATOR_POSITION_3) RobotLogger.getInstance().sendToConsole("Set Talon to setpoint 3.");
+//	    		toteMotor.set(RobotMap.ELEVATOR_POSITION_3);
+//	    		break;
+//	    	case 3:
+//	    		if(toteMotor.getSetpoint() !=RobotMap.ELEVATOR_POSITION_4) RobotLogger.getInstance().sendToConsole("Set Talon to setpoint 4.");
+//	    		toteMotor.set(RobotMap.ELEVATOR_POSITION_4);
+//	    		break;
+//	    	case 4:
+//	    		if(toteMotor.getSetpoint() !=RobotMap.ELEVATOR_POSITION_5) RobotLogger.getInstance().sendToConsole("Set Talon to setpoint 5.");
+//	    		toteMotor.set(RobotMap.ELEVATOR_POSITION_5);
+//	    		break;
+//	    	case 5:
+//	    		if(toteMotor.getSetpoint() != RobotMap.ELEVATOR_POSITION_6) RobotLogger.getInstance().sendToConsole("Set Talon to setpoint 6.");
+//	    		toteMotor.set(RobotMap.ELEVATOR_POSITION_6);
+//	    		break;
+//	    }
+		
+    	if(newSetpoint)
+    	{
+    		targetIndex = (int) Math.round((setPointDelta == setPointChange.DOWN) ? Math.floor((toteMotor.get()-150) / 3150) : Math.ceil((toteMotor.get()+150) / 3150));
+    		if(targetIndex >= RobotMap.ELEVATOR_POSITIONS.length) targetIndex = RobotMap.ELEVATOR_POSITIONS.length -1;
+    		else if(targetIndex < 0) targetIndex = 1;
+    		toteMotor.set(RobotMap.ELEVATOR_POSITIONS[targetIndex]);
+    		setPointDelta = setPointChange.NONE;
+    		newSetpoint = false;
+    		return;
+    	}
+    	toteMotor.set(RobotMap.ELEVATOR_POSITIONS[targetIndex]);
     	// If we're within the error range on PID, close the disk brake
     	if(Math.abs(toteMotor.getClosedLoopError()) < 10)
     	{
@@ -314,10 +336,6 @@ public class RobotToteElevator {
     		autoDriveMode = false;
     		RobotLogger.getInstance().sendToConsole("Exited AutoDriveMode.");
     	}
-    	// If PID is running, the disk brake should be open
-    	else
-    	{
-    		brakeSolenoid.set(Value.kForward);
-    	}
+    	if(Math.abs(CoPilotController.getInstance().getElevatorDriveStick()) > RobotMap.ELEVATOR_ANALOG_STICK_DEADBAND) autoDriveMode = false;
     }
 }

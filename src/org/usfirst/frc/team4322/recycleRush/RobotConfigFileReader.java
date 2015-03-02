@@ -62,7 +62,7 @@ public class RobotConfigFileReader
 	    	RobotMap.STRAFE_LIMIT = Double.parseDouble(p.getProperty("STRAFE_LIMIT"));
 	    	// Drive Gyro Port
 	    	RobotMap.DRIVE_GYRO_ANALOG_PORT = Integer.parseInt(p.getProperty("DRIVE_GYRO_ANALOG_PORT"));
-	    	RobotMap.XBONE_RIGHT_X_DEADBAND = Double.parseDouble(p.getProperty("XBONE_RIGHT_X_DEADBAND"));
+	    	RobotMap.STEERING_DEADBAND = Double.parseDouble(p.getProperty("XBONE_RIGHT_X_DEADBAND"));
 	    	// P constants for driving
 	    	RobotMap.TELEOP_P_CONTROL_VALUE_GYRO = Double.parseDouble(p.getProperty("TELEOP_P_CONTROL_VALUE_GYRO"));
 	    	RobotMap.TELEOP_STRAFE_P_CONTROL_VALUE_GYRO = Double.parseDouble(p.getProperty("TELEOP_STRAFE_P_CONTROL_VALUE_GYRO"));
@@ -77,10 +77,10 @@ public class RobotConfigFileReader
 	    	RobotMap.ELEVATOR_I_VALUE = Double.parseDouble(p.getProperty("ELEVATOR_I_VALUE"));
 	    	RobotMap.ELEVATOR_D_VALUE = Double.parseDouble(p.getProperty("ELEVATOR_D_VALUE"));
 	    	//Tote Elevator positions
-	    	RobotMap.ELEVATOR_POSITION_1 = Integer.parseInt(p.getProperty("ELEVATOR_POSITION_1"));
-	    	RobotMap.ELEVATOR_POSITION_2 = Integer.parseInt(p.getProperty("ELEVATOR_POSITION_2"));
-	    	RobotMap.ELEVATOR_POSITION_3 = Integer.parseInt(p.getProperty("ELEVATOR_POSITION_3"));
-	    	RobotMap.ELEVATOR_POSITION_4 = Integer.parseInt(p.getProperty("ELEVATOR_POSITION_4"));
+	    	RobotMap.ELEVATOR_POSITIONS[0] = Integer.parseInt(p.getProperty("ELEVATOR_POSITION_1"));
+	    	RobotMap.ELEVATOR_POSITIONS[1] = Integer.parseInt(p.getProperty("ELEVATOR_POSITION_2"));
+	    	RobotMap.ELEVATOR_POSITIONS[2] = Integer.parseInt(p.getProperty("ELEVATOR_POSITION_3"));
+	    	RobotMap.ELEVATOR_POSITIONS[3] = Integer.parseInt(p.getProperty("ELEVATOR_POSITION_4"));
 	    }
 	    catch (NumberFormatException ex)
 	    {

@@ -42,17 +42,21 @@ public class RobotMain extends IterativeRobot
 	    	RobotLogger.getInstance().update(true);
 	    	RobotDriveBase.getInstance().initRobotDrive();
 	    	RobotToteElevator.getInstance().initRobotToteElevator();
+//			RobotVision.getInstance().initRobotVision();
+
 	    	// Turn on the camera and trap any exceptions if it is not available
-		    try
-		    {
-		    	CameraServer camera = CameraServer.getInstance();
-		    	camera.setQuality(50);
-		    	camera.startAutomaticCapture("cam0");
-			}
-			catch (Exception ex)
-			{
-				RobotLogger.getInstance().writeErrorToFile("robotInit() Camera Server Startup: ", ex);
-			}
+//		    try
+//		    {
+//		    	CameraServer camera = CameraServer.getInstance();
+//		    	camera.setQuality(50);
+//		    	camera.startAutomaticCapture("cam0");
+//			}
+//			catch (Exception ex)
+//			{
+//				RobotLogger.getInstance().writeErrorToFile("robotInit() Camera Server Startup: ", ex);
+//			}
+	    	
+	    	
 	    	// Initiate each system on the robot
 	    	
 
@@ -123,8 +127,8 @@ public class RobotMain extends IterativeRobot
  			{ //Reinitialize!
  				RobotDriveBase.getInstance().robotGyro = new Gyro(RobotMap.DRIVE_GYRO_ANALOG_PORT);
  			}
- 			SmartDashboard.putNumber("Autonomous Mode", autoMode);
- 	        SmartDashboard.putNumber("Xbone Controller Right Stick X Axis", PilotController.getInstance().getDriveBaseSteeringStick());
+// 			SmartDashboard.putNumber("Autonomous Mode", autoMode);
+// 	        SmartDashboard.putNumber("Xbone Controller Right Stick X Axis", PilotController.getInstance().getDriveBaseSteeringStick());
 		}
 		catch (Exception ex)
 		{
@@ -226,6 +230,7 @@ public class RobotMain extends IterativeRobot
 			}
 			RobotDriveBase.getInstance().runTeleop();
 			RobotToteElevator.getInstance().runTeleop();
+			//RobotVision.getInstance().runTeleop();
 		}
 		catch (Exception ex)
 		{
