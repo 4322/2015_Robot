@@ -564,8 +564,8 @@ public class RobotDriveBase
 //				        		// Set motors to drive forward while more than 8"
 //			        			do
 //			        			{
-	//			        			slideJaguar1.set(RobotMap.AUTO_ALIGN_DRIVE_FORWARD_SPEED);
-	//			        			slideJaguar2.set(RobotMap.AUTO_ALIGN_DRIVE_FORWARD_SPEED);
+//			        				slideJaguar1.set(RobotMap.AUTO_ALIGN_DRIVE_FORWARD_SPEED);
+//			        				slideJaguar2.set(RobotMap.AUTO_ALIGN_DRIVE_FORWARD_SPEED);
 //						        } while ();
 //				        	case AUTO_ALIGN:
 //				        		// Set motors to zero
