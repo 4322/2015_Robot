@@ -102,7 +102,7 @@ public class TestRobot {
 		{
 			piston.set(Value.kForward);
 		}
-		if(PilotController.getInstance().getAutoModeSelectUp())
+		if(PilotController.getInstance().getDriverModeSelectUp())
 		{
 			piston.set(Value.kReverse);
 		}

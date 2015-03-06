@@ -60,8 +60,7 @@ public class RobotConfigFileReader
 	    	RobotMap.THROTTLE_LIMIT = Double.parseDouble(p.getProperty("THROTTLE_LIMIT"));
 	    	RobotMap.STEERING_LIMIT = Double.parseDouble(p.getProperty("STEERING_LIMIT"));
 	    	RobotMap.STRAFE_LIMIT = Double.parseDouble(p.getProperty("STRAFE_LIMIT"));
-	    	// Drive Gyro Port
-	    	RobotMap.DRIVE_GYRO_ANALOG_PORT = Integer.parseInt(p.getProperty("DRIVE_GYRO_ANALOG_PORT"));
+	    	// Controller deadband
 	    	RobotMap.STEERING_DEADBAND = Double.parseDouble(p.getProperty("XBONE_RIGHT_X_DEADBAND"));
 	    	// P constants for driving
 	    	RobotMap.TELEOP_P_CONTROL_VALUE_GYRO = Double.parseDouble(p.getProperty("TELEOP_P_CONTROL_VALUE_GYRO"));
@@ -70,17 +69,23 @@ public class RobotConfigFileReader
 	    	RobotMap.ACCELEROMETER_DEADBAND_X = Double.parseDouble(p.getProperty("ACCELEROMETER_DEADBAND_X"));
 	    	RobotMap.ACCELEROMETER_DEADBAND_Y = Double.parseDouble(p.getProperty("ACCELEROMETER_DEADBAND_Y"));
 	    	RobotMap.ACCELEROMETER_DEADBAND_Z = Double.parseDouble(p.getProperty("ACCELEROMETER_DEADBAND_Z"));
+	    	// Auto Alignment Strafe Speed
+	    	RobotMap.AUTO_ALIGN_STRAFE_SPEED = Double.parseDouble(p.getProperty("AUTO_ALIGN_STRAFE_SPEED"));
+	    	
 	    	// Tote Encoder Values
 	    	RobotMap.ELEVATOR_INITIAL_SEEK_SPEED = Double.parseDouble(p.getProperty("ELEVATOR_INITIAL_SEEK_SPEED"));
-	    	//Tote Elevator PID Constants
+	    	// Tote Elevator PID Constants
 	    	RobotMap.ELEVATOR_P_VALUE = Double.parseDouble(p.getProperty("ELEVATOR_P_VALUE"));
 	    	RobotMap.ELEVATOR_I_VALUE = Double.parseDouble(p.getProperty("ELEVATOR_I_VALUE"));
 	    	RobotMap.ELEVATOR_D_VALUE = Double.parseDouble(p.getProperty("ELEVATOR_D_VALUE"));
-	    	//Tote Elevator positions
+	    	// Tote Elevator positions
 	    	RobotMap.ELEVATOR_POSITIONS[0] = Integer.parseInt(p.getProperty("ELEVATOR_POSITION_1"));
 	    	RobotMap.ELEVATOR_POSITIONS[1] = Integer.parseInt(p.getProperty("ELEVATOR_POSITION_2"));
 	    	RobotMap.ELEVATOR_POSITIONS[2] = Integer.parseInt(p.getProperty("ELEVATOR_POSITION_3"));
 	    	RobotMap.ELEVATOR_POSITIONS[3] = Integer.parseInt(p.getProperty("ELEVATOR_POSITION_4"));
+	    	
+	    	// Infrared Sensor Error
+	    	RobotMap.PROXIMITY_SENSOR_ERROR_VALUE = Double.parseDouble(p.getProperty("PROXIMITY_SENSOR_ERROR_VALUE"));
 	    }
 	    catch (NumberFormatException ex)
 	    {

@@ -27,8 +27,9 @@ public class RobotMain extends IterativeRobot
 	private SendableChooser autoChooser;
 	
 	// Instance for autonomous mode (integer)
-	private int autoMode = 1;
-		
+	private int driverProfileMode = 1;
+	private String dPModeString = "Default";
+	
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
@@ -59,7 +60,6 @@ public class RobotMain extends IterativeRobot
 	    	
 	    	// Initiate each system on the robot
 	    	
-
 	    	// Create the Sendable Choosers on the SmartDashboard (does not work with new sfx currently)
 //	    	autoChooser = new SendableChooser();
 //	    	autoChooser.addDefault("DriveForward (Auto 1)", new DriveForward());
@@ -109,20 +109,24 @@ public class RobotMain extends IterativeRobot
 				disabledBegin = true;
 	    		RobotLogger.getInstance().close();
 			}
- 			if(PilotController.getInstance().getAutoModeSelectUp())
+ 			if(PilotController.getInstance().getDriverModeSelectUp())
  			{
- 				if(autoMode < 2) //Max mode #
- 					autoMode++;
+ 				if(driverProfileMode < 2) //Max mode #
+ 					driverProfileMode++;
  				else
- 					autoMode = 1; //Min mode #
+ 					driverProfileMode = 1; //Min mode #
  			}
- 			if(PilotController.getInstance().getAutoModeSelectDown())
+ 			if(PilotController.getInstance().getDriverModeSelectDown())
  			{
- 				if(autoMode > 1) //Min mode #
- 					autoMode--;
+ 				if(driverProfileMode > 1) //Min mode #
+ 					driverProfileMode--;
  				else
- 					autoMode = 2; //Max mode #
+ 					driverProfileMode = 2; //Max mode #
  			}
+ 			if (driverProfileMode == 1) dPModeString = "Default";
+ 			else if (driverProfileMode == 2) dPModeString = "Seth";
+ 			SmartDashboard.putString("Driver Profile Mode: ", dPModeString);
+ 			
  			if(PilotController.getInstance().getResetGyroButton())
  			{ //Reinitialize!
  				RobotDriveBase.getInstance().robotGyro = new Gyro(RobotMap.DRIVE_GYRO_ANALOG_PORT);
@@ -178,7 +182,6 @@ public class RobotMain extends IterativeRobot
 				RobotLogger.getInstance().sendToConsole("Robot Autonomous Mode Begin.");
 				autoBegin = true;
 			}
-			RobotDriveBase.getInstance().runAutonomous(autoMode);
 			
 			/**
 			 * RobotBuilder will generate code automatically that runs the
@@ -225,10 +228,10 @@ public class RobotMain extends IterativeRobot
     		// Log initiation only once
 			if (!teleBegin)
 			{
-				//RobotLogger.getInstance().sendToConsole("Robot Teleop Mode Begin.");
+				RobotLogger.getInstance().sendToConsole("Robot Teleop Mode Begin.");
 				teleBegin = true;
 			}
-			RobotDriveBase.getInstance().runTeleop();
+			RobotDriveBase.getInstance().runTeleop(driverProfileMode);
 			RobotToteElevator.getInstance().runTeleop();
 			//RobotVision.getInstance().runTeleop();
 		}
@@ -242,11 +245,9 @@ public class RobotMain extends IterativeRobot
     {
     	try
 		{
-    		//RobotLogger.getInstance().close();
-			//RobotLogger.getInstance().update();
-			TestRobot.getInstance().init();
+    		TestRobot.getInstance().init();
 			testBegin = false;
-			//RobotLogger.getInstance().sendToConsole("Robot Test Mode Initialized.");
+			RobotLogger.getInstance().sendToConsole("Robot Test Mode Initialized.");
 		}
 		catch (Exception ex)
 		{

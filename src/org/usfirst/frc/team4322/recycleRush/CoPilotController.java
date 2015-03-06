@@ -37,4 +37,8 @@ public class CoPilotController {
 	{
 		return controller.getStart();
 	}
+	public boolean getAutoAlignButton()
+	{
+		return controller.getBumper(Hand.kRight);
+	}
 }
