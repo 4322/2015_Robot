@@ -5,7 +5,7 @@ String ver = "2.1";
 //elevator encoder positions
 //absolute encoder ticks for each elevator position
 #define elevatorMin 0
-#define elevatorMax 1300
+#define elevatorMax 13881
 #define elevatorPosition0 0
 #define elevatorPosition1 3095
 #define elevatorPosition2 6245
@@ -17,9 +17,9 @@ String ver = "2.1";
 
 // define digital button pins
 // these buttons get sent directly to the driver station over the HID interface
-#define stackPin 28
+#define stackPin 34
 #define containerPin 30
-#define tiltPin 34
+#define tiltPin 28
 #define resetEncPin 36
 #define nextAutoPin 22
 
@@ -28,21 +28,21 @@ String ver = "2.1";
 // gets sent to the driver station
 #define stackUpPin 24
 #define stackDownPin 26
-#define elevator0ButtonPin
-#define elevator1ButtonPin
-#define elevator2ButtonPin
-#define elevator3ButtonPin
-#define elevator4ButtonPin
+#define elevator0ButtonPin 33
+#define elevator1ButtonPin 35
+#define elevator2ButtonPin 37
+#define elevator3ButtonPin 39
+#define elevator4ButtonPin 41
 
 // Define Joystick Analog Pins
-#define thumbYPin 15
+int thumbYPin = 15;
 
 //slide pot constants
 #define slidePotMin 0
-#define slidePotMax 1000
+#define slidePotMax 1023
 
 // slide pot pins
-#define analogInPin 1
+#define analogInPin A0
 #define motorUpPin 2
 #define motorDownPin 3
 #define capacitiveInPin 

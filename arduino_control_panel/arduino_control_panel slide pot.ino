@@ -27,33 +27,6 @@ int containerButton;         // Switch PID to Container Mode  (D30)
 int tiltButton;              // Tilt                          (D34)
 int resetEnc;                // Reset Encoder to new "0"      (D36)
 
-
-int intpid0;             // elevator position 0
-int intpid1;             // elevator position 1
-int intpid2;           // elevator position 2
-int intpid3;            // elevator position 3
-int intpid4;            // elevator position 4
-
-// initialize Booleans for buttons
-
-boolean autoNext = false;                 // nextAutoButton
-boolean stackUpPID = false;               // Level Up
-boolean stackDownPID = false;             // Level Down
-boolean stacked = false;                  // Stack
-boolean swtichSet = false;            	 // Change PID to use container values
-boolean tilt = false;                     // Tilt
-boolean pidResetEnc = false;              // resetEnc (current pos = encoder new "0")
-
-boolean boolpid0 = false;             // elevator position 0
-boolean boolpid1 = false;             // elevator position 1
-boolean boolpid2 = false;           // elevator position 2
-boolean boolpid3 = false;            // elevator position 3
-boolean boolpid4 = false;            // elevator position 4
-
-//booleans is changed?
-boolean manualChanged = true;  			//Boolean for thumbY
-boolean autoChanged = false;
-
 // initialize Joystick Values;
 int joyY = 0;
 int joyYold = 0;
@@ -67,8 +40,16 @@ int lcdBacklight;
 
 int lcdInfo = 0;
 
-
-
+// Booleans
+boolean manualChanged = true;  //Boolean for thumbY
+boolean autoNext = false;                 // nextAutoButton
+boolean autoChanged = false;              //
+boolean stackUpPID = false;               // Level Up
+boolean stackDownPID = false;             // Level Down
+boolean pidResetEnc = false;              // resetEnc (current pos = encoder new "0")
+boolean swtichSet = false;             // Change PID to use container values
+boolean stacked = false;                  // Stack
+boolean tilt = false;                     // Tilt
 
 boolean startup = false;
 boolean defaultLCD = false;
@@ -139,7 +120,6 @@ void sendControls()
 
 void setup()
 {
-
 // Define which pins are inputs or outputs.
 	pinMode ((nextAutoButton, tiltButton, stackUp, stackDown, containerButton, stack, pidResetEnc), INPUT);
 	pinMode (LCD_BACKLIGHT_PIN, OUTPUT);
@@ -149,7 +129,7 @@ void setup()
 	getBlankDataForController();
 
 // Read Joystick to get stationary vaules
-	joyY = map(analogRead(15), 0, 1023, 0, 255);
+	joyY = map(analogRead(thumbYPin), slidePotMin, slidePotMax, 0, 255);
 	sendControls();
 
 
@@ -193,18 +173,53 @@ void loop()
 
   if (startup) writeLCD(); //shouldn't happen because startup has already been set false
 
-				
-// Get values for Manual Joystick
-	joyY = map(analogRead(thumbYPin), 0, 1023, 0, 255);
- 	//Serial.println(joyY);			
 
-// Read Stack Up Button
+  
+
+// Read Next Auto Button 
+		nextAutoButton = digitalRead(nextAutoPin);
+		if (nextAutoButton == HIGH && !autoChanged)
+			{
+			autoMode++;
+			autoNext = true;
+			autoChanged = true;
+			}
+ 	 	else if (nextAutoButton == LOW && autoChanged)
+			{
+			autoNext = false;
+			autoChanged = false;
+			}
+
+//Read the slide pot
+rawJoyY = analogRead(thumbYPin);
+
+// Read Stack Up/Down Buttons
 		stackUp = digitalRead(stackUpPin);
-		if (stackUp == HIGH) stackUpPID = true;
-		else if (stackUp == LOW) stackUpPID = false;
-// Read Stack Down Button
+			if (stackUp == HIGH)
+				{
+				stackUpPID = true;
+				toteIndex++;
+			
+				int temp = map(rawJoyY,slidePotMin,slidePotMax,elevatorMin,elevatorMax);
+				if (temp<(elevatorPosition1-50)) setSlider(elevatorPosition1);
+				else if (temp<(elevatorPosition2-50)) setSlider(elevatorPosition2);
+				else if (temp<(elevatorPosition3-50)) setSlider(elevatorPosition3);
+				else if (temp<(elevatorPosition4-50)) setSlider(elevatorPosition4);
+				}
+			else if (stackUp == LOW) stackUpPID = false;
+
 		stackDown = digitalRead(stackDownPin);
-		if (stackDown == HIGH) stackDownPID = true;
+		if (stackDown == HIGH)
+			{
+			stackDownPID = true;
+			toteIndex--;
+			
+			int temp = map(rawJoyY,slidePotMin,slidePotMax,elevatorMin,elevatorMax);
+			if (temp>(elevatorPosition3+50)) setSlider(elevatorPosition1);
+			else if (temp>(elevatorPosition2+50)) setSlider(elevatorPosition2);
+			else if (temp>(elevatorPosition1+50)) setSlider(elevatorPosition3);
+			else if (temp>(elevatorPosition0+50)) setSlider(elevatorPosition4);
+			}
 		else if (stackDown == LOW) stackDownPID = false;
 
 // Read Stack Button
@@ -227,30 +242,18 @@ void loop()
 		if (resetEnc == HIGH) pidResetEnc = true;
 		else if (resetEnc == LOW) pidResetEnc = false;
 		
-		
-		
-// Read PID0
-		intpid0 = digitalRead(elevator0ButtonPin);
-		if (resetEnc == HIGH) boolpid0 = true;
-		else if (resetEnc == LOW) boolpid0 = false;
-// Read PID1
-		intpid1 = digitalRead(elevator1ButtonPin);
-		if (resetEnc == HIGH) boolpid1 = true;
-		else if (resetEnc == LOW) boolpid1 = false;
-// Read PID2
-		intpid2 = digitalRead(elevator2ButtonPin);
-		if (resetEnc == HIGH) boolpid2 = true;
-		else if (resetEnc == LOW) boolpid2 = false;
-// Read PID3
-		intpid3 = digitalRead(elevator3ButtonPin);
-		if (resetEnc == HIGH) boolpid3 = true;
-		else if (resetEnc == LOW) boolpid3 = false;
-//Read PID4
-		intpid4 = digitalRead(elevator4ButtonPin);
-		if (resetEnc == HIGH) boolpid4 = true;
-		else if (resetEnc == LOW) boolpid4 = false;
-		
+// Get values for Manual Joystick
+		joyY = map(analogRead(thumbYPin), slidePotMin, slidePotMax, 255, 0);
 
+		if (joyYold != joyY)
+			{
+				manualChanged = true;
+				//sendControls();
+				joyYold = joyY;
+			}
+		else manualChanged = false;
+		//Serial.println(joyY);		
+		
 
 // Send Controls
 		sendControls();
@@ -311,6 +314,30 @@ void loop()
   
 }
 
+void setSlider(int robotEncoderValue)
+{
+	int absdiff = 0;
+	int analogSetPoint = map(robotEncoderValue, elevatorMin,elevatorMax,slidePotMin,slidePotMax);
+	do{
+
+		int analogReading = analogRead(thumbYPin);
+		int difference = analogReading-analogSetPoint;
+		absdiff = abs(difference);
+
+		if (analogReading>(analogSetPoint+10))
+		{
+		if ((analogReading-analogSetPoint)>100) analogWrite(motorDownPin,255);
+		else analogWrite(motorDownPin,(analogReading-analogSetPoint)*255/100);
+		}
+
+		if (analogReading<(analogSetPoint-10))
+		{
+		if ((analogSetPoint-analogReading)>100) analogWrite(motorDownPin,255);
+		else analogWrite(motorDownPin,(analogSetPoint-analogReading)*255/100);
+		}
+	} while(absdiff<11);
+
+}
 
 // Output controller values.  (reference PS3 DualShock buttons)
 dataForController_t getControllerData(void) {
@@ -324,56 +351,36 @@ dataForController_t getControllerData(void) {
   // Since our buttons are all held high and
   //  pulled low when pressed, we use the "!"
   //  operator to invert the readings from the pins
-  controllerData.leftStickY = joyY;
+  if (manualChanged) controllerData.leftStickY = joyY;
+  //controllerData.leftStickY = joyY;
 
-
-// Tilt Button
-  if (tilt) controllerData.l2On  = 1;
+  // Tilt Button
+  if (tilt) controllerData.l2On = 1;
   else if (!tilt) controllerData.l2On = 0;
 
-// Auto Button (Right Bumper)
+  // Auto Button (Right Bumper)
   if (autoNext) controllerData.r2On = 1;
   else if (!autoNext) controllerData.r2On = 0;
 
-// Stack Up Button
+  // Stack Up Button
   if (stackUpPID) controllerData.triangleOn = 1;
   else if (!stackUpPID) controllerData.triangleOn = 0;
 
-// Stack Down Button
+  // Stack Down Button
   if (stackDownPID) controllerData.crossOn = 1;
   else if (!stackDownPID) controllerData.crossOn = 0;
 
-// Stack Button
+  // Stack Button
   if (stacked) controllerData.squareOn = 1;
   else if (!stacked) controllerData.squareOn = 0;
 
-// Switch PID Mode
+  // Switch PID Mode
   if (swtichSet) controllerData.circleOn = 1;
   else if (!swtichSet) controllerData.circleOn = 0;
 
-// Reset PID Encoder "0" position
+  // Reset PID Encoder "0" position
   if (pidResetEnc) controllerData.selectOn = 1;
   else if (!pidResetEnc) controllerData.selectOn = 0;
-
-// pid0
-  if (boolpid0) controllerData.l2On = 1;
-  else if (!boolpid0) controllerData.l2On = 0;
-  
-// pid1
-  if (boolpid1) controllerData.l3On = 1;
-  else if (!boolpid1) controllerData.l3On = 0;
-  
-// pid2
-  if (boolpid2) controllerData.r1On = 1;
-  else if (!boolpid2) controllerData.r1On = 0;
-  
-// pid3
-  if (boolpid3) controllerData.r3On = 1;
-  else if (!boolpid3) controllerData.r3On = 0;
-  
-// pid4
-  if (boolpid4) controllerData.dpadLeftOn = 1;
-  else if (!boolpid4) controllerData.dpadLeftOn = 0;
 
   // And return the data!
   return controllerData;
