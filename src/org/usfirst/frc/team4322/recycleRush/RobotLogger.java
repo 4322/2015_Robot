@@ -44,6 +44,7 @@ public class RobotLogger
 	private File oldLog = null;
 	private FileWriter fw = null;
 	private BufferedWriter bw = null;
+	private PrintWriter pw = null;
 	private boolean closed = true;
 
 	// Instances for ZIP File
@@ -140,7 +141,7 @@ public class RobotLogger
 	 * If there is not, create the file.
 	 * If the file is too big, add it to a ZIP file.
 	 */
-	private void writeToFile(final String msg)
+	private void writeToFile(final String msg, Object... args)
 	{
 		try
 		{
@@ -158,8 +159,9 @@ public class RobotLogger
 				// Write data using buffered writer; enhances IO operations
 				fw = new FileWriter(oldLog, true);
 				bw = new BufferedWriter(fw);
+				pw = new PrintWriter(bw);
 			}
-			bw.write(msg);
+			pw.format(msg,args);
 		}
 		catch (IOException e)
 		{
@@ -173,6 +175,7 @@ public class RobotLogger
 				{
 					fw.flush();
 					bw.flush();
+					pw.flush();
 				}				
 			}
 			catch (IOException ex)
@@ -195,16 +198,16 @@ public class RobotLogger
 	}
 
 	// Sends message to console and .txt log file
-	public void sendToConsole(String thisMessage)
+	public void sendToConsole(String thisMessage, Object... args)
 	{
 		// Prevent different threads from interrupting log entries
 		synchronized (System.out)
 		{
 			// Output logging messages to the console with a standard format
 			String datetimeFormat = "\n [" + CurrentReadable_DateTime() + "] - Robot4322: ";
-			System.out.println(datetimeFormat + thisMessage);
+			System.out.format(datetimeFormat + thisMessage+"\n", args);
 			// Output logging messages to a .txt log file
-			writeToFile(datetimeFormat + thisMessage);
+			writeToFile(datetimeFormat + thisMessage+"\n",args);
 		}
 	}
 
@@ -299,8 +302,10 @@ public class RobotLogger
 			{
 				fw.flush();
 				bw.flush();
+				pw.flush();
 				fw.close();
 				bw.close();
+				pw.close();
 				closed = true;
 			}
 		}

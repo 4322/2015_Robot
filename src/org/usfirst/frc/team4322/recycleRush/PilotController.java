@@ -12,7 +12,7 @@ public class PilotController {
 	// * Throttle will be right stick Y axis
 	// * Strafing will be right stick X axis
 	// This value could be selected in a configuration file or using a SmartDashboard selector
-	private boolean useAlternateDriveProfile = false;
+	private boolean useAlternateDriveProfile = true; // Seth's preference
     
 	static PilotController getInstance()
 	{
@@ -28,14 +28,7 @@ public class PilotController {
 	{
 		return controller.getAButton();
 	}
-	public boolean getDriverModeSelectDown()
-	{
-		return controller.getXButton();
-	}
-	public boolean getDriverModeSelectUp()
-	{
-		return controller.getYButton();
-	}
+
 	public double getDriveBaseStrafingStick()
 	{
 		if(useAlternateDriveProfile)
@@ -84,6 +77,10 @@ public class PilotController {
 	public boolean getDualRateButton()
 	{
 		return controller.getBumper(Hand.kRight);
+	}
+	public boolean getAutoAlignButton()
+	{
+		return controller.getYButton();
 	}
 	public void setUseAlternateDriveProfile(boolean useAlternateDriveProfile)
 	{

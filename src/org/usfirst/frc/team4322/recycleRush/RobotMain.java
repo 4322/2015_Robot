@@ -22,14 +22,6 @@ public class RobotMain extends IterativeRobot
 	private boolean teleBegin = false;
 	private boolean testBegin = false;
 	
-	// Sendables for choosing autonomous modes
-	private Command autoCommand;
-	private SendableChooser autoChooser;
-	
-	// Instance for autonomous mode (integer)
-	private int driverProfileMode = 1;
-	private String dPModeString = "Default";
-	
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
@@ -109,23 +101,25 @@ public class RobotMain extends IterativeRobot
 				disabledBegin = true;
 	    		RobotLogger.getInstance().close();
 			}
- 			if(PilotController.getInstance().getDriverModeSelectUp())
- 			{
- 				if(driverProfileMode < 2) //Max mode #
- 					driverProfileMode++;
- 				else
- 					driverProfileMode = 1; //Min mode #
- 			}
- 			if(PilotController.getInstance().getDriverModeSelectDown())
- 			{
- 				if(driverProfileMode > 1) //Min mode #
- 					driverProfileMode--;
- 				else
- 					driverProfileMode = 2; //Max mode #
- 			}
- 			if (driverProfileMode == 1) dPModeString = "Default";
- 			else if (driverProfileMode == 2) dPModeString = "Seth";
- 			SmartDashboard.putString("Driver Profile Mode: ", dPModeString);
+ 			
+// 			if(PilotController.getInstance().getDriverModeSelectUp())
+// 			{
+// 				if(driverProfileMode < 2) //Max mode #
+// 					driverProfileMode++;
+// 				else
+// 					driverProfileMode = 1; //Min mode #
+// 			}
+// 			if(PilotController.getInstance().getDriverModeSelectDown())
+// 			{
+// 				if(driverProfileMode > 1) //Min mode #
+// 					driverProfileMode--;
+// 				else
+// 					driverProfileMode = 2; //Max mode #
+// 			}
+// 			if (driverProfileMode == 1) dPModeString = "Default";
+// 			else if (driverProfileMode == 2) dPModeString = "Seth";
+// 			SmartDashboard.putString("Driver Profile Mode: ", dPModeString);
+ 			
  			
  			if(PilotController.getInstance().getResetGyroButton())
  			{ //Reinitialize!
@@ -231,7 +225,7 @@ public class RobotMain extends IterativeRobot
 				RobotLogger.getInstance().sendToConsole("Robot Teleop Mode Begin.");
 				teleBegin = true;
 			}
-			RobotDriveBase.getInstance().runTeleop(driverProfileMode);
+			RobotDriveBase.getInstance().runTeleop();
 			RobotToteElevator.getInstance().runTeleop();
 			//RobotVision.getInstance().runTeleop();
 		}

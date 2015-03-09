@@ -1,12 +1,13 @@
 package org.usfirst.frc.team4322.recycleRush;
 
-public class RobotMap {
-	
-	public static String LAST_BUILD_TIME = "Robot4322_2015: 3/5/2015 8:32 PM";
+public class RobotMap
+{
+	public static String LAST_BUILD_TIME = "Robot4322_2015: 3/8/2015 1:55 PM";
 	
 	// Initialize Joystick Ports
 	public static int PILOT_CONTROLLER_JOYSTICK_PORT = 0;
 	public static int COPILOT_CONTROLLER_JOYSTICK_PORT = 1;
+	public static int COPILOT_CONTROL_PANEL_PORT = 2;
 	
 	// Initialize RobotDriveBase Ports
 	public static int TALON_LEFT_DRIVE_CHANNEL = 0;
@@ -91,11 +92,12 @@ public class RobotMap {
 	
 	// Tote Proximity Sensor Values
 	public static double PROXIMITY_SENSOR_ERROR_VALUE = 0.1; // 1 inch error
-	public static double MAX_EXPECTED_TOTE_DISTANCE = 10.5; // inches
+	public static double EXPECTED_TOTE_DISTANCE = 6.25; // inches
+	public static double MAX_EXPECTED_TOTE_DISTANCE = 10; // inches
 	
 	// Tote Elevator PID Constants
 	public static double ELEVATOR_P_VALUE = 0.85;
-	public static double ELEVATOR_I_VALUE = 0.00265;
+	public static double ELEVATOR_I_VALUE = 0.0026;
 	public static double ELEVATOR_D_VALUE = 0.4;
 	public static double ELEVATOR_F_VALUE = 0;
 	public static int ELEVATOR_IZONE_VALUE = 825;
@@ -104,5 +106,6 @@ public class RobotMap {
 	
 	// Tote Elevator positions
 	public static double ELEVATOR_JOYSTICK_DEADBAND = 0.1;
-	public static double[] ELEVATOR_POSITIONS ={0, 3095, 6245, 9430, 12580};
+	public static double[] ELEVATOR_POSITIONS ={0, 3055, 6215, 9530, 12580};
+	public static double[] ELEVATOR_STACK_POSITIONS = {0, 623, 3087, 5832, 8282};
 }

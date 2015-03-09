@@ -121,7 +121,7 @@ public class RobotVision {
 		NIVision.IMAQdxGrab(session, frame, 1);
 
 		// read file in from disk (FTP)
-		NIVision.imaqReadFile(frame, "/home/lvuser/VisionImages/1YellowTote.jpg");
+		//NIVision.imaqReadFile(frame, "/home/lvuser/VisionImages/1YellowTote.jpg");
 
 		// Update threshold values from SmartDashboard. For performance reasons
 		// it is recommended to remove this after calibration is finished.
