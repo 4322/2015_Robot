@@ -325,17 +325,30 @@ public class RobotDriveBase
     	try
     	{
     		// You must press and hold the button to auto align with the tote
-	        if(PilotController.getInstance().getAutoAlignButton())
+	        if(PilotController.getInstance().getAutoAlignButton() || PilotController.getInstance().getQuickAutoAlignButton())
 	        {
 	        	if(!autoAlignButtonPressed) RobotLogger.getInstance().sendToConsole("*****AUTO ALIGNMENT BEGIN*****");
         		dirtyAngularAlignmentCount = 0;
 	        	autoAlignButtonPressed = true;
+	        	// Skip to angular alignment
+	        	if(toteAlignmentMode == AUTO_ALIGN_COMPLETE)
+	        	{
+		        	if(PilotController.getInstance().getAutoAlignButton())
+		        	{
+		        		toteAlignmentMode = INITIALIZE_AUTO_ALIGNMENT;
+		        	}
+		        	else
+		        	{
+		        		dirtyAngularAlignmentCount++;
+		        		toteAlignmentMode = ANGULAR_ALIGNMENT_WITH_TOTE;
+		        	}
+	        	}
 	        }
 	        // If we are not holding down the button, the driver may drive
 	        else
 	        {
 	        	autoAlignButtonPressed = false;
-	        	toteAlignmentMode = INITIALIZE_AUTO_ALIGNMENT;
+	        	toteAlignmentMode = AUTO_ALIGN_COMPLETE;
 	        }
 	        
 	        // Get Proximity Sensor Values for Left and Right
@@ -347,6 +360,7 @@ public class RobotDriveBase
 	        SmartDashboard.putNumber("Tote Distance (Left)", toteDistanceLeft);
 	        SmartDashboard.putBoolean("AutoAlignButton: ", autoAlignButtonPressed);
 	        
+	        // Driving
     		if(!autoAlignButtonPressed)
     		{
 		        // Get the current throttle value from the Pilot Controller

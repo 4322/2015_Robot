@@ -19,7 +19,7 @@ public class RobotToteElevator {
 	};
 	
 	// Instance for the Singleton Class
-    static private RobotToteElevator _instance = null;
+    private static RobotToteElevator _instance = null;
     
     // Instance for tote lifting motor.
     private CANTalon toteMotor = null;
@@ -38,6 +38,10 @@ public class RobotToteElevator {
 	int targetIndex = 0;
 	boolean newStack = false;
 	boolean stackDone = false;
+	
+	boolean containerMode = false; 
+	int containerModeTargetIndex = 0;
+	
 	// Instance for tote lifting after auto-align
 	boolean autoLift = false;
 	
@@ -68,11 +72,10 @@ public class RobotToteElevator {
 	    {
 	    	// Create toteMotor
 	    	if(toteMotor == null)
-	    	{
-	    		
+	    	{	
 	    		toteMotor = new CANTalon(RobotMap.TOTE_ELEVATOR_CONTROLLER_ADDRESS);
 	    		toteMotor.setFeedbackDevice(FeedbackDevice.QuadEncoder);
-	    		toteMotor.setPID( RobotMap.ELEVATOR_P_VALUE, RobotMap.ELEVATOR_I_VALUE,RobotMap.ELEVATOR_D_VALUE, RobotMap.ELEVATOR_F_VALUE,RobotMap.ELEVATOR_IZONE_VALUE, RobotMap.ELEVATOR_RAMPRATE_VALUE, 0);
+	    		toteMotor.setPID(RobotMap.ELEVATOR_P_VALUE, RobotMap.ELEVATOR_I_VALUE,RobotMap.ELEVATOR_D_VALUE, RobotMap.ELEVATOR_F_VALUE,RobotMap.ELEVATOR_IZONE_VALUE, RobotMap.ELEVATOR_RAMPRATE_VALUE, 0);
 	    		toteMotor.ClearIaccum();
 	    		toteMotor.enableControl();
 	    		RobotLogger.getInstance().sendToConsole("Elevator TalonSRX Firmware Version: " + toteMotor.GetFirmwareVersion());
@@ -160,7 +163,7 @@ public class RobotToteElevator {
         			brakeSolenoid.set(Value.kForward);
         			stackDone = true;
         		}
-        		else if(CoPilotController.getInstance().getElevatorSetPointUpButton() || autoLift)
+        		else if(CoPilotController.getInstance().getElevatorSetPointUpButton() || autoLift) //up button or auto align 
         		{
         			setPointDelta = setPointChange.UP;
         			newSetpoint = true;
@@ -232,12 +235,33 @@ public class RobotToteElevator {
         			stackDone = true;
         			setPointDelta = setPointChange.NONE;//going to an arbitrary index; not incrementing or decrementing
         		}
+        		else if(CoPilotController.getInstance().getElevatorSetPointContainerButton())
+        		{
+        			tiltMode = false;
+        			containerMode = true;
+        			newSetpoint = true;
+        			//targetIndex = 4; //target index doesn't matter
+        			setPointSelectButtonPressed = true;
+        			if(autoDriveMode) controlModeV = true;
+        			autoDriveMode = true;
+        			RobotLogger.getInstance().sendToConsole("Set Point Container Button.");
+        			brakeSolenoid.set(Value.kForward);
+        			stackDone = true;
+        			setPointDelta = setPointChange.NONE;//going to an arbitrary index; not incrementing or decrementing
+        		}
         	}
         	// Making sure button pressing is handled correctly
         	if(setPointSelectButtonPressed)
         	{
         		if(!CoPilotController.getInstance().getElevatorSetPointUpButton()
-        		&& !CoPilotController.getInstance().getElevatorSetPointDownButton())
+        		&& !CoPilotController.getInstance().getElevatorSetPointDownButton()
+        		&& !CoPilotController.getInstance().getElevatorSetPoint0Button()
+        		&& !CoPilotController.getInstance().getElevatorSetPoint1Button()
+        		&& !CoPilotController.getInstance().getElevatorSetPoint3Button()
+        		&& !CoPilotController.getInstance().getElevatorSetPoint2Button()
+        		&& !CoPilotController.getInstance().getElevatorSetPoint4Button()
+        		&& !CoPilotController.getInstance().getElevatorSetPointContainerButton()
+        		)
         		{
         			setPointSelectButtonPressed = false;
         			RobotLogger.getInstance().sendToConsole("Setpoint buttons released");
@@ -397,7 +421,16 @@ public class RobotToteElevator {
     		{
     			RobotLogger.getInstance().sendToConsole("Set Point Up Button: Current Encoder Position is " + toteMotor.get() + " and moving to " + RobotMap.ELEVATOR_POSITIONS[targetIndex]);
     		}
+    		if(!containerMode)
     		toteMotor.set(RobotMap.ELEVATOR_POSITIONS[targetIndex]);
+    		else if (containerMode)
+    		{
+    			RobotLogger.getInstance().sendToConsole("In container Mode. Going to Container Index %d",containerModeTargetIndex);
+    			toteMotor.set(RobotMap.ELEVATOR_CONTAINER_POSITIONS[containerModeTargetIndex]);
+    			containerModeTargetIndex++;
+    			if(containerModeTargetIndex > RobotMap.ELEVATOR_CONTAINER_POSITIONS.length-1) containerModeTargetIndex = 0;
+    			containerMode = false;
+    		}
     		setPointDelta = setPointChange.NONE;
     		newSetpoint = false;
     		return;

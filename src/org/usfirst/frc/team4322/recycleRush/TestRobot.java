@@ -98,15 +98,6 @@ public class TestRobot {
 		}
 		SmartDashboard.putNumber("Gyro Angle:", gyro.getAngle());
 		SmartDashboard.putNumber("Gyro Rate:", gyro.getRate());
-		if(PilotController.getInstance().getNorth())
-		{
-			piston.set(Value.kForward);
-		}
-
-		if(PilotController.getInstance().getSouth())
-		{
-			piston.set(Value.kForward);
-		}
 		
 		//Gyro & Accelerometer
 	}

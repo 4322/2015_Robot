@@ -61,6 +61,10 @@ public class CoPilotController {
 	{
 		return (controlPanel.getPOV() == 270);
 	}
+	public boolean getElevatorSetPointContainerButton()
+	{
+		return (controlPanel.getPOV() == 45);
+	}
 	public int getPOV()
 	{
 		return controlPanel.getPOV();

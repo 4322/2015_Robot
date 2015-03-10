@@ -21,6 +21,7 @@ public class RobotMain extends IterativeRobot
 	private boolean autoBegin = false;
 	private boolean teleBegin = false;
 	private boolean testBegin = false;
+
 	
     /**
      * This function is run when the robot is first started up and should be
@@ -48,16 +49,7 @@ public class RobotMain extends IterativeRobot
 //			{
 //				RobotLogger.getInstance().writeErrorToFile("robotInit() Camera Server Startup: ", ex);
 //			}
-	    	
-	    	
-	    	// Initiate each system on the robot
-	    	
-	    	// Create the Sendable Choosers on the SmartDashboard (does not work with new sfx currently)
-//	    	autoChooser = new SendableChooser();
-//	    	autoChooser.addDefault("DriveForward (Auto 1)", new DriveForward());
-//	    	autoChooser.addObject("DriveBackward (Auto 2)", new DriveBackward());
-//	    	SmartDashboard.putData("Auto Mode Chooser", autoChooser);
-	    	
+	    	RobotAutonModes.getInstance().runAutoModeChoosers();
 	    	// Send success and last build time to log file
 	    	RobotLogger.getInstance().sendToConsole("Robot Successfully Started. Last Build Time: " + RobotMap.LAST_BUILD_TIME);
 	    	SmartDashboard.putString("Last Robot Build Time", RobotMap.LAST_BUILD_TIME);
@@ -150,10 +142,6 @@ public class RobotMain extends IterativeRobot
 			RobotDriveBase.getInstance().initAutonomous();
 			autoBegin = false;
 	    	
-	    	// Get the selected command and schedule it (sfx currently does not support SendableChoosers)
-//			autoCommand = (Command) autoChooser.getSelected();
-//			autoCommand.start();
-			
 			RobotLogger.getInstance().sendToConsole("Robot Autonomous Mode Initialized.");
 		}
 		catch (Exception ex)
@@ -177,12 +165,7 @@ public class RobotMain extends IterativeRobot
 				autoBegin = true;
 			}
 			
-			/**
-			 * RobotBuilder will generate code automatically that runs the
-			 * scheduler every driver station update period (about every 20ms).
-			 * This will cause the selected autonomous command to run.
-			 */
-//			Scheduler.getInstance().run();
+			RobotAutonModes.getInstance().runRobotAutonMode(RobotAutonModes.getInstance().getAutoMode());
 		}
 		catch (Exception ex)
 		{

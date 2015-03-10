@@ -66,14 +66,6 @@ public class PilotController {
 	{
 		return controller.getBumper(Hand.kLeft);
 	}
-	public boolean getNorth()
-	{
-		return controller.getNorth();
-	}
-	public boolean getSouth()
-	{
-		return controller.getSouth();
-	}
 	public boolean getDualRateButton()
 	{
 		return controller.getBumper(Hand.kRight);
@@ -81,6 +73,10 @@ public class PilotController {
 	public boolean getAutoAlignButton()
 	{
 		return controller.getYButton();
+	}
+	public boolean getQuickAutoAlignButton()
+	{
+		return controller.getBButton();
 	}
 	public void setUseAlternateDriveProfile(boolean useAlternateDriveProfile)
 	{
