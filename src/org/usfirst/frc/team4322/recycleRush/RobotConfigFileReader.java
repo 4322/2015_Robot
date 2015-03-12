@@ -7,6 +7,7 @@ public class RobotConfigFileReader
 {
 	private static RobotConfigFileReader _instance = null;
 
+	
     public final String CONFIG_FILE = "/RobotConfig.ini";
     
     public static RobotConfigFileReader getInstance()
