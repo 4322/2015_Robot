@@ -2,7 +2,7 @@ package org.usfirst.frc.team4322.recycleRush;
 
 public class RobotMap
 {
-	public static String LAST_BUILD_TIME = "Robot4322_2015: 3/9/2015 7:57 PM";
+	public static String LAST_BUILD_TIME = "Robot4322_2015: 3/11/2015 4:29 PM";
 	
 	// Initialize Joystick Ports
 	public static int PILOT_CONTROLLER_JOYSTICK_PORT = 0;
@@ -16,7 +16,6 @@ public class RobotMap
 	// Initialize Slide Drive CAN Address
 	public static int CANJAGUAR_SLIDE_2_DRIVE_ADDRESS = 10;
 	public static int CANJAGUAR_SLIDE_1_DRIVE_ADDRESS = 11;
-
 	
 	// Initialize Pneumatic Control Module Solenoid Ports
 	public static int SLIDE_PISTON_FORWARD_PORT = 4;
@@ -39,9 +38,10 @@ public class RobotMap
 	public static double CREEP_DRIVE_SPEED = -.50;
 	public static double AUTO_ALIGN_STRAFE_SPEED = 0.3;
 	public static double AUTO_ALIGN_DRIVE_FORWARD_SPEED = 0.3;
+	public static double BACK_AWAY_FROM_TOTE_SPEED = -0.2;
 	
 	//dual rates (crawl mode) //motor power is divided by this value
-	public static double THROTLE_DUAL_RATE = 1.625;
+	public static double THROTTLE_DUAL_RATE = 1.625;
 	public static double STEERING_DUAL_RATE = 1.625;
 	public static double STRAFE_DUAL_RATE = 1.625;
 	
@@ -56,7 +56,11 @@ public class RobotMap
 	public static int DRIVE_ENCODER_A_GPIO_PORT = 1;
 	public static int DRIVE_ENCODER_B_GPIO_PORT = 0;
 	public static double ENCODER_DISTANCE_PER_TICK = 0.07539822368615503772310344119871; //inches; diameter of wheel * pi / counts per revolution
-	public static double ENCODER_AUTONOMOUS_DRIVE_DISTANCE = 40; //132
+	public static double BACK_AWAY_FROM_TOTE_DISTANCE = 10;
+	public static double AUTO_DRIVE_FORWARD_DISTANCE = 60; //60-70
+	public static double AUTO_DRIVE_STRAFE_DISTANCE = 140;
+	public static double AUTO_DRIVE_BACKWARD_WITH_TOTE_CONTAINER = 115;
+	public static double AUTO_DRIVE_BACKWARD_WITH_TOTE_CONTAINER_OVER_PLATFORM = 130; //???
 	
 	// Strafe Encoder Values (360 counts / revolution)
 	public static int STRAFE_ENCODER_A_GPIO_PORT = 2;
@@ -106,7 +110,7 @@ public class RobotMap
 	
 	// Tote Elevator positions
 	public static double ELEVATOR_JOYSTICK_DEADBAND = 0.1;
-	public static double[] ELEVATOR_POSITIONS ={0, 3055, 6215, 9530, 12580};
+	public static double[] ELEVATOR_POSITIONS = {0, 3055, 6215, 9530, 12580};
 	public static double[] ELEVATOR_STACK_POSITIONS = {0, 623, 3087, 5832, 8282};
 	public static double[] ELEVATOR_CONTAINER_POSITIONS = {2694, 2070};
 }

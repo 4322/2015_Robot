@@ -265,33 +265,7 @@ public class RobotDriveBase
     {
     	try
     	{
-		    double correction = -1 * robotGyro.getAngle() * RobotMap.AUTONOMOUS_P_CONTROL_VALUE_GYRO;
-		    double distance = driveEncoder.getDistance();
-		    if(distance <= RobotMap.ENCODER_AUTONOMOUS_DRIVE_DISTANCE)
-		    {
-		    	robotDrive.drive((mode == 1) ? RobotMap.AUTONOMOUS_DRIVE_SPEED : -RobotMap.AUTONOMOUS_DRIVE_SPEED, correction);
-		    }
-		    else if(distance <= RobotMap.ENCODER_AUTONOMOUS_DRIVE_DISTANCE + 4 && distance >= RobotMap.ENCODER_AUTONOMOUS_DRIVE_DISTANCE - 4)
-		    {
-		    	robotDrive.drive(0, 0);
-		    }
-		    else if(distance >= RobotMap.ENCODER_AUTONOMOUS_DRIVE_DISTANCE + 4)
-		    {
-		    	robotDrive.drive((mode == 1) ? RobotMap.AUTONOMOUS_REVERSE_SPEED : -RobotMap.AUTONOMOUS_REVERSE_SPEED, 0);
-		    }
-		    SmartDashboard.putNumber("Encoder Raw Tick Count", driveEncoder.getRaw());
-		    SmartDashboard.putNumber("Encoder Distance", driveEncoder.getDistance());
-		    SmartDashboard.putNumber("Gyro Angle", robotGyro.getAngle());
-		    if(robotGyro.getAngle() < 0.05)
-		    {
-		       	SmartDashboard.putNumber("Autonomous Turning Correction Value", correction);
-		     	SmartDashboard.putString("Autonomous Turning Correction", "Active");
-		    }
-		    else
-		    {
-		       	SmartDashboard.putString("Autonomous Turning Correction", "Currently Straight");
-		       	SmartDashboard.putNumber("Autonomous Turning Correction Value", 0);
-		    }
+		    // Everything is run in RobotAutonModes
     	}
     	catch (Exception ex)
     	{
@@ -391,7 +365,7 @@ public class RobotDriveBase
 		        
 		        // Scale Values
 		        boolean dualRateEnabled = PilotController.getInstance().getDualRateButton();
-		        throttleValue = (throttleValue * RobotMap.THROTTLE_LIMIT)  / (dualRateEnabled ? RobotMap.THROTLE_DUAL_RATE : 1);
+		        throttleValue = (throttleValue * RobotMap.THROTTLE_LIMIT)  / (dualRateEnabled ? RobotMap.THROTTLE_DUAL_RATE : 1);
 		        steeringValue  = (steeringValue * RobotMap.STEERING_LIMIT) / (dualRateEnabled ? RobotMap.STEERING_DUAL_RATE : 1);
 		        strafingValue = (strafingValue * RobotMap.STRAFE_LIMIT) / (dualRateEnabled ? RobotMap.STRAFE_DUAL_RATE : 1);
 		        
@@ -495,7 +469,7 @@ public class RobotDriveBase
 	            	dirtyGyro = true;
 	            	accelerometerDeadbandCount = RobotMap.ACCELEROMETER_DEADBAND_COUNTDOWN;
 	            }
-		        SmartDashboard.putNumber("Encoder Distance", driveEncoder.getDistance());
+		        SmartDashboard.putNumber("Drive Encoder Distance", driveEncoder.getDistance());
 		        SmartDashboard.putNumber("Strafe Distance", strafeEncoder.getDistance());
 		        SmartDashboard.putNumber("Strafe Distance (RAW)", strafeEncoder.getRaw());
 		        SmartDashboard.putNumber("Gyro Angle", dirtyGyro ? 999999 : gyroAngle);
@@ -794,4 +768,91 @@ public class RobotDriveBase
     	// Both sensors need to be in range
     	return (left.getDistance() <= expectedDistanceFromTote && right.getDistance() <= expectedDistanceFromTote);
     }
+    
+    public void driveToAutoZone(boolean forward, double correctDistance)
+    {
+    	double correction = -1 * robotGyro.getAngle() * RobotMap.AUTONOMOUS_P_CONTROL_VALUE_GYRO;
+	    double distance = driveEncoder.getDistance();
+	    // Drive toward the auto zone
+	    if(distance <= correctDistance)
+	    {
+	    	robotDrive.drive(forward ? RobotMap.AUTONOMOUS_DRIVE_SPEED : -RobotMap.AUTONOMOUS_DRIVE_SPEED, forward ? correction : -correction);
+	    }
+	    // We are at the correct distance; stop and wait
+	    else if(distance <= correctDistance + 5 && distance >= correctDistance - 5)
+	    {
+	    	robotDrive.drive(0, 0);
+	    }
+	    // We went too far
+	    else if(distance >= correctDistance)
+	    {
+	    	robotDrive.drive(forward ? RobotMap.AUTONOMOUS_REVERSE_SPEED : -RobotMap.AUTONOMOUS_REVERSE_SPEED, 0);
+	    }
+	    SmartDashboard.putNumber("[Auto] Encoder Raw Tick Count: ", driveEncoder.getRaw());
+	    SmartDashboard.putNumber("[Auto] Encoder Distance: ", driveEncoder.getDistance());
+    }
+    
+    public void strafeToAutoZone(double correctDistance)
+    {
+    	double correction = -1 * robotGyro.getAngle() * RobotMap.AUTONOMOUS_P_CONTROL_VALUE_GYRO;
+	    double distance = strafeEncoder.getDistance();
+	    // Drive toward the auto zone
+	    if(distance <= correctDistance)
+	    {
+	    	slideJaguar1.set(RobotMap.AUTONOMOUS_DRIVE_SPEED);
+	    	slideJaguar2.set(RobotMap.AUTONOMOUS_DRIVE_SPEED);
+	    }
+	    // We are at the correct distance; stop and wait
+	    else if(distance <= correctDistance + 5 && distance >= correctDistance - 5)
+	    {
+	    	slideJaguar1.set(0);
+	    	slideJaguar2.set(0);
+	    }
+	    // We went too far
+	    else if(distance >= correctDistance)
+	    {
+	    	slideJaguar1.set(RobotMap.AUTONOMOUS_REVERSE_SPEED);
+	    	slideJaguar2.set(RobotMap.AUTONOMOUS_REVERSE_SPEED);
+	    }
+	    SmartDashboard.putNumber("[Auto] Strafe Encoder Raw Tick Count", strafeEncoder.getRaw());
+	    SmartDashboard.putNumber("[Auto] Strafe Encoder Distance", strafeEncoder.getDistance());
+    
+    }
+    
+    public void autoDriveToTote()
+    {
+    	double correction = -1 * robotGyro.getAngle() * RobotMap.AUTONOMOUS_P_CONTROL_VALUE_GYRO;
+	    double leftDistance = proximitySensorLeft.getDistance();
+	    double rightDistance = proximitySensorRight.getDistance();
+	    // Drive toward the auto zone
+	    if(calculateToteDistanceError(leftDistance, rightDistance) <= RobotMap.PROXIMITY_SENSOR_ERROR_VALUE
+	    		&& rightDistance <= RobotMap.EXPECTED_TOTE_DISTANCE)
+	    {
+	    	robotDrive.drive(0, 0);
+	    }
+	    // We are at the correct distance; stop and wait
+	    else
+	    {
+	    	robotDrive.drive(RobotMap.AUTONOMOUS_DRIVE_SPEED, correction);
+	    }
+    }
+    
+    public void getAwayFromTote(boolean forward)
+    {
+    	double correction = -1 * robotGyro.getAngle() * RobotMap.AUTONOMOUS_P_CONTROL_VALUE_GYRO;
+	    if(driveEncoder.getDistance() < RobotMap.BACK_AWAY_FROM_TOTE_DISTANCE)
+	    {
+	    	robotDrive.drive(forward ? RobotMap.BACK_AWAY_FROM_TOTE_SPEED : -RobotMap.BACK_AWAY_FROM_TOTE_SPEED, correction);
+	    }
+	    else
+	    {
+	    	robotDrive.drive(0, 0);
+	    }
+    }
+    
+    public double getAutoDriveDistanceTraveled()
+    {
+    	return driveEncoder.getDistance();
+    }
+
 }

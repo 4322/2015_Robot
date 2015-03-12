@@ -369,7 +369,7 @@ public class RobotToteElevator {
 //        	SmartDashboard.putNumber("Error Value:",toteMotor.getClosedLoopError());
         	SmartDashboard.putBoolean("Tote Lift Forward Limit Closed:", toteMotor.isFwdLimitSwitchClosed());
         	SmartDashboard.putBoolean("Tote Lift Reverse Limit Closed:", toteMotor.isRevLimitSwitchClosed());
-//        	SmartDashboard.putNumber("Elevator Joystick Value",CoPilotController.getInstance().getElevatorDriveStick());
+        	SmartDashboard.putNumber("Elevator Joystick Value", CoPilotController.getInstance().getElevatorDriveStick());
 //        	SmartDashboard.putNumber("Elevator Drive Value",-1*CoPilotController.getInstance().getElevatorDriveStick());
         	SmartDashboard.putNumber("Current Encoder Value", toteMotor.getEncPosition());
 //        	SmartDashboard.putNumber("Talon Iaccum:", toteMotor.GetIaccum());

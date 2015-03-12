@@ -29,8 +29,8 @@ public class CoPilotController {
 	}
 	public double getElevatorDriveStick()
 	{
-		//return controller.getY(Hand.kLeft);
-		return controlPanel.getRawAxis(1);
+		return controller.getY(Hand.kLeft);
+//		return controlPanel.getRawAxis(1);
 	}
 	public boolean getElevatorTiltButton()
 	{

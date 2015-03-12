@@ -2,8 +2,6 @@
 package org.usfirst.frc.team4322.recycleRush;
 
 import edu.wpi.first.wpilibj.*;
-import edu.wpi.first.wpilibj.command.Command;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -34,22 +32,12 @@ public class RobotMain extends IterativeRobot
 	    {
 	    	// Open and update the RobotLogger in case log files are too large
 	    	RobotLogger.getInstance().update(true);
+	    	// Get information
+	    	RobotConfigFileReader.getInstance().runRobotFileReader();
 	    	RobotDriveBase.getInstance().initRobotDrive();
 	    	RobotToteElevator.getInstance().initRobotToteElevator();
 //			RobotVision.getInstance().initRobotVision();
-
-	    	// Turn on the camera and trap any exceptions if it is not available
-//		    try
-//		    {
-//		    	CameraServer camera = CameraServer.getInstance();
-//		    	camera.setQuality(50);
-//		    	camera.startAutomaticCapture("cam0");
-//			}
-//			catch (Exception ex)
-//			{
-//				RobotLogger.getInstance().writeErrorToFile("robotInit() Camera Server Startup: ", ex);
-//			}
-	    	RobotAutonModes.getInstance().runAutoModeChoosers();
+	    	
 	    	// Send success and last build time to log file
 	    	RobotLogger.getInstance().sendToConsole("Robot Successfully Started. Last Build Time: " + RobotMap.LAST_BUILD_TIME);
 	    	SmartDashboard.putString("Last Robot Build Time", RobotMap.LAST_BUILD_TIME);
@@ -67,9 +55,10 @@ public class RobotMain extends IterativeRobot
 		{
     		RobotLogger.getInstance().close();
     		RobotLogger.getInstance().update(false);
+	    	RobotConfigFileReader.getInstance().runRobotFileReader();
     		RobotLogger.getInstance().sendToConsole("Robot Disabled.");
     		// Restart disabled
-			disabledBegin = false;			
+			disabledBegin = false;
 		}
 		catch (Exception ex)
 		{
@@ -93,31 +82,12 @@ public class RobotMain extends IterativeRobot
 				disabledBegin = true;
 	    		RobotLogger.getInstance().close();
 			}
- 			
-// 			if(PilotController.getInstance().getDriverModeSelectUp())
-// 			{
-// 				if(driverProfileMode < 2) //Max mode #
-// 					driverProfileMode++;
-// 				else
-// 					driverProfileMode = 1; //Min mode #
-// 			}
-// 			if(PilotController.getInstance().getDriverModeSelectDown())
-// 			{
-// 				if(driverProfileMode > 1) //Min mode #
-// 					driverProfileMode--;
-// 				else
-// 					driverProfileMode = 2; //Max mode #
-// 			}
-// 			if (driverProfileMode == 1) dPModeString = "Default";
-// 			else if (driverProfileMode == 2) dPModeString = "Seth";
-// 			SmartDashboard.putString("Driver Profile Mode: ", dPModeString);
- 			
- 			
+	    	RobotAutonModes.getInstance().runAutoModeChoosers();
+			
  			if(PilotController.getInstance().getResetGyroButton())
  			{ //Reinitialize!
  				RobotDriveBase.getInstance().robotGyro = new Gyro(RobotMap.DRIVE_GYRO_ANALOG_PORT);
  			}
-// 			SmartDashboard.putNumber("Autonomous Mode", autoMode);
 // 	        SmartDashboard.putNumber("Xbone Controller Right Stick X Axis", PilotController.getInstance().getDriveBaseSteeringStick());
 		}
 		catch (Exception ex)
@@ -138,6 +108,7 @@ public class RobotMain extends IterativeRobot
     		// Open and update the RobotLogger in case log files are too large
     		RobotLogger.getInstance().close();
 	    	RobotLogger.getInstance().update(false);
+	    	RobotConfigFileReader.getInstance().runRobotFileReader();
 	    	
 			RobotDriveBase.getInstance().initAutonomous();
 			autoBegin = false;
@@ -183,6 +154,7 @@ public class RobotMain extends IterativeRobot
 		{
     		RobotLogger.getInstance().close();
 			RobotLogger.getInstance().update(false);
+	    	RobotConfigFileReader.getInstance().runRobotFileReader();
 			RobotDriveBase.getInstance().initTeleop();
 			RobotToteElevator.getInstance().initTeleop();
 			teleBegin = false;
