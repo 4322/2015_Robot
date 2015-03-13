@@ -55,10 +55,11 @@ public class RobotMain extends IterativeRobot
 		{
     		RobotLogger.getInstance().close();
     		RobotLogger.getInstance().update(false);
-	    	RobotConfigFileReader.getInstance().runRobotFileReader();
+	//    	RobotConfigFileReader.getInstance().runRobotFileReader();
     		RobotLogger.getInstance().sendToConsole("Robot Disabled.");
     		// Restart disabled
 			disabledBegin = false;
+	    	RobotAutonModes.getInstance().runAutoModeChoosers();
 		}
 		catch (Exception ex)
 		{
@@ -81,13 +82,13 @@ public class RobotMain extends IterativeRobot
 				RobotLogger.getInstance().sendToConsole("Robot Disabled Mode Begin.");
 				disabledBegin = true;
 	    		RobotLogger.getInstance().close();
-			}
-	    	RobotAutonModes.getInstance().runAutoModeChoosers();
-			
+			}			
  			if(PilotController.getInstance().getResetGyroButton())
  			{ //Reinitialize!
  				RobotDriveBase.getInstance().robotGyro = new Gyro(RobotMap.DRIVE_GYRO_ANALOG_PORT);
  			}
+// 	    	SmartDashboard.putNumber("[CURRENT] Autonomous Mode: ", RobotAutonModes.getInstance().getAutoMode());
+
 // 	        SmartDashboard.putNumber("Xbone Controller Right Stick X Axis", PilotController.getInstance().getDriveBaseSteeringStick());
 		}
 		catch (Exception ex)
@@ -108,8 +109,8 @@ public class RobotMain extends IterativeRobot
     		// Open and update the RobotLogger in case log files are too large
     		RobotLogger.getInstance().close();
 	    	RobotLogger.getInstance().update(false);
-	    	RobotConfigFileReader.getInstance().runRobotFileReader();
-	    	
+	    	//RobotConfigFileReader.getInstance().runRobotFileReader();
+	    	RobotToteElevator.getInstance().initAutonomous();
 			RobotDriveBase.getInstance().initAutonomous();
 			autoBegin = false;
 	    	
@@ -135,7 +136,6 @@ public class RobotMain extends IterativeRobot
 				RobotLogger.getInstance().sendToConsole("Robot Autonomous Mode Begin.");
 				autoBegin = true;
 			}
-			
 			RobotAutonModes.getInstance().runRobotAutonMode(RobotAutonModes.getInstance().getAutoMode());
 		}
 		catch (Exception ex)
@@ -154,7 +154,7 @@ public class RobotMain extends IterativeRobot
 		{
     		RobotLogger.getInstance().close();
 			RobotLogger.getInstance().update(false);
-	    	RobotConfigFileReader.getInstance().runRobotFileReader();
+//	    	RobotConfigFileReader.getInstance().runRobotFileReader();
 			RobotDriveBase.getInstance().initTeleop();
 			RobotToteElevator.getInstance().initTeleop();
 			teleBegin = false;
@@ -186,7 +186,7 @@ public class RobotMain extends IterativeRobot
 		}
 		catch (Exception ex)
 		{
-    		//RobotLogger.getInstance().writeErrorToFile("teleopPeriodic()", ex);
+    		RobotLogger.getInstance().writeErrorToFile("teleopPeriodic()", ex);
     	}
     }
   
@@ -200,7 +200,7 @@ public class RobotMain extends IterativeRobot
 		}
 		catch (Exception ex)
 		{
-    		//RobotLogger.getInstance().writeErrorToFile("testInit()", ex);
+    		RobotLogger.getInstance().writeErrorToFile("testInit()", ex);
     	}
     }
 

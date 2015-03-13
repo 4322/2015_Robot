@@ -2,7 +2,7 @@ package org.usfirst.frc.team4322.recycleRush;
 
 public class RobotMap
 {
-	public static String LAST_BUILD_TIME = "Robot4322_2015: 3/11/2015 4:29 PM";
+	public static String LAST_BUILD_TIME = "Robot4322_2015: 3/12/2015 5:17 PM";
 	
 	// Initialize Joystick Ports
 	public static int PILOT_CONTROLLER_JOYSTICK_PORT = 0;
@@ -75,14 +75,17 @@ public class RobotMap
 	
 	// Accelerometer Deadband values per axis
 	public static double ACCELEROMETER_DEADBAND_X = 0.05; //0.4;
-	public static double ACCELEROMETER_DEADBAND_Y = 0.4; //0.15
+	public static double ACCELEROMETER_DEADBAND_Y = 0.4; //0.15; not used
 	public static double ACCELEROMETER_DEADBAND_Z = 1; //pretty sensitive
+	public static double ACCELEROMETER_DEADBAND_X_COMPRESSOR = 0.1;
+	public static double ACCELEROMETER_DEADBAND_Y_COMPRESSOR = 0.8; //not used
+	public static double ACCELEROMETER_DEADBAND_Z_COMPRESSOR = 1; //not used
 	public static int ACCELEROMETER_DEADBAND_COUNTDOWN = 10;
 	
 	// Initialize Elevator CAN Addresses
-	public static int TOTE_ELEVATOR_CONTROLLER_ADDRESS = 31; //12;
-	public static int CONTAINER_ELEVATOR_CONTROLLER_ADDRESS = 30; //31;
-	
+	public static int TOTE_ELEVATOR_CONTROLLER_ADDRESS = 31;
+	public static int TOTE_ELEVATOR_SLAVE_CONTROLLER_ADDRESS = 30;
+
 	// Initialize Pneumatic Control Module Solenoid Ports
 	public static int BRAKE_PISTON_FORWARD_PORT = 0;
 	public static int BRAKE_PISTON_REVERSE_PORT = 1;
@@ -100,17 +103,18 @@ public class RobotMap
 	public static double MAX_EXPECTED_TOTE_DISTANCE = 10; // inches
 	
 	// Tote Elevator PID Constants
-	public static double ELEVATOR_P_VALUE = 0.85;
-	public static double ELEVATOR_I_VALUE = 0.0026;
-	public static double ELEVATOR_D_VALUE = 0.4;
+	public static double ELEVATOR_P_VALUE = 0.3;
+	public static double ELEVATOR_I_VALUE = 0.00255;
+	public static double ELEVATOR_D_VALUE = 0.35;
 	public static double ELEVATOR_F_VALUE = 0;
-	public static int ELEVATOR_IZONE_VALUE = 825;
+	public static int ELEVATOR_IZONE_VALUE = 850;
 	public static int ELEVATOR_RAMPRATE_VALUE = 0;
 	public static double ELEVATOR_ANALOG_STICK_DEADBAND = 0.1;
+	public static int ELEVATOR_POSITION_DISTANCE = 2850;
 	
 	// Tote Elevator positions
 	public static double ELEVATOR_JOYSTICK_DEADBAND = 0.1;
-	public static double[] ELEVATOR_POSITIONS = {0, 3055, 6215, 9530, 12580};
+	public static double[] ELEVATOR_POSITIONS = {0,2806,5605,8376,11426};
 	public static double[] ELEVATOR_STACK_POSITIONS = {0, 623, 3087, 5832, 8282};
 	public static double[] ELEVATOR_CONTAINER_POSITIONS = {2694, 2070};
 }

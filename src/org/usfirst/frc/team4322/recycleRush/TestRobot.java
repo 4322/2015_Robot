@@ -51,7 +51,7 @@ public class TestRobot {
 		}
 		if(containerElevatorController == null)
 		{
-			containerElevatorController = new CANTalon(RobotMap.CONTAINER_ELEVATOR_CONTROLLER_ADDRESS);
+			containerElevatorController = new CANTalon(RobotMap.TOTE_ELEVATOR_SLAVE_CONTROLLER_ADDRESS);
 		}
 		if(accelerometer == null)
 		{

@@ -63,7 +63,6 @@ public class RobotAutonModes {
     	autoChooser.addObject("Pick Up Grey Totes", new Integer(PICK_UP_GREY_TOTES));
     	
     	SmartDashboard.putData("Auto Mode Chooser", autoChooser);
-    	SmartDashboard.putNumber("[CURRENT] Autonomous Mode: ", autoMode);
     }
     
     /**

@@ -430,7 +430,7 @@ public class RobotDriveBase
 	//	           			     && Math.abs(robotAccelerometer.getY()) < RobotMap.ACCELEROMETER_DEADBAND_Y)
 		           	if(dirtyGyro)
 		           	{
-		           		if(Math.abs(accelerometerXAxis) < RobotMap.ACCELEROMETER_DEADBAND_X)
+		           		if(Math.abs(accelerometerXAxis) < (compressor.enabled() ? RobotMap.ACCELEROMETER_DEADBAND_X_COMPRESSOR : RobotMap.ACCELEROMETER_DEADBAND_X))
 		           		{
 		           			if(accelerometerDeadbandCount <= 0)
 		           			{
@@ -474,7 +474,7 @@ public class RobotDriveBase
 		        SmartDashboard.putNumber("Strafe Distance (RAW)", strafeEncoder.getRaw());
 		        SmartDashboard.putNumber("Gyro Angle", dirtyGyro ? 999999 : gyroAngle);
 				SmartDashboard.putNumber("ACCEL (X)", robotAccelerometer.getX());
-				SmartDashboard.putBoolean("ACCEL Deadband", (Math.abs(accelerometerXAxis) < RobotMap.ACCELEROMETER_DEADBAND_X));
+				SmartDashboard.putBoolean("ACCEL Deadband", (Math.abs(accelerometerXAxis) < (compressor.enabled() ? RobotMap.ACCELEROMETER_DEADBAND_X_COMPRESSOR : RobotMap.ACCELEROMETER_DEADBAND_X)));
     		}
     		// If autoAlign is true, meaning the button is being pressed
     		else
@@ -799,6 +799,7 @@ public class RobotDriveBase
 	    // Drive toward the auto zone
 	    if(distance <= correctDistance)
 	    {
+	    	robotDrive.drive(0, correction);
 	    	slideJaguar1.set(RobotMap.AUTONOMOUS_DRIVE_SPEED);
 	    	slideJaguar2.set(RobotMap.AUTONOMOUS_DRIVE_SPEED);
 	    }

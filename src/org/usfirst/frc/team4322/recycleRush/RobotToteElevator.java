@@ -23,6 +23,7 @@ public class RobotToteElevator {
     
     // Instance for tote lifting motor.
     private CANTalon toteMotor = null;
+    private CANTalon toteSlave = null;
     
     // Instance for Brake Solenoid
     private DoubleSolenoid brakeSolenoid = null;
@@ -80,6 +81,13 @@ public class RobotToteElevator {
 	    		toteMotor.enableControl();
 	    		RobotLogger.getInstance().sendToConsole("Elevator TalonSRX Firmware Version: " + toteMotor.GetFirmwareVersion());
 	    	}
+	    	if(toteSlave == null)
+	    	{
+	    		toteSlave = new CANTalon(RobotMap.TOTE_ELEVATOR_SLAVE_CONTROLLER_ADDRESS);
+	    		toteSlave.changeControlMode(edu.wpi.first.wpilibj.CANTalon.ControlMode.Follower);
+	    		toteSlave.set(toteMotor.getDeviceID());
+	    		toteSlave.enableControl();	    		
+	    	}
 	    	if(brakeSolenoid == null)
 	    	{
 	    		brakeSolenoid = new DoubleSolenoid(RobotMap.BRAKE_PISTON_FORWARD_PORT,RobotMap.BRAKE_PISTON_REVERSE_PORT);
@@ -108,7 +116,7 @@ public class RobotToteElevator {
     // Initialization code for autonomous mode should go here.
     public void initAutonomous()
     {
-
+    	toteMotor.setPosition(0);
     }
 
     // Initialization code for teleop mode should go here.
@@ -119,7 +127,6 @@ public class RobotToteElevator {
 	    	brakeSolenoid.set(Value.kReverse);
 	    	toteMotor.clearStickyFaults();
 	    	toteMotor.ClearIaccum();
-	    	toteMotor.setPosition(0);
 	    	autoDriveMode = false;
 	    	currentPosition = 0;
 	    	setPointDelta = setPointChange.NONE;
@@ -408,7 +415,7 @@ public class RobotToteElevator {
     	{
     		if(setPointDelta != setPointChange.NONE) 
     		{
-    			targetIndex = (int) Math.round((setPointDelta == setPointChange.DOWN) ? Math.floor((toteMotor.get() - 150) / 3150) : Math.ceil((toteMotor.get() + 250) / 3150));
+    			targetIndex = (int) Math.round((setPointDelta == setPointChange.DOWN) ? Math.floor((toteMotor.get() - 150) / RobotMap.ELEVATOR_POSITION_DISTANCE) : Math.ceil((toteMotor.get() + 250) / RobotMap.ELEVATOR_POSITION_DISTANCE));
     		}
     		if(targetIndex >= RobotMap.ELEVATOR_POSITIONS.length) targetIndex = RobotMap.ELEVATOR_POSITIONS.length -1;
     		else if(targetIndex < 0) targetIndex = 1;
@@ -444,5 +451,6 @@ public class RobotToteElevator {
     		RobotLogger.getInstance().sendToConsole("Exited AutoDriveMode.");
     	}
     	if(Math.abs(CoPilotController.getInstance().getElevatorDriveStick()) > RobotMap.ELEVATOR_ANALOG_STICK_DEADBAND) autoDriveMode = false;
+    	
     }
 }
