@@ -24,7 +24,6 @@ public class RobotAutonModes {
     private static final int PUSH_TOTE_AND_CONTAINER = 50;
     private static final int STACK_YELLOW_TOTES = 60;
     private static final int PICK_UP_GREY_TOTES = 70;
-    
     // Autonomous Tote Pickup Mode
     public int autoPickUpMode = DRIVE_FORWARD_AND_PICK_UP_TOTE;
     public static final int DRIVE_FORWARD_AND_PICK_UP_TOTE = 10;
@@ -61,7 +60,6 @@ public class RobotAutonModes {
     	autoChooser.addObject("Push Tote AND Container", new Integer(PUSH_TOTE_AND_CONTAINER));
     	autoChooser.addObject("Stack Yellow Totes", new Integer(STACK_YELLOW_TOTES));
     	autoChooser.addObject("Pick Up Grey Totes", new Integer(PICK_UP_GREY_TOTES));
-    	
     	SmartDashboard.putData("Auto Mode Chooser", autoChooser);
     }
     
@@ -71,14 +69,14 @@ public class RobotAutonModes {
     public int getAutoMode()
     {
     	// Get the selection
-		autoMode = (Integer) autoChooser.getSelected();
-		// Only record changes in auto modes
-		if(lastAutoMode != autoMode)
-		{
-			RobotLogger.getInstance().sendToConsole("Auto Mode: " + autoMode);
-			lastAutoMode = autoMode;
-		}
-		return autoMode;
+    	autoMode = (Integer) autoChooser.getSelected();
+    	// Only record changes in auto modes
+   		if(lastAutoMode != autoMode)
+   		{
+   			RobotLogger.getInstance().sendToConsole("New Auto Mode: " + autoMode);
+   			lastAutoMode = autoMode;    		
+   		}
+    	return autoMode;
     }
     
     /**
@@ -99,7 +97,15 @@ public class RobotAutonModes {
         	proximitySensorLeft = new ProximitySensor(RobotMap.DRIVE_PROXIMITY_SENSOR_2_ANALOG_PORT);
         }
     }
+    public void init()
+    {
+    	initRobotAutonMode(autoMode);
+    }
     
+    public void poll()
+    {
+    	autoMode = (Integer)autoChooser.getSelected();
+    }
     /**
      * Run the selected autonomous mode.
      * @param autoMode
@@ -107,7 +113,6 @@ public class RobotAutonModes {
     public void runRobotAutonMode(int autoMode)
     {
     	SmartDashboard.putNumber("AutoMode: ", autoMode);
-    	RobotLogger.getInstance().sendToConsole("Initialize Auto Mode: " + autoMode);
     	switch(autoMode)
     	{
     	case DO_NOTHING:

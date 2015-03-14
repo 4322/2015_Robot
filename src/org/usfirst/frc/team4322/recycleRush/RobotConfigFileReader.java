@@ -152,8 +152,17 @@ public class RobotConfigFileReader
     	    while (enumeration.hasMoreElements()) {
     	        String key = (String) enumeration.nextElement();
     	        String value = p.getProperty(key);
-    	        Field current = RobotMap.class.getField(key);
-    	        if(current == null) continue;
+    	        Field current = null;
+    	        try
+    	        {
+    	        current = RobotMap.class.getField(key);
+    	        }
+    	        catch(NoSuchFieldException ex)
+    	        {
+    	        	RobotLogger.getInstance().sendToConsole("The field \"%s\" doesnt exist in RobotMap!", key);
+    	        	RobotLogger.getInstance().writeErrorToFile("RobotConfigFileReader.runRobotFileReader()", ex);
+    	        	continue;
+    	        }
     	        if(current.getType().isArray())
     	        {
     	        	Matcher m = arrayFinder.matcher(value);
@@ -162,15 +171,50 @@ public class RobotConfigFileReader
     	        	arrayValues[0] = arrayValues[0].replace("{", "");
     	        	arrayValues[arrayValues.length-1] = arrayValues[arrayValues.length-1].replace("}", "");
     	        	Object elementArray = Array.newInstance(current.getType().getComponentType(), arrayValues.length);
-    	        	for(int i = 0; i< arrayValues.length;i++)
+    	        	try
     	        	{
-    	        		Array.set(elementArray, i, primitiveMap.get(current.getType().getComponentType()).invoke(null, arrayValues[i]));
+    	        		for(int i = 0; i< arrayValues.length;i++)
+    	        		{
+    	        			if(current.getType().getComponentType() == String.class)
+    	        			{
+    	        				Array.set(elementArray, i,arrayValues[i]);
+    	        			}
+    	        			else
+    	        			{
+    	        				Array.set(elementArray, i, primitiveMap.get(current.getType().getComponentType()).invoke(null, arrayValues[i]));
+    	        			}
+    	        		}
     	        	}
-    	        	current.set(null,elementArray);
+    	        	catch(InvocationTargetException ex)
+    	        	{
+    	        		RobotLogger.getInstance().sendToConsole("Unable to set property \"%s\" to \"%s\". Target type was %s[].", key,value,current.getType().getComponentType().getSimpleName());
+    	        		RobotLogger.getInstance().writeErrorToFile("RobotConfigFileReader.runRobotFileReader()", ex);
+    	        		continue;
+    	        	}
+	        		current.set(null,elementArray);
     	        }
     	        else
     	        {
-    	        	current.set(null, primitiveMap.get(current.getType()).invoke(null, value));       
+    	        	
+    	        	Object finalValue = null;
+    	        	if(current.getType() == String.class)
+    	        	{
+    	        		finalValue = value;
+    	        	}
+    	        	else
+    	        	{
+    	        		try
+    	        		{
+    	        			finalValue = primitiveMap.get(current.getType()).invoke(null, value);
+    	        		}
+    	        		catch(InvocationTargetException ex)
+    	        		{
+    	        			RobotLogger.getInstance().sendToConsole("Unable to set property \"%s\" to \"%s\". Target type was %s.", key,value,current.getType().getSimpleName());
+    	        			RobotLogger.getInstance().writeErrorToFile("RobotConfigFileReader.runRobotFileReader()", ex);
+    	        			continue;
+    	        		}
+    	        	}
+    	        	current.set(null, finalValue);       
     	        }
     	    }
     	} 
@@ -183,14 +227,6 @@ public class RobotConfigFileReader
 			RobotLogger.getInstance().writeErrorToFile("Exception caught in runRobotFileReader()", ex);
 		} 
     	catch (SecurityException ex	)
-    	{
-			RobotLogger.getInstance().writeErrorToFile("Exception caught in runRobotFileReader()", ex);
-		}
-    	catch (NoSuchFieldException ex)
-    	{
-			RobotLogger.getInstance().writeErrorToFile("Exception caught in runRobotFileReader()", ex);
-		} 
-    	catch (InvocationTargetException ex) 
     	{
 			RobotLogger.getInstance().writeErrorToFile("Exception caught in runRobotFileReader()", ex);
 		}

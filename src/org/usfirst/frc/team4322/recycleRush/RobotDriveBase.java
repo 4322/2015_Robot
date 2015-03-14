@@ -278,6 +278,7 @@ public class RobotDriveBase
     {
     	try
     	{
+    		RobotLogger.getInstance().sendToConsole("Strafe Encoder Distance after auto was %f inches.", driveEncoder.getDistance());
 	        // Reset throttle and steering values
 	        throttleValue = 0;
 	        steeringValue = 0;
@@ -304,7 +305,7 @@ public class RobotDriveBase
 	        	if(!autoAlignButtonPressed) RobotLogger.getInstance().sendToConsole("*****AUTO ALIGNMENT BEGIN*****");
         		dirtyAngularAlignmentCount = 0;
 	        	autoAlignButtonPressed = true;
-	        	// Skip to angular alignment
+	        	// Choose to skip to angular alignment or not
 	        	if(toteAlignmentMode == AUTO_ALIGN_COMPLETE)
 	        	{
 		        	if(PilotController.getInstance().getAutoAlignButton())
@@ -321,6 +322,11 @@ public class RobotDriveBase
 	        // If we are not holding down the button, the driver may drive
 	        else
 	        {
+	        	// If we just changed from auto align to normal drive
+	        	if(autoAlignButtonPressed)
+	        	{
+	        		robotGyro.reset();
+	        	}
 	        	autoAlignButtonPressed = false;
 	        	toteAlignmentMode = AUTO_ALIGN_COMPLETE;
 	        }
@@ -470,11 +476,13 @@ public class RobotDriveBase
 	            	accelerometerDeadbandCount = RobotMap.ACCELEROMETER_DEADBAND_COUNTDOWN;
 	            }
 		        SmartDashboard.putNumber("Drive Encoder Distance", driveEncoder.getDistance());
+		        SmartDashboard.putNumber("Drive Encoder Raw Ticks", driveEncoder.getRaw());
 		        SmartDashboard.putNumber("Strafe Distance", strafeEncoder.getDistance());
 		        SmartDashboard.putNumber("Strafe Distance (RAW)", strafeEncoder.getRaw());
 		        SmartDashboard.putNumber("Gyro Angle", dirtyGyro ? 999999 : gyroAngle);
 				SmartDashboard.putNumber("ACCEL (X)", robotAccelerometer.getX());
 				SmartDashboard.putBoolean("ACCEL Deadband", (Math.abs(accelerometerXAxis) < (compressor.enabled() ? RobotMap.ACCELEROMETER_DEADBAND_X_COMPRESSOR : RobotMap.ACCELEROMETER_DEADBAND_X)));
+				SmartDashboard.putBoolean("Strafing On", (Math.abs(strafingValue) > 0) ? true : false);
     		}
     		// If autoAlign is true, meaning the button is being pressed
     		else
@@ -825,13 +833,13 @@ public class RobotDriveBase
     	double correction = -1 * robotGyro.getAngle() * RobotMap.AUTONOMOUS_P_CONTROL_VALUE_GYRO;
 	    double leftDistance = proximitySensorLeft.getDistance();
 	    double rightDistance = proximitySensorRight.getDistance();
-	    // Drive toward the auto zone
+	    // We are at the correct distance; stop and wait
 	    if(calculateToteDistanceError(leftDistance, rightDistance) <= RobotMap.PROXIMITY_SENSOR_ERROR_VALUE
 	    		&& rightDistance <= RobotMap.EXPECTED_TOTE_DISTANCE)
 	    {
 	    	robotDrive.drive(0, 0);
 	    }
-	    // We are at the correct distance; stop and wait
+	    // Drive toward the auto zone
 	    else
 	    {
 	    	robotDrive.drive(RobotMap.AUTONOMOUS_DRIVE_SPEED, correction);

@@ -31,16 +31,15 @@ public class RobotLogger
 
 	// Instance for Singleton class
 	private static RobotLogger _instance = null;
-
 	// Instance for Driver Station
 	private DriverStation m_ds = DriverStation.getInstance();
-
 	// Instances for the log files
-	public final String LOG_FILE = "/home/lvuser/logs/FRC4322InitLog.txt",
-			Robot_Disabled_Log = "/home/lvuser/logs/FRC4322DisabledLog.txt",
-			Robot_Auto_Log = "/home/lvuser/logs/FRC4322AutoLog.txt",
-			Robot_Teleop_Log = "/home/lvuser/logs/FRC4322TeleopLog.txt",
-			Robot_Test_Log = "/home/lvuser/logs/FRC4322TestLog.txt";
+	public final String logFolder = "/home/lvuser/logs/";
+	public final String LOG_FILE = "FRC4322InitLog.txt",
+			Robot_Disabled_Log = "FRC4322DisabledLog.txt",
+			Robot_Auto_Log = "FRC4322AutoLog.txt",
+			Robot_Teleop_Log = "FRC4322TeleopLog.txt",
+			Robot_Test_Log = "FRC4322TestLog.txt";
 	private File oldLog = null;
 	private FileWriter fw = null;
 	private BufferedWriter bw = null;
@@ -53,7 +52,7 @@ public class RobotLogger
 
 	// Get Date Format
 	private static final SimpleDateFormat sdf_ = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
-	
+//	private static final SimpleDateFormat FMSFormat = new SimpleDateFormat("MM/dd-hh:mm");
 
 	// Constants for file
 	private final long MAX_FILE_LENGTH = 10485760; //10MB, 1 MiB = 1024^2 or 2^20
@@ -71,20 +70,22 @@ public class RobotLogger
         // Return the singleton instance to the caller.
         return _instance;
 	}
-
-	
 	
 	private String getProperLogFile()
 	{
-		String file = LOG_FILE;
+		String file = logFolder + LOG_FILE;
+//		if(m_ds.isFMSAttached())
+//		{
+//			return logFolder + FMSFormat.format(Calendar.getInstance().getTime()) + "MatchLog.txt";
+//		}
 		if (m_ds.isDisabled())
-			return file = Robot_Disabled_Log;
+			return file = logFolder + Robot_Disabled_Log;
 		if (m_ds.isAutonomous())
-			file = Robot_Auto_Log;
+			file = logFolder + Robot_Auto_Log;
 		if (m_ds.isOperatorControl())
-			file = Robot_Teleop_Log;
+			file = logFolder + Robot_Teleop_Log;
 		if (m_ds.isTest())
-			file = Robot_Test_Log;
+			file = logFolder + Robot_Test_Log;
 		// Default is initLog
 		return file;
 	}
@@ -193,10 +194,15 @@ public class RobotLogger
 			update(false);
 		}
 		String msg = "\nException in " + method + ": " + getString(t);
-		System.out.println(msg);
+		System.err.println(msg);
 		writeToFile(msg);
 	}
-
+	
+	//Writes throwable error to DS.
+	public void writeErrorToDS(final String message, final Throwable thrown)
+	{
+		DriverStation.reportError("\nException in " + message + getString(thrown), false);
+	}
 	// Sends message to console and .txt log file
 	public void sendToConsole(String thisMessage, Object... args)
 	{
@@ -226,6 +232,7 @@ public class RobotLogger
 	         */
 	        URI uri = URI.create("jar:file:" + zipfile);
 	        
+	       
 	        /* The ZipFileSystem treats jars and ZIPs as a file
 	         * system, allowing the user to manipulate the contents
 	         * in the ZIP as one would in a folder.

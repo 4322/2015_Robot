@@ -2,7 +2,7 @@ package org.usfirst.frc.team4322.recycleRush;
 
 public class RobotMap
 {
-	public static String LAST_BUILD_TIME = "Robot4322_2015: 3/12/2015 5:17 PM";
+	public static String LAST_BUILD_TIME = "Robot4322_2015: 3/13/2015 4:31 PM";
 	
 	// Initialize Joystick Ports
 	public static int PILOT_CONTROLLER_JOYSTICK_PORT = 0;
@@ -53,8 +53,8 @@ public class RobotMap
 	public static int DRIVE_PROXIMITY_SENSOR_2_ANALOG_PORT = 3;
 	
 	// Drive Encoder Values (250 counts / revolution)
-	public static int DRIVE_ENCODER_A_GPIO_PORT = 1;
-	public static int DRIVE_ENCODER_B_GPIO_PORT = 0;
+	public static int DRIVE_ENCODER_A_GPIO_PORT = 4;
+	public static int DRIVE_ENCODER_B_GPIO_PORT = 5;
 	public static double ENCODER_DISTANCE_PER_TICK = 0.07539822368615503772310344119871; //inches; diameter of wheel * pi / counts per revolution
 	public static double BACK_AWAY_FROM_TOTE_DISTANCE = 10;
 	public static double AUTO_DRIVE_FORWARD_DISTANCE = 60; //60-70
@@ -63,8 +63,8 @@ public class RobotMap
 	public static double AUTO_DRIVE_BACKWARD_WITH_TOTE_CONTAINER_OVER_PLATFORM = 130; //???
 	
 	// Strafe Encoder Values (360 counts / revolution)
-	public static int STRAFE_ENCODER_A_GPIO_PORT = 2;
-	public static int STRAFE_ENCODER_B_GPIO_PORT = 3;
+	public static int STRAFE_ENCODER_A_GPIO_PORT = 3;
+	public static int STRAFE_ENCODER_B_GPIO_PORT = 2;
 	public static double STRAFE_ENCODER_DISTANCE_PER_TICK = 0.0523598776; //inches; diameter of wheel * pi / counts per revolution
 	public static double STRAFE_ENCODER_TOTE_ALIGNMENT_DRIVE_DISTANCE = 0.5; //inches
 	
@@ -103,9 +103,9 @@ public class RobotMap
 	public static double MAX_EXPECTED_TOTE_DISTANCE = 10; // inches
 	
 	// Tote Elevator PID Constants
-	public static double ELEVATOR_P_VALUE = 0.3;
-	public static double ELEVATOR_I_VALUE = 0.00255;
-	public static double ELEVATOR_D_VALUE = 0.35;
+	public static double ELEVATOR_P_VALUE = 0.4;
+	public static double ELEVATOR_I_VALUE = 0.00225;
+	public static double ELEVATOR_D_VALUE = 0.4;
 	public static double ELEVATOR_F_VALUE = 0;
 	public static int ELEVATOR_IZONE_VALUE = 850;
 	public static int ELEVATOR_RAMPRATE_VALUE = 0;

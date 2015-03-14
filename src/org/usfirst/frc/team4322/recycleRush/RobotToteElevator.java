@@ -127,6 +127,7 @@ public class RobotToteElevator {
 	    	brakeSolenoid.set(Value.kReverse);
 	    	toteMotor.clearStickyFaults();
 	    	toteMotor.ClearIaccum();
+	    	toteSlave.clearStickyFaults();
 	    	autoDriveMode = false;
 	    	currentPosition = 0;
 	    	setPointDelta = setPointChange.NONE;
@@ -319,6 +320,10 @@ public class RobotToteElevator {
             		toteMotor.changeControlMode(ControlMode.Position);
             		toteMotor.setFeedbackDevice(FeedbackDevice.QuadEncoder);
             		toteMotor.enableControl();
+//            		toteSlave.disableControl();
+//    	    		toteSlave.changeControlMode(edu.wpi.first.wpilibj.CANTalon.ControlMode.Follower);
+//    	    		toteSlave.set(toteMotor.getDeviceID());
+//    	    		toteSlave.enableControl();	    
             		controlModeV = false;
         		}
             	if(!stackDone)
@@ -357,6 +362,10 @@ public class RobotToteElevator {
         			toteMotor.changeControlMode(ControlMode.PercentVbus);
         			toteMotor.setFeedbackDevice(FeedbackDevice.QuadEncoder);
         			toteMotor.enableControl();
+//            		toteSlave.disableControl();
+//    	    		toteSlave.changeControlMode(edu.wpi.first.wpilibj.CANTalon.ControlMode.Follower);
+//    	    		toteSlave.set(toteMotor.getDeviceID());
+//    	    		toteSlave.enableControl();	    
         			controlModeV = true;
         		}
         		toteMotor.set(-CoPilotController.getInstance().getElevatorDriveStick());
@@ -373,7 +382,7 @@ public class RobotToteElevator {
         	}
         	SmartDashboard.putBoolean("Auto Mode:", autoDriveMode);
         	SmartDashboard.putNumber("Target Encoder Value:",toteMotor.getSetpoint());
-//        	SmartDashboard.putNumber("Error Value:",toteMotor.getClosedLoopError());
+        	SmartDashboard.putNumber("Error Value:",toteMotor.getClosedLoopError());
         	SmartDashboard.putBoolean("Tote Lift Forward Limit Closed:", toteMotor.isFwdLimitSwitchClosed());
         	SmartDashboard.putBoolean("Tote Lift Reverse Limit Closed:", toteMotor.isRevLimitSwitchClosed());
         	SmartDashboard.putNumber("Elevator Joystick Value", CoPilotController.getInstance().getElevatorDriveStick());

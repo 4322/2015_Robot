@@ -31,7 +31,7 @@ public class RobotMain extends IterativeRobot
 	    try
 	    {
 	    	// Open and update the RobotLogger in case log files are too large
-	    	RobotLogger.getInstance().update(true);
+	    	RobotLogger.getInstance().update(false); //No zipping right now
 	    	// Get information
 	    	RobotConfigFileReader.getInstance().runRobotFileReader();
 	    	RobotDriveBase.getInstance().initRobotDrive();
@@ -60,7 +60,7 @@ public class RobotMain extends IterativeRobot
     		// Restart disabled
 			disabledBegin = false;
 	    	RobotAutonModes.getInstance().runAutoModeChoosers();
-		}
+	    }
 		catch (Exception ex)
 		{
 			RobotLogger.getInstance().writeErrorToFile("disabledInit()", ex);
@@ -90,7 +90,9 @@ public class RobotMain extends IterativeRobot
 // 	    	SmartDashboard.putNumber("[CURRENT] Autonomous Mode: ", RobotAutonModes.getInstance().getAutoMode());
 
 // 	        SmartDashboard.putNumber("Xbone Controller Right Stick X Axis", PilotController.getInstance().getDriveBaseSteeringStick());
-		}
+			RobotAutonModes.getInstance().runAutoModeChoosers();
+ 			RobotAutonModes.getInstance().poll();
+ 		}
 		catch (Exception ex)
 		{
 			RobotLogger.getInstance().writeErrorToFile("disabledPeriodic()", ex);
@@ -113,7 +115,7 @@ public class RobotMain extends IterativeRobot
 	    	RobotToteElevator.getInstance().initAutonomous();
 			RobotDriveBase.getInstance().initAutonomous();
 			autoBegin = false;
-	    	
+	    	RobotAutonModes.getInstance().init();
 			RobotLogger.getInstance().sendToConsole("Robot Autonomous Mode Initialized.");
 		}
 		catch (Exception ex)
