@@ -6,13 +6,15 @@ public class PilotController {
 
 	private static PilotController _instance = null;
 	private XboxController controller = null;
+	public boolean isPilotDriving = true;
 	
-	// The Alternate Drive Profile swaps driving sticks
-	// * Steering will be left stick X axis
-	// * Throttle will be right stick Y axis
-	// * Strafing will be right stick X axis
-	// This value could be selected in a configuration file or using a SmartDashboard selector
-	private boolean useAlternateDriveProfile = true; // Seth's preference
+	/** The Alternate Drive Profile swaps driving sticks
+	 * Steering will be left stick X axis
+	 * Throttle will be right stick Y axis
+	 * Strafing will be right stick X axis
+	 */
+	// TODO: This value could be selected in a configuration file or using a SmartDashboard selector
+	public boolean useAlternateDriveProfile = true; // Seth's preference
     
 	static PilotController getInstance()
 	{
@@ -70,16 +72,14 @@ public class PilotController {
 	{
 		return controller.getBumper(Hand.kRight);
 	}
-	public boolean getAutoAlignButton()
-	{
-		return controller.getYButton();
-	}
-	public boolean getQuickAutoAlignButton()
-	{
-		return controller.getBButton();
-	}
 	public void setUseAlternateDriveProfile(boolean useAlternateDriveProfile)
 	{
 		this.useAlternateDriveProfile = useAlternateDriveProfile;
+	}
+	public boolean getBuddyDriverTransferButton()
+	{
+		isPilotDriving = false; //CoPilot is driving now
+		useAlternateDriveProfile = false; // Steven's preference
+		return controller.getTrigger(Hand.kRight);
 	}
 }

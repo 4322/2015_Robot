@@ -21,26 +21,32 @@ public class CoPilotController {
 	
 	public boolean getElevatorSetPointUpButton()
 	{
-		return controller.getYButton() || controlPanel.getRawButton(4);
+		return /*controller.getYButton() || */controlPanel.getRawButton(4);
 	}
 	public boolean getElevatorSetPointDownButton()
 	{
-		return controller.getAButton() || controlPanel.getRawButton(2);
+		return /*controller.getAButton() || */controlPanel.getRawButton(2);
 	}
 	public double getElevatorDriveStick()
 	{
-		return controller.getY(Hand.kLeft);
-//		return controlPanel.getRawAxis(1);
+		// You can ONLY control the elevator while you are NOT driving
+		if(!PilotController.getInstance().isPilotDriving)
+		{
+			return controller.getY(Hand.kLeft);
+		}
+		else
+		{
+			return 0.0;
+		}
 	}
 	public boolean getElevatorTiltButton()
 	{
-		return controller.getBumper(Hand.kLeft) || controlPanel.getRawButton(1);
+		return /*controller.getBumper(Hand.kLeft) || */controlPanel.getRawButton(1);
 	}
 	public boolean getAutoEmergencyOff()
 	{
 		return controller.getStart();
 	}
-
 	public boolean getElevatorSetPoint0Button()
 	{
 		return (controlPanel.getPOV() == 0);
@@ -71,6 +77,64 @@ public class CoPilotController {
 	}
 	public boolean getStackButton()
 	{
-		return controller.getXButton() || controlPanel.getRawButton(5);
+		return /*controller.getXButton() || */controlPanel.getRawButton(5);
+	}
+	public boolean getAutoAlignButton()
+	{
+		return controller.getYButton();
+	}
+	public boolean getQuickAutoAlignButton()
+	{
+		return controller.getBButton();
+	}
+	public boolean getDriveAndAutoLiftButton()
+	{
+		return controller.getXButton();
+	}
+	
+	/**
+	 * Driver transfer, only happens when driver holds down right trigger button
+	 * 
+	 * The current drive profile is (false):
+	 * -Steering is right stick X axis
+	 * -Strafing is left stick X axis
+	 * -Throttle is left stick Y axis
+	 */
+	public double getDriveBaseStrafingStick()
+	{
+		if(PilotController.getInstance().useAlternateDriveProfile)
+		{
+			return controller.getX(Hand.kRight);
+		}
+		else
+		{
+			return controller.getX(Hand.kLeft);
+		}
+	}
+	public double getDriveBaseSteeringStick()
+	{
+		if(PilotController.getInstance().useAlternateDriveProfile)
+		{
+			return controller.getX(Hand.kLeft);
+		}
+		else
+		{
+			return controller.getX(Hand.kRight);
+		}
+	}
+	public double getDriveBaseThrottleStick()
+	{
+		if(PilotController.getInstance().useAlternateDriveProfile)
+		{
+			return controller.getY(Hand.kRight);
+		}
+		else
+		{
+			return controller.getY(Hand.kLeft);
+		}
+	}
+	public boolean getSlideDriveLiftButton()
+	{
+		return controller.getBumper(Hand.kLeft);
 	}
 }

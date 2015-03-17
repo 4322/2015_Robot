@@ -87,11 +87,7 @@ public class RobotMain extends IterativeRobot
  			{ //Reinitialize!
  				RobotDriveBase.getInstance().robotGyro = new Gyro(RobotMap.DRIVE_GYRO_ANALOG_PORT);
  			}
-// 	    	SmartDashboard.putNumber("[CURRENT] Autonomous Mode: ", RobotAutonModes.getInstance().getAutoMode());
-
-// 	        SmartDashboard.putNumber("Xbone Controller Right Stick X Axis", PilotController.getInstance().getDriveBaseSteeringStick());
-			RobotAutonModes.getInstance().runAutoModeChoosers();
- 			RobotAutonModes.getInstance().poll();
+			RobotAutonModes.getInstance().poll();
  		}
 		catch (Exception ex)
 		{
@@ -108,14 +104,14 @@ public class RobotMain extends IterativeRobot
     {
     	try
 		{
-    		// Open and update the RobotLogger in case log files are too large
+    		// Open and update the RobotLogger (no zipping)
     		RobotLogger.getInstance().close();
 	    	RobotLogger.getInstance().update(false);
-	    	//RobotConfigFileReader.getInstance().runRobotFileReader();
 	    	RobotToteElevator.getInstance().initAutonomous();
 			RobotDriveBase.getInstance().initAutonomous();
 			autoBegin = false;
-	    	RobotAutonModes.getInstance().init();
+			// We're not currently using the proximity sensors
+//	    	RobotAutonModes.getInstance().initRobotAutonMode(RobotAutonModes.getInstance().getAutoMode());
 			RobotLogger.getInstance().sendToConsole("Robot Autonomous Mode Initialized.");
 		}
 		catch (Exception ex)

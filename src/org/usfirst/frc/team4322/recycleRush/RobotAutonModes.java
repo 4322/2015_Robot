@@ -90,11 +90,11 @@ public class RobotAutonModes {
         // Create proximity sensors if they do not exist
         if(proximitySensorRight == null)
         {
-        	proximitySensorRight = new ProximitySensor(RobotMap.DRIVE_PROXIMITY_SENSOR_1_ANALOG_PORT);
+        	proximitySensorRight = RobotDriveBase.getInstance().proximitySensorRight;
         }
         if(proximitySensorLeft == null)
         {
-        	proximitySensorLeft = new ProximitySensor(RobotMap.DRIVE_PROXIMITY_SENSOR_2_ANALOG_PORT);
+        	proximitySensorLeft = RobotDriveBase.getInstance().proximitySensorLeft;
         }
     }
     public void init()
@@ -104,7 +104,7 @@ public class RobotAutonModes {
     
     public void poll()
     {
-    	autoMode = (Integer)autoChooser.getSelected();
+    	autoMode = (Integer) autoChooser.getSelected();
     }
     /**
      * Run the selected autonomous mode.
@@ -112,7 +112,7 @@ public class RobotAutonModes {
      */
     public void runRobotAutonMode(int autoMode)
     {
-    	SmartDashboard.putNumber("AutoMode: ", autoMode);
+    	SmartDashboard.putNumber("[Running] Auto Mode: ", autoMode);
     	switch(autoMode)
     	{
     	case DO_NOTHING:
@@ -175,6 +175,7 @@ public class RobotAutonModes {
     	case DRIVE_BACKWARD_TO_AUTO:
     		// Drive backward to auto zone
     		RobotDriveBase.getInstance().driveToAutoZone(false, platform ? RobotMap.AUTO_DRIVE_BACKWARD_WITH_TOTE_CONTAINER_OVER_PLATFORM : RobotMap.AUTO_DRIVE_BACKWARD_WITH_TOTE_CONTAINER);
+    		// Now we've gotta get away from the tote
     		autoPickUpMode = GET_AWAY_FROM_TOTE;
     		break;
     	case GET_AWAY_FROM_TOTE:
@@ -183,13 +184,15 @@ public class RobotAutonModes {
     		{
     			RobotDriveBase.getInstance().getAwayFromTote(true);
     		}
-    		// Otherwise, shut the drive down; we're done
+    		// Otherwise, we're done
     		else
     		{
-    			RobotDriveBase.getInstance().shutdownRobotDrive();
     			autoPickUpMode = AUTO_COMPLETE;
     		}
     	case AUTO_COMPLETE:
+    		// Turn off robot drive
+    		RobotDriveBase.getInstance().shutdownRobotDrive();
+    		break;
    		default:
    			break;
     	}

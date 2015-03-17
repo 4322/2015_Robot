@@ -2,7 +2,7 @@ package org.usfirst.frc.team4322.recycleRush;
 
 public class RobotMap
 {
-	public static String LAST_BUILD_TIME = "Robot4322_2015: 3/13/2015 4:31 PM";
+	public static String LAST_BUILD_TIME = "Robot4322_2015: 3/14/2015 11:20 AM";
 	
 	// Initialize Joystick Ports
 	public static int PILOT_CONTROLLER_JOYSTICK_PORT = 0;
@@ -35,7 +35,7 @@ public class RobotMap
 	public static double AUTONOMOUS_REVERSE_SPEED = .25;
 	public static double STEERING_DEADBAND = 0.17; //0.04
 	public static double THROTTLE_DEADBAND = 0.17;
-	public static double CREEP_DRIVE_SPEED = -.50;
+	public static double CREEP_DRIVE_SPEED = -.30;
 	public static double AUTO_ALIGN_STRAFE_SPEED = 0.3;
 	public static double AUTO_ALIGN_DRIVE_FORWARD_SPEED = 0.3;
 	public static double BACK_AWAY_FROM_TOTE_SPEED = -0.2;
@@ -58,9 +58,9 @@ public class RobotMap
 	public static double ENCODER_DISTANCE_PER_TICK = 0.07539822368615503772310344119871; //inches; diameter of wheel * pi / counts per revolution
 	public static double BACK_AWAY_FROM_TOTE_DISTANCE = 10;
 	public static double AUTO_DRIVE_FORWARD_DISTANCE = 60; //60-70
-	public static double AUTO_DRIVE_STRAFE_DISTANCE = 140;
+	public static double AUTO_DRIVE_STRAFE_DISTANCE = 200; //140
 	public static double AUTO_DRIVE_BACKWARD_WITH_TOTE_CONTAINER = 115;
-	public static double AUTO_DRIVE_BACKWARD_WITH_TOTE_CONTAINER_OVER_PLATFORM = 130; //???
+	public static double AUTO_DRIVE_BACKWARD_WITH_TOTE_CONTAINER_OVER_PLATFORM = 80;
 	
 	// Strafe Encoder Values (360 counts / revolution)
 	public static int STRAFE_ENCODER_A_GPIO_PORT = 3;
@@ -111,7 +111,7 @@ public class RobotMap
 	public static int ELEVATOR_RAMPRATE_VALUE = 0;
 	public static double ELEVATOR_ANALOG_STICK_DEADBAND = 0.1;
 	public static int ELEVATOR_POSITION_DISTANCE = 2850;
-	
+	public static double ELEVATOR_ALLOWED_CLOSED_LOOP_ERROR = 25;
 	// Tote Elevator positions
 	public static double ELEVATOR_JOYSTICK_DEADBAND = 0.1;
 	public static double[] ELEVATOR_POSITIONS = {0,2806,5605,8376,11426};

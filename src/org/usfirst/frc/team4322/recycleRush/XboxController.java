@@ -10,6 +10,8 @@ import edu.wpi.first.wpilibj.GenericHID;
 /**
  * A nearly drop in replacement for Joystick using an XBOX USB Controller
  *
+ * THE NEW DRIVER STATION DOES NOT LIKE XBOX CONTROLLERS :(
+ * 
  * @author Gustave Michel
  */
 public class XboxController extends GenericHID

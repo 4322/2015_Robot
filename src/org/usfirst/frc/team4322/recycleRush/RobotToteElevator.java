@@ -381,15 +381,13 @@ public class RobotToteElevator {
         		}
         	}
         	SmartDashboard.putBoolean("Auto Mode:", autoDriveMode);
-        	SmartDashboard.putNumber("Target Encoder Value:",toteMotor.getSetpoint());
-        	SmartDashboard.putNumber("Error Value:",toteMotor.getClosedLoopError());
+        	SmartDashboard.putBoolean("Auto Lifting: ", autoLift);
+        	SmartDashboard.putNumber("Target Encoder Value:", toteMotor.getSetpoint());
+        	SmartDashboard.putNumber("[Elevator] Current Encoder Value", toteMotor.getEncPosition());
+        	SmartDashboard.putNumber("Error Value:", toteMotor.getClosedLoopError());
         	SmartDashboard.putBoolean("Tote Lift Forward Limit Closed:", toteMotor.isFwdLimitSwitchClosed());
         	SmartDashboard.putBoolean("Tote Lift Reverse Limit Closed:", toteMotor.isRevLimitSwitchClosed());
         	SmartDashboard.putNumber("Elevator Joystick Value", CoPilotController.getInstance().getElevatorDriveStick());
-//        	SmartDashboard.putNumber("Elevator Drive Value",-1*CoPilotController.getInstance().getElevatorDriveStick());
-        	SmartDashboard.putNumber("Current Encoder Value", toteMotor.getEncPosition());
-//        	SmartDashboard.putNumber("Talon Iaccum:", toteMotor.GetIaccum());
-//        	SmartDashboard.putNumber("Target Encoder Value", autoDriveMode ? toteMotor.get() : 0);
         	SmartDashboard.putNumber("Control Panel POV Value", CoPilotController.getInstance().getPOV());
     	}
     	catch (Exception ex)
@@ -453,7 +451,7 @@ public class RobotToteElevator {
     	}
     	//toteMotor.set(RobotMap.ELEVATOR_POSITIONS[targetIndex]); // don't call this every loop. use above function
     	// If we're within the error range on PID, close the disk brake
-    	if(Math.abs(toteMotor.getClosedLoopError()) < 10)
+    	if(Math.abs(toteMotor.getClosedLoopError()) < RobotMap.ELEVATOR_ALLOWED_CLOSED_LOOP_ERROR)
     	{
     		brakeSolenoid.set(Value.kReverse);
     		autoDriveMode = false;
