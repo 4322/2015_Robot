@@ -155,7 +155,7 @@ public class RobotLogger
 				if (!oldLog.exists())
 				{
 					oldLog.createNewFile();
-					System.out.println("Creating new file: " + getProperLogFile());
+					System.out.printf("Creating new file:%s\n",getProperLogFile());
 				}
 				// Write data using buffered writer; enhances IO operations
 				fw = new FileWriter(oldLog, true);

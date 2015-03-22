@@ -33,7 +33,7 @@ public class RobotMain extends IterativeRobot
 	    	// Open and update the RobotLogger in case log files are too large
 	    	RobotLogger.getInstance().update(false); //No zipping right now
 	    	// Get information
-	    	RobotConfigFileReader.getInstance().runRobotFileReader();
+	    	//RobotConfigFileReader.getInstance().runRobotFileReader();
 	    	RobotDriveBase.getInstance().initRobotDrive();
 	    	RobotToteElevator.getInstance().initRobotToteElevator();
 //			RobotVision.getInstance().initRobotVision();

@@ -14,7 +14,7 @@ public class RobotMap
 	public static int TALON_RIGHT_DRIVE_CHANNEL = 1;
 	
 	// Initialize Slide Drive CAN Address
-	public static int CANJAGUAR_SLIDE_2_DRIVE_ADDRESS = 10;
+//	public static int CANJAGUAR_SLIDE_2_DRIVE_ADDRESS = 10;
 	public static int CANJAGUAR_SLIDE_1_DRIVE_ADDRESS = 11;
 	
 	// Initialize Pneumatic Control Module Solenoid Ports
@@ -53,9 +53,9 @@ public class RobotMap
 	public static int DRIVE_PROXIMITY_SENSOR_2_ANALOG_PORT = 3;
 	
 	// Drive Encoder Values (250 counts / revolution)
-	public static int DRIVE_ENCODER_A_GPIO_PORT = 4;
-	public static int DRIVE_ENCODER_B_GPIO_PORT = 5;
-	public static double ENCODER_DISTANCE_PER_TICK = 0.07539822368615503772310344119871; //inches; diameter of wheel * pi / counts per revolution
+	public static int DRIVE_ENCODER_A_GPIO_PORT = 0;
+	public static int DRIVE_ENCODER_B_GPIO_PORT = 1;
+	public static double ENCODER_DISTANCE_PER_TICK = 0.0523598776; //inches; diameter of wheel * pi / counts per revolution
 	public static double BACK_AWAY_FROM_TOTE_DISTANCE = 10;
 	public static double AUTO_DRIVE_FORWARD_DISTANCE = 60; //60-70
 	public static double AUTO_DRIVE_STRAFE_DISTANCE = 200; //140

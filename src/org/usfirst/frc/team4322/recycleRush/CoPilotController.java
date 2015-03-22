@@ -30,7 +30,7 @@ public class CoPilotController {
 	public double getElevatorDriveStick()
 	{
 		// You can ONLY control the elevator while you are NOT driving
-		if(!PilotController.getInstance().isPilotDriving)
+		if(PilotController.getInstance().isPilotDriving)
 		{
 			return controller.getY(Hand.kLeft);
 		}

@@ -132,11 +132,11 @@ public class RobotDriveBase
 	        }
 	        
 	        // Create slideJaguar2 if it does not exist.
-	        if(slideJaguar2 == null)
-	        {
-	        	slideJaguar2 = new CANJaguar(RobotMap.CANJAGUAR_SLIDE_2_DRIVE_ADDRESS);
-	        	RobotLogger.getInstance().sendToConsole("CANJaguar Firmware Version: " + slideJaguar2.getFirmwareVersion());
-	        }
+//	        if(slideJaguar2 == null)
+//	        {
+//	        	slideJaguar2 = new CANJaguar(RobotMap.CANJAGUAR_SLIDE_2_DRIVE_ADDRESS);
+//	        	RobotLogger.getInstance().sendToConsole("CANJaguar Firmware Version: " + slideJaguar2.getFirmwareVersion());
+//	        }
 	        
 	        // Create the piston to actuate the slide drive if it does not exist.
 	        if(slideActuatorPiston == null)
@@ -410,7 +410,7 @@ public class RobotDriveBase
 		        	// Lift the SLIDE drive and shut off slide motors
 		        	slideActuatorPiston.set(Value.kReverse);
 		        	slideJaguar1.set(0);
-		        	slideJaguar2.set(0);
+//		        	slideJaguar2.set(0);
 		        }
 		        // Handle STRAFING mode
 		        else if(strafeMode)
@@ -423,7 +423,7 @@ public class RobotDriveBase
 			        }
 		        	slideActuatorPiston.set(Value.kForward);
 		        	slideJaguar1.set(strafingValue * -1);
-		        	slideJaguar2.set(strafingValue * -1);
+//		        	slideJaguar2.set(strafingValue * -1);
 			    }
 		        
 		        // Check to see if we are not steering and reset the gyro heading 
