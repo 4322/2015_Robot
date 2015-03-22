@@ -132,11 +132,11 @@ public class RobotDriveBase
 	        }
 	        
 	        // Create slideJaguar2 if it does not exist.
-//	        if(slideJaguar2 == null)
-//	        {
-//	        	slideJaguar2 = new CANJaguar(RobotMap.CANJAGUAR_SLIDE_2_DRIVE_ADDRESS);
-//	        	RobotLogger.getInstance().sendToConsole("CANJaguar Firmware Version: " + slideJaguar2.getFirmwareVersion());
-//	        }
+	        if(slideJaguar2 == null)
+	        {
+	        	slideJaguar2 = new CANJaguar(RobotMap.CANJAGUAR_SLIDE_2_DRIVE_ADDRESS);
+	        	RobotLogger.getInstance().sendToConsole("CANJaguar Firmware Version: " + slideJaguar2.getFirmwareVersion());
+	        }
 	        
 	        // Create the piston to actuate the slide drive if it does not exist.
 	        if(slideActuatorPiston == null)
@@ -367,7 +367,7 @@ public class RobotDriveBase
 		        rampStrafingValues(strafingValue, lastStrafingValue);
 		        
 		        // Scale Values
-		        boolean dualRateEnabled = (PilotController.getInstance().isPilotDriving) ? true : PilotController.getInstance().getDualRateButton();
+		        boolean dualRateEnabled = (!PilotController.getInstance().isPilotDriving) ? true : PilotController.getInstance().getDualRateButton();
 		        
 		        throttleValue = (throttleValue * RobotMap.THROTTLE_LIMIT)  / (dualRateEnabled ? RobotMap.THROTTLE_DUAL_RATE : 1);
 		        steeringValue  = (steeringValue * RobotMap.STEERING_LIMIT) / (dualRateEnabled ? RobotMap.STEERING_DUAL_RATE : 1);
@@ -481,6 +481,7 @@ public class RobotDriveBase
 				SmartDashboard.putNumber("ACCEL (X)", robotAccelerometer.getX());
 				SmartDashboard.putBoolean("ACCEL Deadband", (Math.abs(accelerometerXAxis) < (compressor.enabled() ? RobotMap.ACCELEROMETER_DEADBAND_X_COMPRESSOR : RobotMap.ACCELEROMETER_DEADBAND_X)));
 				SmartDashboard.putBoolean("Strafing On", (Math.abs(strafingValue) > 0) ? true : false);
+				
     		}
     		// If autoAlign is true, meaning the button is being pressed
     		else
@@ -685,11 +686,15 @@ public class RobotDriveBase
 			        		break;
 			    	}
 			    }
-		        else
+		        else 
 		        {
 		        	RobotLogger.getInstance().sendToConsole("(AUTO-ALIGN) NO TOTE IN RANGE!");
 		        }
 			}
+    		SmartDashboard.putNumber("Left Proximity Sensor Voltage:",proximitySensorLeft.GetVoltage());
+    		SmartDashboard.putNumber("Left Proximity Sensor Distance:",proximitySensorLeft.getDistance());
+    		SmartDashboard.putNumber("Right Proximity Sensor Voltage:",proximitySensorRight.GetVoltage());
+    		SmartDashboard.putNumber("Right Proximity Sensor Distance:",proximitySensorRight.getDistance());
     	}
     	catch (Exception ex)
     	{

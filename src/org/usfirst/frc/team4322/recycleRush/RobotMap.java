@@ -14,7 +14,7 @@ public class RobotMap
 	public static int TALON_RIGHT_DRIVE_CHANNEL = 1;
 	
 	// Initialize Slide Drive CAN Address
-//	public static int CANJAGUAR_SLIDE_2_DRIVE_ADDRESS = 10;
+	public static int CANJAGUAR_SLIDE_2_DRIVE_ADDRESS = 10;
 	public static int CANJAGUAR_SLIDE_1_DRIVE_ADDRESS = 11;
 	
 	// Initialize Pneumatic Control Module Solenoid Ports
