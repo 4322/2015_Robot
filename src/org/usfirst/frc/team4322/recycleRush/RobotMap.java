@@ -99,8 +99,8 @@ public class RobotMap
 	
 	// Tote Proximity Sensor Values
 	public static double PROXIMITY_SENSOR_ERROR_VALUE = 0.1; // 1 inch error
-	public static double EXPECTED_TOTE_DISTANCE = 6.25; // inches
-	public static double MAX_EXPECTED_TOTE_DISTANCE = 10; // inches
+	public static double EXPECTED_TOTE_DISTANCE = 7.25; // inches
+	public static double MAX_EXPECTED_TOTE_DISTANCE = 11; // inches
 	
 	// Tote Elevator PID Constants
 	public static double ELEVATOR_P_VALUE = 0.4;
