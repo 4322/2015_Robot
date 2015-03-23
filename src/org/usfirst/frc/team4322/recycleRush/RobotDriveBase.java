@@ -254,6 +254,9 @@ public class RobotDriveBase
     	{
 	    	driveEncoder.reset();
 	    	robotGyro.reset();
+    		strafeEncoder.reset();
+    		slideJaguar1.enableControl();
+    		slideJaguar2.enableControl();
     	}
     	catch (Exception ex)
     	{
