@@ -79,7 +79,7 @@ public class RobotLogger
 //			return logFolder + FMSFormat.format(Calendar.getInstance().getTime()) + "MatchLog.txt";
 //		}
 		if (m_ds.isDisabled())
-			return file = logFolder + Robot_Disabled_Log;
+			file = logFolder + Robot_Disabled_Log;
 		if (m_ds.isAutonomous())
 			file = logFolder + Robot_Auto_Log;
 		if (m_ds.isOperatorControl())
@@ -166,7 +166,7 @@ public class RobotLogger
 		}
 		catch (IOException e)
 		{
-			System.out.println("IOException caught while writing to file: " + e);
+			System.out.println("IOException caught while writing to file: " + getString(e));
 		}
 		finally
 		{

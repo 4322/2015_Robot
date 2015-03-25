@@ -21,11 +21,11 @@ public class CoPilotController {
 	
 	public boolean getElevatorSetPointUpButton()
 	{
-		return /*controller.getYButton() || */controlPanel.getRawButton(4);
+		return controller.getYButton() || controlPanel.getRawButton(4);
 	}
 	public boolean getElevatorSetPointDownButton()
 	{
-		return /*controller.getAButton() || */controlPanel.getRawButton(2);
+		return controller.getAButton() || controlPanel.getRawButton(2);
 	}
 	public double getElevatorDriveStick()
 	{
@@ -41,7 +41,7 @@ public class CoPilotController {
 	}
 	public boolean getElevatorTiltButton()
 	{
-		return /*controller.getBumper(Hand.kLeft) || */controlPanel.getRawButton(1);
+		return controller.getBumper(Hand.kLeft) || controlPanel.getRawButton(1);
 	}
 	public boolean getAutoEmergencyOff()
 	{
@@ -77,20 +77,9 @@ public class CoPilotController {
 	}
 	public boolean getStackButton()
 	{
-		return /*controller.getXButton() || */controlPanel.getRawButton(5);
+		return controller.getXButton() || controlPanel.getRawButton(5);
 	}
-	public boolean getAutoAlignButton()
-	{
-		return controller.getYButton();
-	}
-	public boolean getQuickAutoAlignButton()
-	{
-		return controller.getBButton();
-	}
-	public boolean getDriveAndAutoLiftButton()
-	{
-		return controller.getXButton();
-	}
+
 	
 	/**
 	 * Driver transfer, only happens when driver holds down right trigger button
@@ -136,5 +125,9 @@ public class CoPilotController {
 	public boolean getSlideDriveLiftButton()
 	{
 		return controller.getBumper(Hand.kLeft);
+	}
+	public boolean getReloadConfigButton()
+	{
+		return controller.getBumper(Hand.kRight);
 	}
 }

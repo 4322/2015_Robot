@@ -48,6 +48,7 @@ public class RobotConfigFileReader
      */
     public void runRobotFileReader()
     {
+    	RobotLogger.getInstance().sendToConsole("Started Config Update.");
     	// Maybe only read the files necessary for the competition mode..
         Properties p = new Properties();
         try
@@ -230,5 +231,6 @@ public class RobotConfigFileReader
     	{
 			RobotLogger.getInstance().writeErrorToFile("Exception caught in runRobotFileReader()", ex);
 		}
+    	RobotLogger.getInstance().sendToConsole("Finished Config Update.");
    }
 }

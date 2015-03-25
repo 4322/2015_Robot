@@ -64,22 +64,46 @@ public class PilotController {
 			return controller.getY(Hand.kLeft);
 		}
 	}
-	public boolean getSlideDriveLiftButton()
-	{
-		return controller.getBumper(Hand.kLeft);
-	}
+	
+	
 	public boolean getDualRateButton()
 	{
 		return controller.getBumper(Hand.kRight);
 	}
+	public boolean getSlideDriveLiftButton()
+	{
+		return controller.getBumper(Hand.kLeft);
+	}
+	
+	
+	public boolean getAutoAlignButton()
+	{
+		return controller.getYButton();
+	}
+	public boolean getQuickAutoAlignButton()
+	{
+		return controller.getBButton();
+	}
+	public boolean getDriveAndAutoLiftButton()
+	{
+		return controller.getXButton();
+	}
+	
+	
+
 	public void setUseAlternateDriveProfile(boolean useAlternateDriveProfile)
 	{
 		this.useAlternateDriveProfile = useAlternateDriveProfile;
 	}
+	
+	
+	
 	public boolean getBuddyDriverTransferButton()
 	{
 		isPilotDriving = false; //CoPilot is driving now
 		useAlternateDriveProfile = false; // Steven's preference
 		return controller.getTrigger(Hand.kRight);
 	}
+	
+	
 }

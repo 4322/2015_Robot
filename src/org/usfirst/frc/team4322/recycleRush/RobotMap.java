@@ -1,9 +1,21 @@
 package org.usfirst.frc.team4322.recycleRush;
-
+import java.io.IOException;
+import java.util.jar.JarFile;
 public class RobotMap
 {
-	public static String LAST_BUILD_TIME = "Robot4322_2015: 3/14/2015 11:20 AM";
-	
+	public static double ANGULAR_ALIGN_MAX_ERROR = 0.25;
+
+
+	public static String LAST_BUILD_TIME;
+	static{
+		try {
+			LAST_BUILD_TIME = new JarFile(RobotMap.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getManifest().getMainAttributes().getValue("Build-Time");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	 
 	// Initialize Joystick Ports
 	public static int PILOT_CONTROLLER_JOYSTICK_PORT = 0;
 	public static int COPILOT_CONTROLLER_JOYSTICK_PORT = 1;
@@ -30,14 +42,15 @@ public class RobotMap
 	// Drive Power Limits
 	public static double THROTTLE_LIMIT = 1;//0.8;
 	public static double STEERING_LIMIT = 1;//0.7;
-	public static double STRAFE_LIMIT = -1;//0.8;  //lowered to make strafe speed match fw/reverse speed;
+	public static double STRAFE_LIMIT = .67;//0.8;  //lowered to make strafe speed match fw/reverse speed;
 	public static double AUTONOMOUS_DRIVE_SPEED = 0.6;
 	public static double AUTONOMOUS_REVERSE_SPEED =- .25;
 	public static double STEERING_DEADBAND = 0.17; //0.04
 	public static double THROTTLE_DEADBAND = 0.17;
-	public static double CREEP_DRIVE_SPEED = -.30;
-	public static double AUTO_ALIGN_STRAFE_SPEED = 0.3;
-	public static double AUTO_ALIGN_DRIVE_FORWARD_SPEED = 0.3;
+	public static double CREEP_DRIVE_SPEED = -.30;     
+	public static double AUTO_ALIGN_STRAFE_SPEED = 0.4;
+	public static double AUTO_ALIGN_DRIVE_FORWARD_SPEED = -.625;
+	public static double AUTO_ALIGN_ANGULAR_P = .425;
 	public static double BACK_AWAY_FROM_TOTE_SPEED = -0.2;
 	
 	//dual rates (crawl mode) //motor power is divided by this value
@@ -70,8 +83,8 @@ public class RobotMap
 	
 	// P constants for autonomous driving
 	public static double AUTONOMOUS_P_CONTROL_VALUE_GYRO = 0.1;
-	public static double TELEOP_P_CONTROL_VALUE_GYRO = 0.10375;
-	public static double TELEOP_STRAFE_P_CONTROL_VALUE_GYRO = 0.15375;
+	public static double TELEOP_P_CONTROL_VALUE_GYRO = 0.07375;
+	public static double TELEOP_STRAFE_P_CONTROL_VALUE_GYRO = 0.09375;
 	
 	// Accelerometer Deadband values per axis
 	public static double ACCELEROMETER_DEADBAND_X = 0.05; //0.4;
@@ -98,9 +111,9 @@ public class RobotMap
 	public static double ELEVATOR_INITIAL_SEEK_SPEED = -0.5;
 	
 	// Tote Proximity Sensor Values
-	public static double PROXIMITY_SENSOR_ERROR_VALUE = 0.1; // 1 inch error
-	public static double EXPECTED_TOTE_DISTANCE = 7.25; // inches
-	public static double MAX_EXPECTED_TOTE_DISTANCE = 10; //inches
+	public static double PROXIMITY_SENSOR_ERROR_VALUE = 0.15; // 1 inch error
+	public static double EXPECTED_TOTE_DISTANCE = 7.95; // inches
+	public static double MAX_EXPECTED_TOTE_DISTANCE = 12; //inches
 	
 	// Tote Elevator PID Constants
 	public static double ELEVATOR_P_VALUE = 0.4;
@@ -116,5 +129,5 @@ public class RobotMap
 	public static double ELEVATOR_JOYSTICK_DEADBAND = 0.1;
 	public static double[] ELEVATOR_POSITIONS = {0,3228,6340,9478,11505};
 	public static double[] ELEVATOR_STACK_POSITIONS = {0, 623, 3087, 5832, 8282};
-	public static double[] ELEVATOR_CONTAINER_POSITIONS = {2694, 2070};
+	public static double[] ELEVATOR_CONTAINER_POSITIONS = {1057,2694};
 }

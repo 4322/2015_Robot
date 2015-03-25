@@ -19,7 +19,7 @@ public class RobotMain extends IterativeRobot
 	private boolean autoBegin = false;
 	private boolean teleBegin = false;
 	private boolean testBegin = false;
-
+	private boolean resetPressed = false;
 	
     /**
      * This function is run when the robot is first started up and should be
@@ -81,8 +81,17 @@ public class RobotMain extends IterativeRobot
 			{
 				RobotLogger.getInstance().sendToConsole("Robot Disabled Mode Begin.");
 				disabledBegin = true;
-	    		RobotLogger.getInstance().close();
-			}			
+//	    		RobotLogger.getInstance().close();
+			}
+ 			if(CoPilotController.getInstance().getReloadConfigButton())
+ 			{
+ 				if(!resetPressed)
+ 				{
+ 					RobotConfigFileReader.getInstance().runRobotFileReader();
+ 					resetPressed = true;
+ 				}
+ 			}
+ 			else resetPressed = false;
  			if(PilotController.getInstance().getResetGyroButton())
  			{ //Reinitialize!
  				RobotDriveBase.getInstance().robotGyro = new Gyro(RobotMap.DRIVE_GYRO_ANALOG_PORT);

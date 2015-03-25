@@ -7,10 +7,6 @@ public class RobotAutonModes {
 
 	// Instance for the Singleton Class
     private static RobotAutonModes _instance = null;
-    
-    // Instance for ProximitySensor
-    private ProximitySensor proximitySensorLeft = null;
-    private ProximitySensor proximitySensorRight = null;
 
     // Initialize auto modes
 	private SendableChooser autoChooser = null;
@@ -30,6 +26,7 @@ public class RobotAutonModes {
     public static final int DRIVE_BACKWARD_TO_AUTO = 20;
     public static final int GET_AWAY_FROM_TOTE = 30;
     public static final int AUTO_COMPLETE = 40;
+    int delay = 10;
 	
 	// This is the static getInstance() method that provides easy access to the RobotToteElevator singleton class.
     public static RobotAutonModes getInstance()
@@ -86,16 +83,6 @@ public class RobotAutonModes {
     public void initRobotAutonMode(int autoMode)
     {
 		RobotLogger.getInstance().sendToConsole("Initializing Auto Mode: " + autoMode);
-		
-        // Create proximity sensors if they do not exist
-        if(proximitySensorRight == null)
-        {
-        	proximitySensorRight = RobotDriveBase.getInstance().proximitySensorRight;
-        }
-        if(proximitySensorLeft == null)
-        {
-        	proximitySensorLeft = RobotDriveBase.getInstance().proximitySensorLeft;
-        }
     }
     public void init()
     {
@@ -153,18 +140,26 @@ public class RobotAutonModes {
     
     public void runPullToteIntoAuto(boolean platform)
     {
+    	if(Math.abs(RobotToteElevator.getInstance().getCLError()) < RobotMap.ELEVATOR_ALLOWED_CLOSED_LOOP_ERROR && RobotToteElevator.getInstance().targetIndex > 0) 
+    	{
+    		RobotToteElevator.getInstance().brake();
+    		RobotLogger.getInstance().sendToConsole("Braking!!!");
+    	}
+    	RobotLogger.getInstance().sendToConsole("Current Closed Loop Error is: %f.\n", RobotToteElevator.getInstance().getCLError());
     	// Pick up a tote or container
     	switch(autoPickUpMode)
     	{
     	case DRIVE_FORWARD_AND_PICK_UP_TOTE:
-    	    double leftDistance = proximitySensorLeft.getDistance();
-    	    double rightDistance = proximitySensorRight.getDistance();
+    	    double leftDistance = RobotDriveBase.getInstance().proximitySensorLeft.getDistance();
+    	    double rightDistance = RobotDriveBase.getInstance().proximitySensorRight.getDistance();
     	    // Pick up the tote!
     	    if(RobotDriveBase.getInstance().calculateToteDistanceError(leftDistance, rightDistance) <= RobotMap.PROXIMITY_SENSOR_ERROR_VALUE
     	    		&& rightDistance <= RobotMap.EXPECTED_TOTE_DISTANCE)
     	    {
-    	    	RobotToteElevator.getInstance().startAutoLift();
-    	    	autoPickUpMode = DRIVE_BACKWARD_TO_AUTO;
+    	    	if(delay == 10) RobotToteElevator.getInstance().startAutoLift();
+    	    	
+    	    	if(delay == 0) autoPickUpMode = DRIVE_BACKWARD_TO_AUTO;
+    	    	else delay--;
     	    }
     	    // We need to keep driving
     	    else
@@ -174,9 +169,13 @@ public class RobotAutonModes {
     		break;
     	case DRIVE_BACKWARD_TO_AUTO:
     		// Drive backward to auto zone
-    		RobotDriveBase.getInstance().driveToAutoZone(false, platform ? RobotMap.AUTO_DRIVE_BACKWARD_WITH_TOTE_CONTAINER_OVER_PLATFORM : RobotMap.AUTO_DRIVE_BACKWARD_WITH_TOTE_CONTAINER);
+    		RobotDriveBase.getInstance().driveToAutoZone(true, platform ? RobotMap.AUTO_DRIVE_BACKWARD_WITH_TOTE_CONTAINER_OVER_PLATFORM : RobotMap.AUTO_DRIVE_BACKWARD_WITH_TOTE_CONTAINER);
     		// Now we've gotta get away from the tote
-    		autoPickUpMode = GET_AWAY_FROM_TOTE;
+    		if(RobotDriveBase.getInstance().getAutoDriveDistanceTraveled() >= RobotMap.AUTO_DRIVE_FORWARD_DISTANCE)
+    		{
+    			RobotDriveBase.getInstance().driveEncoder.reset();
+    			autoPickUpMode = GET_AWAY_FROM_TOTE;
+    		}
     		break;
     	case GET_AWAY_FROM_TOTE:
     		// If the distance traveled is less than 10 inches, move away!

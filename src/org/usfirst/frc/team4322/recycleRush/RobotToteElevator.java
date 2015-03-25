@@ -30,7 +30,7 @@ public class RobotToteElevator {
     
     // Instances for PID Control
 	boolean setPointSelectButtonPressed = false;
-	boolean autoDriveMode = false;
+	public boolean autoDriveMode = false;
 	boolean switchPressed = false;
 	boolean controlModeV = true; 
 	boolean newSetpoint =false;
@@ -245,7 +245,7 @@ public class RobotToteElevator {
         		}
         		else if(CoPilotController.getInstance().getElevatorSetPointContainerButton())
         		{
-        			tiltMode = false;
+        			tiltMode = true;
         			containerMode = true;
         			newSetpoint = true;
         			//targetIndex = 4; //target index doesn't matter
@@ -407,12 +407,24 @@ public class RobotToteElevator {
     {
     	
     }
-    
     public void startAutoLift()
     {
-    	autoLift = true;
+    	targetIndex++;
+    	toteMotor.disableControl();
+		// Change to position mode
+		toteMotor.changeControlMode(ControlMode.Position);
+		toteMotor.setFeedbackDevice(FeedbackDevice.QuadEncoder);
+		toteMotor.enableControl();
+		controlModeV=false;
+		autoDriveMode=true;
+		toteMotor.set(RobotMap.ELEVATOR_POSITIONS[targetIndex]);
     }
     
+    public void brake()
+    {
+		brakeSolenoid.set(Value.kReverse);
+		if(toteMotor.isControlEnabled()) toteMotor.disableControl();
+    }
     public void autoDrive()
     {
     	//Ensure brake is open
@@ -422,7 +434,7 @@ public class RobotToteElevator {
     	{
     		if(setPointDelta != setPointChange.NONE) 
     		{
-    			targetIndex = (int) Math.round((setPointDelta == setPointChange.DOWN) ? Math.floor((toteMotor.get() - 150) / RobotMap.ELEVATOR_POSITION_DISTANCE) : Math.ceil((toteMotor.get() + 250) / RobotMap.ELEVATOR_POSITION_DISTANCE));
+    			targetIndex = (int) Math.round((setPointDelta == setPointChange.DOWN) ? Math.floor((toteMotor.get() - 200) / RobotMap.ELEVATOR_POSITION_DISTANCE) : Math.ceil((toteMotor.get() + 250) / RobotMap.ELEVATOR_POSITION_DISTANCE));
     		}
     		if(targetIndex >= RobotMap.ELEVATOR_POSITIONS.length) targetIndex = RobotMap.ELEVATOR_POSITIONS.length -1;
     		else if(targetIndex < 0) targetIndex = 1;
@@ -459,5 +471,9 @@ public class RobotToteElevator {
     	}
     	if(Math.abs(CoPilotController.getInstance().getElevatorDriveStick()) > RobotMap.ELEVATOR_ANALOG_STICK_DEADBAND) autoDriveMode = false;
     	
+    }
+    public double getCLError()
+    {
+    	return toteMotor.getClosedLoopError();
     }
 }
