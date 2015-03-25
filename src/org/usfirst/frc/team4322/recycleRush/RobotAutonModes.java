@@ -83,6 +83,7 @@ public class RobotAutonModes {
     public void initRobotAutonMode(int autoMode)
     {
 		RobotLogger.getInstance().sendToConsole("Initializing Auto Mode: " + autoMode);
+		autoPickUpMode = DRIVE_FORWARD_AND_PICK_UP_TOTE;
     }
     public void init()
     {
@@ -140,11 +141,6 @@ public class RobotAutonModes {
     
     public void runPullToteIntoAuto(boolean platform)
     {
-    	if(Math.abs(RobotToteElevator.getInstance().getCLError()) < RobotMap.ELEVATOR_ALLOWED_CLOSED_LOOP_ERROR && RobotToteElevator.getInstance().targetIndex > 0) 
-    	{
-    		RobotToteElevator.getInstance().brake();
-    		RobotLogger.getInstance().sendToConsole("Braking!!!");
-    	}
     	RobotLogger.getInstance().sendToConsole("Current Closed Loop Error is: %f.\n", RobotToteElevator.getInstance().getCLError());
     	// Pick up a tote or container
     	switch(autoPickUpMode)
@@ -194,6 +190,11 @@ public class RobotAutonModes {
     		break;
    		default:
    			break;
+    	}
+    	if(Math.abs(RobotToteElevator.getInstance().getCLError()) < RobotMap.ELEVATOR_ALLOWED_CLOSED_LOOP_ERROR && autoPickUpMode >= DRIVE_BACKWARD_TO_AUTO) 
+    	{
+    		RobotToteElevator.getInstance().brake();
+    		RobotLogger.getInstance().sendToConsole("Braking!!!");
     	}
     }
 }
