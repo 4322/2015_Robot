@@ -127,9 +127,9 @@ public class RobotToteElevator {
 	    	brakeSolenoid.set(Value.kReverse);
 	    	toteMotor.clearStickyFaults();
 	    	toteMotor.ClearIaccum();
-	    	toteSlave.clearStickyFaults();
-	    	autoDriveMode = false;
+	    	toteSlave.clearStickyFaults();	    	autoDriveMode = false;
 	    	currentPosition = 0;
+	    	toteMotor.enableControl();
 	    	setPointDelta = setPointChange.NONE;
 	    	tiltMode = true; // We want the elevator to be tilted at startup
 	    	RobotLogger.getInstance().sendToConsole("RobotToteElevator.initTeleop() successfully run.");
