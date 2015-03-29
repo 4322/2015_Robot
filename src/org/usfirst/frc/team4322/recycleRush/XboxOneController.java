@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj.GenericHID;
  * 
  * @author Gustave Michel
  */
-public class XboxController extends GenericHID
+public class XboxOneController extends GenericHID
 {
 
     private DriverStation m_ds;
@@ -161,7 +161,7 @@ public class XboxController extends GenericHID
      *
      * @param port USB Port on DriverStation
      */
-    public XboxController(int port)
+    public XboxOneController(int port)
     {
         super();
         m_port = port;

@@ -194,7 +194,7 @@ public class RobotLogger
 			update(false);
 		}
 		String msg = "\nException in " + method + ": " + getString(t);
-		System.err.println(msg);
+		if(!DriverStation.getInstance().isFMSAttached()) System.err.println(msg);
 		writeToFile(msg);
 	}
 	
@@ -211,7 +211,7 @@ public class RobotLogger
 		{
 			// Output logging messages to the console with a standard format
 			String datetimeFormat = "\n [" + CurrentReadable_DateTime() + "] - Robot4322: ";
-			System.out.format(datetimeFormat + thisMessage+"\n", args);
+			if(!DriverStation.getInstance().isFMSAttached()) System.out.format(datetimeFormat + thisMessage+"\n", args);
 			// Output logging messages to a .txt log file
 			writeToFile(datetimeFormat + thisMessage+"\n",args);
 		}

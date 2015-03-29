@@ -21,6 +21,7 @@ public class RobotToteElevator {
 	// Instance for the Singleton Class
     private static RobotToteElevator _instance = null;
     
+    private int brakeDelay = 4;
     // Instance for tote lifting motor.
     private CANTalon toteMotor = null;
     private CANTalon toteSlave = null;
@@ -39,7 +40,7 @@ public class RobotToteElevator {
 	int targetIndex = 0;
 	boolean newStack = false;
 	boolean stackDone = false;
-	
+
 	boolean containerMode = false; 
 	int containerModeTargetIndex = 0;
 	
@@ -76,7 +77,8 @@ public class RobotToteElevator {
 	    	{	
 	    		toteMotor = new CANTalon(RobotMap.TOTE_ELEVATOR_CONTROLLER_ADDRESS);
 	    		toteMotor.setFeedbackDevice(FeedbackDevice.QuadEncoder);
-	    		toteMotor.setPID(RobotMap.ELEVATOR_P_VALUE, RobotMap.ELEVATOR_I_VALUE,RobotMap.ELEVATOR_D_VALUE, RobotMap.ELEVATOR_F_VALUE,RobotMap.ELEVATOR_IZONE_VALUE, RobotMap.ELEVATOR_RAMPRATE_VALUE, 0);
+	    		toteMotor.setPID(RobotMap.ELEVATOR_PROFILE_1_P_VALUE, RobotMap.ELEVATOR_PROFILE_1_I_VALUE,RobotMap.ELEVATOR_PROFILE_1_D_VALUE, RobotMap.ELEVATOR_PROFILE_1_F_VALUE,RobotMap.ELEVATOR_PROFILE_1_IZONE_VALUE, RobotMap.ELEVATOR_RAMPRATE_VALUE, 0);
+	    		toteMotor.setPID(RobotMap.ELEVATOR_PROFILE_2_P_VALUE, RobotMap.ELEVATOR_PROFILE_2_I_VALUE,RobotMap.ELEVATOR_PROFILE_2_D_VALUE, RobotMap.ELEVATOR_PROFILE_2_F_VALUE,RobotMap.ELEVATOR_PROFILE_2_IZONE_VALUE, RobotMap.ELEVATOR_RAMPRATE_VALUE, 1);
 	    		toteMotor.ClearIaccum();
 	    		toteMotor.enableControl();
 	    		RobotLogger.getInstance().sendToConsole("Elevator TalonSRX Firmware Version: " + toteMotor.GetFirmwareVersion());
@@ -129,7 +131,7 @@ public class RobotToteElevator {
 	    	toteMotor.ClearIaccum();
 	    	toteSlave.clearStickyFaults();	    	autoDriveMode = false;
 	    	currentPosition = 0;
-	    	toteMotor.enableControl();
+	    	if(!toteMotor.isControlEnabled()) toteMotor.enableControl();
 	    	setPointDelta = setPointChange.NONE;
 	    	tiltMode = true; // We want the elevator to be tilted at startup
 	    	RobotLogger.getInstance().sendToConsole("RobotToteElevator.initTeleop() successfully run.");
@@ -245,7 +247,7 @@ public class RobotToteElevator {
         		}
         		else if(CoPilotController.getInstance().getElevatorSetPointContainerButton())
         		{
-        			tiltMode = true;
+        			tiltMode = false;
         			containerMode = true;
         			newSetpoint = true;
         			//targetIndex = 4; //target index doesn't matter
@@ -310,7 +312,7 @@ public class RobotToteElevator {
 	    	// PID Control
         	if(autoDriveMode)
         	{
-        		// Switch from voltage control (manual) to position control (automatic)
+        		// Switch from voltagecontrol (manual) to position control (automatic)
         		if(controlModeV)
         		{
         			RobotLogger.getInstance().sendToConsole("Changing to PID position mode");
@@ -330,6 +332,8 @@ public class RobotToteElevator {
             	{
             		if(newStack)
             		{
+            			tiltActuatorPiston.set(Value.kForward);
+            			tiltMode = false;
             			toteMotor.set(RobotMap.ELEVATOR_STACK_POSITIONS[targetIndex]);
             			RobotLogger.getInstance().sendToConsole("Set AutoStack!\n Target Position number is :%d, and target encoder position is %f.\n",targetIndex,RobotMap.ELEVATOR_STACK_POSITIONS[targetIndex]);
             			newStack = false;
@@ -380,15 +384,15 @@ public class RobotToteElevator {
         			brakeSolenoid.set(Value.kForward);
         		}
         	}
-        	SmartDashboard.putBoolean("Auto Mode:", autoDriveMode);
-        	SmartDashboard.putBoolean("Auto Lifting: ", autoLift);
+//        	SmartDashboard.putBoolean("Auto Mode:", autoDriveMode);
+//        	SmartDashboard.putBoolean("Auto Lifting: ", autoLift);
         	SmartDashboard.putNumber("Target Encoder Value:", toteMotor.getSetpoint());
         	SmartDashboard.putNumber("[Elevator] Current Encoder Value", toteMotor.getEncPosition());
         	SmartDashboard.putNumber("Error Value:", toteMotor.getClosedLoopError());
         	SmartDashboard.putBoolean("Tote Lift Forward Limit Closed:", toteMotor.isFwdLimitSwitchClosed());
         	SmartDashboard.putBoolean("Tote Lift Reverse Limit Closed:", toteMotor.isRevLimitSwitchClosed());
-        	SmartDashboard.putNumber("Elevator Joystick Value", CoPilotController.getInstance().getElevatorDriveStick());
-        	SmartDashboard.putNumber("Control Panel POV Value", CoPilotController.getInstance().getPOV());
+//        	SmartDashboard.putNumber("Elevator Joystick Value", CoPilotController.getInstance().getElevatorDriveStick());
+//        	SmartDashboard.putNumber("Control Panel POV Value", CoPilotController.getInstance().getPOV());
     	}
     	catch (Exception ex)
     	{
@@ -408,6 +412,10 @@ public class RobotToteElevator {
     	
     }
     public void startAutoLift()
+    {
+    	autoLift = true;
+    }
+    public void runAuto()
     {
     	targetIndex++;
     	toteMotor.disableControl();
@@ -447,9 +455,17 @@ public class RobotToteElevator {
     		{
     			RobotLogger.getInstance().sendToConsole("Set Point Up Button: Current Encoder Position is " + toteMotor.get() + " and moving to " + RobotMap.ELEVATOR_POSITIONS[targetIndex]);
     		}
+    		if(targetIndex >= 3)
+    		{
+    			toteMotor.setProfile(1);
+    		}
+    		else
+    		{
+    			toteMotor.setProfile(0);
+    		}
     		if(!containerMode)
     		toteMotor.set(RobotMap.ELEVATOR_POSITIONS[targetIndex]);
-    		else if (containerMode)
+    		else if (containerMode) 
     		{
     			RobotLogger.getInstance().sendToConsole("In container Mode. Going to Container Index %d",containerModeTargetIndex);
     			toteMotor.set(RobotMap.ELEVATOR_CONTAINER_POSITIONS[containerModeTargetIndex]);
@@ -465,9 +481,15 @@ public class RobotToteElevator {
     	// If we're within the error range on PID, close the disk brake
     	if(Math.abs(toteMotor.getClosedLoopError()) < RobotMap.ELEVATOR_ALLOWED_CLOSED_LOOP_ERROR)
     	{
-    		brakeSolenoid.set(Value.kReverse);
-    		autoDriveMode = false;
-    		RobotLogger.getInstance().sendToConsole("Exited AutoDriveMode.");
+    		if(brakeDelay == 0)
+    		{
+    			brakeSolenoid.set(Value.kReverse);
+        		autoDriveMode = false;
+        		RobotLogger.getInstance().sendToConsole("Exited AutoDriveMode.");
+        		brakeDelay = 4;
+    		}
+    		else brakeDelay--;
+
     	}
     	if(Math.abs(CoPilotController.getInstance().getElevatorDriveStick()) > RobotMap.ELEVATOR_ANALOG_STICK_DEADBAND) autoDriveMode = false;
     	

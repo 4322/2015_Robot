@@ -75,7 +75,8 @@ public class RobotDriveBase
 	private double rightEncoderCount = 0.0;
 	private double leftEncoderCount = 0.0;
 	private double targetCenterEncoderCount = 0.0;
-	private int dirtyAngularAlignmentCount = 0;
+	private int driveDelay = 50;
+	private int pickupDelay = 25;
 	
 	// Tote Alignment Modes
     private int toteAlignmentMode = INITIALIZE_AUTO_ALIGNMENT;
@@ -310,6 +311,8 @@ public class RobotDriveBase
 		        	{
 		        		// Already align, just drive forward and lift
 		        		toteAlignmentMode = DRIVE_FORWARD_TO_TOTE;
+		        		driveDelay = 0x32; //HEX FTW!!!!
+		        		pickupDelay = 0b11001; //BIN FTW!!!
 		        	}
 		        	else
 		        	{
@@ -477,9 +480,9 @@ public class RobotDriveBase
 		        SmartDashboard.putNumber("[Strafe] Distance", strafeEncoder.getDistance());
 		        SmartDashboard.putNumber("[Strafe] Distance (RAW)", strafeEncoder.getRaw());
 		        SmartDashboard.putNumber("Gyro Angle", dirtyGyro ? 999999 : gyroAngle);
-				SmartDashboard.putNumber("ACCEL (X)", robotAccelerometer.getX());
-				SmartDashboard.putBoolean("ACCEL Deadband", (Math.abs(accelerometerXAxis) < (compressor.enabled() ? RobotMap.ACCELEROMETER_DEADBAND_X_COMPRESSOR : RobotMap.ACCELEROMETER_DEADBAND_X)));
-				SmartDashboard.putBoolean("Strafing On", (Math.abs(strafingValue) > 0) ? true : false);
+//				SmartDashboard.putNumber("ACCEL (X)", robotAccelerometer.getX());
+//				SmartDashboard.putBoolean("ACCEL Deadband", (Math.abs(accelerometerXAxis) < (compressor.enabled() ? RobotMap.ACCELEROMETER_DEADBAND_X_COMPRESSOR : RobotMap.ACCELEROMETER_DEADBAND_X)));
+//				SmartDashboard.putBoolean("Strafing On", (Math.abs(strafingValue) > 0) ? true : false);
 				
     		}
     		// If autoAlign is true, meaning the button is being pressed
@@ -625,9 +628,8 @@ public class RobotDriveBase
 			        		break;
 			        	case ANGULAR_ALIGNMENT_WITH_TOTE:
 			        		// Try to get the left and right tote distances within 1/2 inch of each other
-			        		double angularAlignment = Math.abs(toteDistanceLeft - toteDistanceRight); 
+			        		double angularAlignment = (Math.PI/2) - Math.atan((toteDistanceLeft - toteDistanceRight)/RobotMap.INTER_SENSOR_DISTANCE); 
 //			        		angularAlignment = Math.min(angularAlignment, 5);
-//			        		double angularErrorInDegrees = 90 - Math.atan((toteDistanceLeft - toteDistanceRight) / 19.5);
 			        		if(angularAlignment < RobotMap.ANGULAR_ALIGN_MAX_ERROR)
 			        		{
 			        			// We have acheived angular alignment
@@ -672,23 +674,37 @@ public class RobotDriveBase
 			    			// Once the robot is within reach, switch to next mode
 				        	RobotLogger.getInstance().sendToConsole("(DRIVE_FORWARD_TO_TOTE) Left Tote Distance  = " + toteDistanceLeft);
 				        	RobotLogger.getInstance().sendToConsole("(DRIVE_FORWARD_TO_TOTE) Right Tote Distance = " + toteDistanceRight);
-				        	if(toteDistanceLeft <= RobotMap.EXPECTED_TOTE_DISTANCE && toteDistanceRight <= RobotMap.EXPECTED_TOTE_DISTANCE)
+				        	if(pickupDelay == 50 &&(toteDistanceLeft + toteDistanceRight) / 2 <= RobotMap.EXPECTED_TOTE_DISTANCE)
 							{
-					        	RobotLogger.getInstance().sendToConsole("(DRIVE_FORWARD_TO_TOTE) WE HAVE ACHIEVED LIFTING DISTANCE!");
-			    				// Stop driving
-					            robotDrive.arcadeDrive(0, 0);
-					        	// Begin tote lift
-				    			RobotToteElevator.getInstance().startAutoLift();
-						        RobotLogger.getInstance().sendToConsole("(DRIVE_FORWARD_TO_TOTE) AUTO LIFT STARTED!");
-								toteAlignmentMode = AUTO_ALIGN_COMPLETE;
+				        		pickupDelay -=1;
 							}
 			    			else
 			    			{
-			    				// Drive Forward (Negative Value)
+			    				if(pickupDelay == 0)
+				        		{
+				        			RobotLogger.getInstance().sendToConsole("(DRIVE_FORWARD_TO_TOTE) WE HAVE ACHIEVED LIFTING DISTANCE!");
+				        			// Stop driving
+//					        	    robotDrive.arcadeDrive(0, 0);
+				        			// Begin tote lift
+				        			RobotToteElevator.getInstance().startAutoLift();
+				        			RobotLogger.getInstance().sendToConsole("(DRIVE_FORWARD_TO_TOTE) AUTO LIFT STARTED!");
+				        			toteAlignmentMode = AUTO_ALIGN_COMPLETE;
+				        		}
+				        		else
+				        		{
+				        			pickupDelay--;
+				        		}
+				        			// Drive Forward (Negative Value)
 					            robotDrive.arcadeDrive(RobotMap.AUTO_ALIGN_DRIVE_FORWARD_SPEED, 0);
 			    			}
 							break;
 			        	case AUTO_ALIGN_COMPLETE:
+			        		if(driveDelay != 0)
+			        		{
+			        			robotDrive.arcadeDrive(RobotMap.AUTO_ALIGN_DRIVE_CREEP_SPEED, 0);	
+			        			driveDelay -= 1;
+			        		}
+			        		else robotDrive.arcadeDrive(0,0);
 			        		break;
 			        	default:
 			        		// We've pressed the button, but don't know what mode we're in?
@@ -851,7 +867,7 @@ public class RobotDriveBase
 	    {
 	    	RobotLogger.getInstance().sendToConsole("Driving " + (forward ? "forward " : "backward " + "towards auto zone."));
 	    	slideActuatorPiston.set(Value.kReverse);
-	    	robotDrive.drive(forward ? RobotMap.AUTONOMOUS_DRIVE_SPEED : -RobotMap.AUTONOMOUS_DRIVE_SPEED, forward ? -correction : correction);
+	    	robotDrive.drive(forward ? RobotMap.AUTONOMOUS_DRIVE_SPEED : -RobotMap.AUTONOMOUS_DRIVE_SPEED, forward ? correction : -correction);
 	    }
 	    // We are at the correct distance; stop and wait
 	    else if(distance <= correctDistance + 5 && distance >= correctDistance - 5)
@@ -917,7 +933,7 @@ public class RobotDriveBase
 	    else
 	    {
 	    	RobotLogger.getInstance().sendToConsole("Driving toward the tote");
-	    	robotDrive.drive(-RobotMap.AUTONOMOUS_DRIVE_SPEED, correction);
+	    	robotDrive.drive(-RobotMap.AUTONOMOUS_DRIVE_SPEED, -correction);
 	    }
     }
     
@@ -928,7 +944,7 @@ public class RobotDriveBase
 	    if(Math.abs(driveEncoder.getDistance()) < RobotMap.BACK_AWAY_FROM_TOTE_DISTANCE) 
 	    {
 	    	RobotLogger.getInstance().sendToConsole("Getting away from the tote.");
-	    	robotDrive.drive(forward ? RobotMap.BACK_AWAY_FROM_TOTE_SPEED : -RobotMap.BACK_AWAY_FROM_TOTE_SPEED, forward ? -correction:correction);
+	    	robotDrive.drive(forward ? RobotMap.BACK_AWAY_FROM_TOTE_SPEED : -RobotMap.BACK_AWAY_FROM_TOTE_SPEED, forward ? -correction : correction);
 	    }
 	    else
 	    {

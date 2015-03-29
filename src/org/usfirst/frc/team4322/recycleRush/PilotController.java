@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj.GenericHID.Hand;
 public class PilotController {
 
 	private static PilotController _instance = null;
-	private XboxController controller = null;
+	private XboxOneController controller = null;
 	public boolean isPilotDriving = true;
 	
 	/** The Alternate Drive Profile swaps driving sticks
@@ -21,7 +21,7 @@ public class PilotController {
 		if(_instance == null)
 		{
 			_instance = new PilotController();
-			_instance.controller = new XboxController(RobotMap.PILOT_CONTROLLER_JOYSTICK_PORT);
+			_instance.controller = new XboxOneController(RobotMap.PILOT_CONTROLLER_JOYSTICK_PORT);
 		}
 		return _instance;
 	}
@@ -88,8 +88,6 @@ public class PilotController {
 	{
 		return controller.getXButton();
 	}
-	
-	
 
 	public void setUseAlternateDriveProfile(boolean useAlternateDriveProfile)
 	{

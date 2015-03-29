@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj.GenericHID.Hand;
 public class CoPilotController {
 
 	private static CoPilotController _instance = null;
-	private XboxController controller = null;
+	private XboxOneController controller = null;
 	private RobotControlPanel controlPanel = null;
 	
 	static CoPilotController getInstance()
@@ -13,7 +13,7 @@ public class CoPilotController {
 		if(_instance == null)
 		{
 			_instance = new CoPilotController();
-			_instance.controller = new XboxController(RobotMap.COPILOT_CONTROLLER_JOYSTICK_PORT);
+			_instance.controller = new XboxOneController(RobotMap.COPILOT_CONTROLLER_JOYSTICK_PORT);
 			_instance.controlPanel = new RobotControlPanel(RobotMap.COPILOT_CONTROL_PANEL_PORT);
 		}
 		return _instance;

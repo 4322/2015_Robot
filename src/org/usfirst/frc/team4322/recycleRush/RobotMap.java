@@ -1,9 +1,13 @@
 package org.usfirst.frc.team4322.recycleRush;
 import java.io.IOException;
 import java.util.jar.JarFile;
+
+import edu.wpi.first.wpilibj.GenericHID;
 public class RobotMap
 {
-	public static double ANGULAR_ALIGN_MAX_ERROR = 0.25;
+	public static final double INTER_SENSOR_DISTANCE = 19.5;
+
+	public static double ANGULAR_ALIGN_MAX_ERROR = 0.130899694; //LOL RADIANS
 
 
 	public static String LAST_BUILD_TIME;
@@ -11,7 +15,6 @@ public class RobotMap
 		try {
 			LAST_BUILD_TIME = new JarFile(RobotMap.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getManifest().getMainAttributes().getValue("Build-Time");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -41,17 +44,17 @@ public class RobotMap
 		
 	// Drive Power Limits
 	public static double THROTTLE_LIMIT = 1;//0.8;
-	public static double STEERING_LIMIT = 1;//0.7;
+	public static double STEERING_LIMIT = -1;//0.7;
 	public static double STRAFE_LIMIT = .67;//0.8;  //lowered to make strafe speed match fw/reverse speed;
-	public static double AUTONOMOUS_DRIVE_SPEED = 0.6;
+	public static double AUTONOMOUS_DRIVE_SPEED = -0.6;
 	public static double AUTONOMOUS_REVERSE_SPEED =- .25;
 	public static double STEERING_DEADBAND = 0.17; //0.04
 	public static double THROTTLE_DEADBAND = 0.17;
 	public static double CREEP_DRIVE_SPEED = -.30;     
 	public static double AUTO_ALIGN_STRAFE_SPEED = 0.4;
-	public static double AUTO_ALIGN_DRIVE_FORWARD_SPEED = -.625;
-	public static double AUTO_ALIGN_ANGULAR_P = .425;
-	public static double BACK_AWAY_FROM_TOTE_SPEED = -0.2;
+	public static double AUTO_ALIGN_DRIVE_FORWARD_SPEED = -.425;
+	public static double AUTO_ALIGN_ANGULAR_P = -.30; //-.425
+	public static double BACK_AWAY_FROM_TOTE_SPEED = 0.2;
 	
 	//dual rates (crawl mode) //motor power is divided by this value
 	public static double THROTTLE_DUAL_RATE = 1.625;
@@ -66,8 +69,8 @@ public class RobotMap
 	public static int DRIVE_PROXIMITY_SENSOR_2_ANALOG_PORT = 3;
 	
 	// Drive Encoder Values (250 counts / revolution)
-	public static int DRIVE_ENCODER_A_GPIO_PORT = 0;
-	public static int DRIVE_ENCODER_B_GPIO_PORT = 1;
+	public static int DRIVE_ENCODER_A_GPIO_PORT = 4;
+	public static int DRIVE_ENCODER_B_GPIO_PORT = 5;
 	public static double ENCODER_DISTANCE_PER_TICK = 0.0523598776; //inches; diameter of wheel * pi / counts per revolution
 	public static double BACK_AWAY_FROM_TOTE_DISTANCE = 10;
 	public static double AUTO_DRIVE_FORWARD_DISTANCE = 60; //60-70
@@ -82,9 +85,9 @@ public class RobotMap
 	public static double STRAFE_ENCODER_TOTE_ALIGNMENT_DRIVE_DISTANCE = 0.5; //inches
 	
 	// P constants for autonomous driving
-	public static double AUTONOMOUS_P_CONTROL_VALUE_GYRO = 0.1;
-	public static double TELEOP_P_CONTROL_VALUE_GYRO = 0.07375;
-	public static double TELEOP_STRAFE_P_CONTROL_VALUE_GYRO = 0.09375;
+	public static double AUTONOMOUS_P_CONTROL_VALUE_GYRO = -0.1;
+	public static double TELEOP_P_CONTROL_VALUE_GYRO = -0.07375;
+	public static double TELEOP_STRAFE_P_CONTROL_VALUE_GYRO = -0.09375;
 	
 	// Accelerometer Deadband values per axis
 	public static double ACCELEROMETER_DEADBAND_X = 0.05; //0.4;
@@ -112,22 +115,30 @@ public class RobotMap
 	
 	// Tote Proximity Sensor Values
 	public static double PROXIMITY_SENSOR_ERROR_VALUE = 0.15; // 1 inch error
-	public static double EXPECTED_TOTE_DISTANCE = 7.95; // inches
+	public static double EXPECTED_TOTE_DISTANCE = 8; // inches
 	public static double MAX_EXPECTED_TOTE_DISTANCE = 12; //inches
 	
 	// Tote Elevator PID Constants
-	public static double ELEVATOR_P_VALUE = 0.4;
-	public static double ELEVATOR_I_VALUE = 0.00225;
-	public static double ELEVATOR_D_VALUE = 0.4;
-	public static double ELEVATOR_F_VALUE = 0;
-	public static int ELEVATOR_IZONE_VALUE = 850;
+	public static double ELEVATOR_PROFILE_1_P_VALUE = 0.425;
+	public static double ELEVATOR_PROFILE_1_I_VALUE = 0.0018;
+	public static double ELEVATOR_PROFILE_1_D_VALUE = 0.45;
+	public static double ELEVATOR_PROFILE_1_F_VALUE = 0;
+	public static int ELEVATOR_PROFILE_1_IZONE_VALUE = 500;
 	public static int ELEVATOR_RAMPRATE_VALUE = 0;
 	public static double ELEVATOR_ANALOG_STICK_DEADBAND = 0.1;
-	public static int ELEVATOR_POSITION_DISTANCE = 3125;
+	public static int ELEVATOR_POSITION_DISTANCE = 3011;
 	public static double ELEVATOR_ALLOWED_CLOSED_LOOP_ERROR = 25;
+	public static double ELEVATOR_PROFILE_2_P_VALUE = 0.575;
+	public static double ELEVATOR_PROFILE_2_I_VALUE = 0.002075;
+	public static double ELEVATOR_PROFILE_2_D_VALUE = 0.45;
+	public static double ELEVATOR_PROFILE_2_F_VALUE = 0;
+	public static int ELEVATOR_PROFILE_2_IZONE_VALUE = 750;
 	// Tote Elevator positions
 	public static double ELEVATOR_JOYSTICK_DEADBAND = 0.1;
-	public static double[] ELEVATOR_POSITIONS = {0,3228,6340,9478,11505};
-	public static double[] ELEVATOR_STACK_POSITIONS = {0, 623, 3087, 5832, 8282};
+	public static double[] ELEVATOR_POSITIONS = {0,2970,6030,8972,10423}; //1877 //3151 //2948 //2934 
+	public static double[] ELEVATOR_STACK_POSITIONS = {0,0, 2869, 5490, 7911}; //2758, 5049, 7508, 8282
 	public static double[] ELEVATOR_CONTAINER_POSITIONS = {1057,2694};
+
+	public static double AUTO_ALIGN_DRIVE_CREEP_SPEED = -.2;
+	
 }

@@ -20,6 +20,7 @@ public class RobotMain extends IterativeRobot
 	private boolean teleBegin = false;
 	private boolean testBegin = false;
 	private boolean resetPressed = false;
+	private boolean matchRecord = false;
 	
     /**
      * This function is run when the robot is first started up and should be
@@ -59,7 +60,6 @@ public class RobotMain extends IterativeRobot
     		RobotLogger.getInstance().sendToConsole("Robot Disabled.");
     		// Restart disabled
 			disabledBegin = false;
-	    	RobotAutonModes.getInstance().runAutoModeChoosers();
 	    }
 		catch (Exception ex)
 		{
@@ -81,8 +81,13 @@ public class RobotMain extends IterativeRobot
 			{
 				RobotLogger.getInstance().sendToConsole("Robot Disabled Mode Begin.");
 				disabledBegin = true;
-//	    		RobotLogger.getInstance().close();
+				RobotAutonModes.getInstance().runAutoModeChoosers();
 			}
+    		if(DriverStation.getInstance().isFMSAttached() && !matchRecord)
+    		{
+    			matchRecord = true;
+    			RobotLogger.getInstance().sendToConsole("Current Match: " + DriverStation.getInstance().getAlliance() + " Alliance " + DriverStation.getInstance().getLocation());
+    		}
  			if(CoPilotController.getInstance().getReloadConfigButton())
  			{
  				if(!resetPressed)
@@ -120,7 +125,7 @@ public class RobotMain extends IterativeRobot
 			RobotDriveBase.getInstance().initAutonomous();
 			autoBegin = false;
 			// We're not currently using the proximity sensors
-//	    	RobotAutonModes.getInstance().initRobotAutonMode(RobotAutonModes.getInstance().getAutoMode());
+	    	RobotAutonModes.getInstance().init();
 			RobotLogger.getInstance().sendToConsole("Robot Autonomous Mode Initialized.");
 		}
 		catch (Exception ex)
