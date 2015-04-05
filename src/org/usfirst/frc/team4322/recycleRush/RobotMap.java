@@ -127,6 +127,9 @@ public class RobotMap
 	public static int ELEVATOR_RAMPRATE_VALUE = 0;
 	public static double ELEVATOR_ANALOG_STICK_DEADBAND = 0.1;
 	public static int ELEVATOR_POSITION_DISTANCE = 3011;
+	public static int ELEVATOR_UP_DEADBAND = 200;
+	public static int ELEVATOR_DOWN_DEADBAND = 200;
+	public static int ELEVATOR_BRAKE_DELAY = 4;
 	public static double ELEVATOR_ALLOWED_CLOSED_LOOP_ERROR = 25;
 	public static double ELEVATOR_PROFILE_2_P_VALUE = 0.575;
 	public static double ELEVATOR_PROFILE_2_I_VALUE = 0.002075;

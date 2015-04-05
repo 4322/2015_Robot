@@ -33,8 +33,8 @@ public class RobotMain extends IterativeRobot
 	    {
 	    	// Open and update the RobotLogger in case log files are too large
 	    	RobotLogger.getInstance().update(false); //No zipping right now
-	    	// Get information
-	    	//RobotConfigFileReader.getInstance().runRobotFileReader();
+	    	// Read RobotConfig.ini
+	    	RobotConfigFileReader.getInstance().runRobotFileReader();
 	    	RobotDriveBase.getInstance().initRobotDrive();
 	    	RobotToteElevator.getInstance().initRobotToteElevator();
 //			RobotVision.getInstance().initRobotVision();
@@ -56,7 +56,7 @@ public class RobotMain extends IterativeRobot
 		{
     		RobotLogger.getInstance().close();
     		RobotLogger.getInstance().update(false);
-	//    	RobotConfigFileReader.getInstance().runRobotFileReader();
+    		
     		RobotLogger.getInstance().sendToConsole("Robot Disabled.");
     		// Restart disabled
 			disabledBegin = false;
@@ -166,7 +166,6 @@ public class RobotMain extends IterativeRobot
 		{
     		RobotLogger.getInstance().close();
 			RobotLogger.getInstance().update(false);
-//	    	RobotConfigFileReader.getInstance().runRobotFileReader();
 			RobotDriveBase.getInstance().initTeleop();
 			RobotToteElevator.getInstance().initTeleop();
 			teleBegin = false;

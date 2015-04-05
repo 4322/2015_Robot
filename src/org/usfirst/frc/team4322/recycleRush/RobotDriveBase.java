@@ -65,7 +65,7 @@ public class RobotDriveBase
     private BuiltInAccelerometer robotAccelerometer = null;
     private int accelerometerDeadbandCount = 10;
     
-    boolean strafeMode = true; // false; <-- Lets start in strafe mode, driver preference.
+    boolean strafeMode = true; // true; <-- Lets start in strafe mode, driver preference.
     boolean strafeStart = false;
     boolean strafePressed = false;
     
