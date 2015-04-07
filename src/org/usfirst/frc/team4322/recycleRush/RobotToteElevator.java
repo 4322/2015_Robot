@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class RobotToteElevator {
 
-	private enum setPointChange // initialize enum to keep track of which way the elevator should be going
+	private enum setPointChange //enum of elevator movements
 	{
 		ARB, UP, DOWN,CONTAINER,STACK //arb = going to arbitrary index, up = incrementing index, down = decrementing index, container = next container position, stack = stack position
 	};
@@ -81,6 +81,7 @@ public class RobotToteElevator {
 	    		toteMotor.enableControl();
 	    		RobotLogger.getInstance().sendToConsole("Elevator TalonSRX Firmware Version: " + toteMotor.GetFirmwareVersion());
 	    	}
+	    	// Create slave motor
 	    	if(toteSlave == null)
 	    	{
 	    		toteSlave = new CANTalon(RobotMap.TOTE_ELEVATOR_SLAVE_CONTROLLER_ADDRESS);
@@ -88,6 +89,7 @@ public class RobotToteElevator {
 	    		toteSlave.set(toteMotor.getDeviceID());
 	    		toteSlave.enableControl();	    		
 	    	}
+	    	// Create brake Soleniod
 	    	if(brakeSolenoid == null)
 	    	{
 	    		brakeSolenoid = new DoubleSolenoid(RobotMap.BRAKE_PISTON_FORWARD_PORT,RobotMap.BRAKE_PISTON_REVERSE_PORT);
