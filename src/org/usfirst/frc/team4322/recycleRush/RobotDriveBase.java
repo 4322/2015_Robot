@@ -1,5 +1,5 @@
 /*
- * This singleton class will provide access to the Robot Drivebase.
+2 * This singleton class will provide access to the Robot Drivebase.
  * FRC4322 will use the singleton pattern in the 2014 robot code to simplfy access to robot subsystems.
  * The robot will never have more than one instance of any subsystem, so the single pattern fits nicely.
  * http://en.wikipedia.org/wiki/Singleton_pattern
@@ -56,6 +56,10 @@ public class RobotDriveBase
     
     private double strafingValue = 0;
     private double lastStrafingValue = 0;
+    
+    // Gyro PI values
+    private double gyroAngle = 0;
+    private double steeringErrorSum = 0, compensatedSteeringValue = 0;
     
     // Autonomous Gyro
     public Gyro robotGyro = null;
@@ -247,7 +251,15 @@ public class RobotDriveBase
     		RobotLogger.getInstance().writeErrorToFile("Exception caught in shutdownRobotDrive()", ex);
     	}
     }
-
+    public void disabledPeriodic()
+    {
+    	proximitySensorLeft.feedSensorBuffer();
+    	proximitySensorRight.feedSensorBuffer();
+    	SmartDashboard.putNumber("Left Proximity Sensor Voltage:",proximitySensorLeft.GetVoltage());
+		SmartDashboard.putNumber("Left Proximity Sensor Distance:",proximitySensorLeft.getFilteredDistance());
+		SmartDashboard.putNumber("Right Proximity Sensor Voltage:",proximitySensorRight.GetVoltage());
+		SmartDashboard.putNumber("Right Proximity Sensor Distance:",proximitySensorRight.getFilteredDistance());
+    }
     // Initialization code for autonomous mode should go here.
     public void initAutonomous()
     {
@@ -291,36 +303,45 @@ public class RobotDriveBase
     {
     	try
     	{
+    		//feed both distance sensors
+        	proximitySensorLeft.feedSensorBuffer();
+        	proximitySensorRight.feedSensorBuffer();
+        	
+   
+    		
     		// You must press and hold the button to auto align with the tote
 	        if(PilotController.getInstance().getAutoAlignButton()
 	        || PilotController.getInstance().getQuickAutoAlignButton()
 	        || PilotController.getInstance().getDriveAndAutoLiftButton())
 	        {
-	        	if(!autoAlignButtonPressed) RobotLogger.getInstance().sendToConsole("*****AUTO ALIGNMENT BEGIN*****");
-//        		dirtyAngularAlignmentCount = 0;  // WE DECIDED TO NOT USE THIS
-	        	autoAlignButtonPressed = true;
-	        	// Choose to skip modes
-	        	if(toteAlignmentMode == AUTO_ALIGN_COMPLETE)
-	        	{
-		        	if(PilotController.getInstance().getAutoAlignButton())
+	    		if(!autoAlignButtonPressed)
+	    		{
+		        	if(!autoAlignButtonPressed) RobotLogger.getInstance().sendToConsole("*****AUTO ALIGNMENT BEGIN*****");
+	//        		dirtyAngularAlignmentCount = 0;  // WE DECIDED TO NOT USE THIS
+		        	autoAlignButtonPressed = true;
+		        	// Choose to skip modes
+		        	if(toteAlignmentMode == AUTO_ALIGN_COMPLETE)
 		        	{
-		        		// Normal
-		        		toteAlignmentMode = INITIALIZE_AUTO_ALIGNMENT;
+			        	if(PilotController.getInstance().getAutoAlignButton())
+			        	{
+			        		// Normal
+			        		toteAlignmentMode = INITIALIZE_AUTO_ALIGNMENT;
+			        	}
+			        	else if(PilotController.getInstance().getDriveAndAutoLiftButton())
+			        	{
+			        		// Already align, just drive forward and lift
+			        		toteAlignmentMode = DRIVE_FORWARD_TO_TOTE;
+			        		driveDelay = 0x32; //HEX FTW!!!!
+			        		pickupDelay = 0b11001; //BIN FTW!!!
+			        	}
+			        	else
+			        	{
+			        		// Skip to angular alignment
+	//		        		dirtyAngularAlignmentCount++;
+			        		toteAlignmentMode = ANGULAR_ALIGNMENT_WITH_TOTE;
+			        	}
 		        	}
-		        	else if(PilotController.getInstance().getDriveAndAutoLiftButton())
-		        	{
-		        		// Already align, just drive forward and lift
-		        		toteAlignmentMode = DRIVE_FORWARD_TO_TOTE;
-		        		driveDelay = 0x32; //HEX FTW!!!!
-		        		pickupDelay = 0b11001; //BIN FTW!!!
-		        	}
-		        	else
-		        	{
-		        		// Skip to angular alignment
-//		        		dirtyAngularAlignmentCount++;
-		        		toteAlignmentMode = ANGULAR_ALIGNMENT_WITH_TOTE;
-		        	}
-	        	}
+		        }
 	        }
 	        // If we are not holding down the button, the driver may drive
 	        else
@@ -336,8 +357,10 @@ public class RobotDriveBase
 	        }
 	        
 	        // Get Proximity Sensor Values for Left and Right
-    		double toteDistanceRight = proximitySensorRight.getDistance();
-	        double toteDistanceLeft = proximitySensorLeft.getDistance();
+    		double toteDistanceRight = proximitySensorRight.getFilteredDistance();
+	        double toteDistanceLeft = proximitySensorLeft.getFilteredDistance();
+    		double toteInstantDistanceRight = proximitySensorRight.getInstantDistance();
+	        double toteInstantDistanceLeft = proximitySensorLeft.getInstantDistance();
 	        
 	        // Driving
     		if(!autoAlignButtonPressed)
@@ -389,10 +412,10 @@ public class RobotDriveBase
 		    		strafePressed = false;
 		    	}
 		    	
-		    	double gyroAngle = 0;
+		    	// get gyro and set to gyroAngle
+		    	// this should be the only place we read the gyro
 		    	try
 		    	{
-			    	// Drive with Gyro Assist, get Angle
 			    	gyroAngle = robotGyro.getAngle();
 		    	}
 		    	catch (Exception ex)
@@ -400,6 +423,14 @@ public class RobotDriveBase
 		    		RobotLogger.getInstance().writeErrorToFile("Exception caught in runTeleop() robotGyro.getAngle()", ex);
 		    	}
 		    	
+	        	//Calculate steering compensation for current cycle
+		    	steeringErrorSum = steeringErrorSum + gyroAngle * .02 ;   
+		    	compensatedSteeringValue =  gyroAngle * RobotMap.TELEOP_P_CONTROL_VALUE_GYRO + steeringErrorSum * RobotMap.TELEOP_I_CONTROL_VALUE_GYRO; 	
+
+		        SmartDashboard.putNumber("[Gyro] Steering Error Sum", steeringErrorSum);
+		        SmartDashboard.putNumber("[Gryo] Compensated Steering Value", compensatedSteeringValue);
+		    	
+	        	//get X axis of accelerometer
 		    	double accelerometerXAxis = robotAccelerometer.getX();
 		    	
 		    	// Handle DRIVING mode
@@ -454,11 +485,13 @@ public class RobotDriveBase
 		           	if(dirtyGyro)
 		            {
 		            	gyroAngle = 0;
+		            	steeringErrorSum = 0;
 		            }
 	    	        try
 	            	{
+
 	            		// Drive STRAIGHT and use the GYRO to keep us straight
-		            	double compensatedSteeringValue = gyroAngle * RobotMap.TELEOP_P_CONTROL_VALUE_GYRO * -1;            	
+     	
 			            robotDrive.arcadeDrive(throttleValue, compensatedSteeringValue);
 		            }
 		            catch (Exception ex)
@@ -479,7 +512,7 @@ public class RobotDriveBase
 		        SmartDashboard.putNumber("[Drive] Encoder Raw Ticks", driveEncoder.getRaw());
 		        SmartDashboard.putNumber("[Strafe] Distance", strafeEncoder.getDistance());
 		        SmartDashboard.putNumber("[Strafe] Distance (RAW)", strafeEncoder.getRaw());
-		        SmartDashboard.putNumber("Gyro Angle", dirtyGyro ? 999999 : gyroAngle);
+		        SmartDashboard.putNumber("Gyro Angle", /*dirtyGyro ? 999999 : */gyroAngle);
 //				SmartDashboard.putNumber("ACCEL (X)", robotAccelerometer.getX());
 //				SmartDashboard.putBoolean("ACCEL Deadband", (Math.abs(accelerometerXAxis) < (compressor.enabled() ? RobotMap.ACCELEROMETER_DEADBAND_X_COMPRESSOR : RobotMap.ACCELEROMETER_DEADBAND_X)));
 //				SmartDashboard.putBoolean("Strafing On", (Math.abs(strafingValue) > 0) ? true : false);
@@ -506,7 +539,7 @@ public class RobotDriveBase
 			        		robotGyro.reset();
 			        		
 					        // If the left sensor detects tote, but the right one doesn't
-					        if(toteDistanceRight > RobotMap.MAX_EXPECTED_TOTE_DISTANCE)
+					        if(toteInstantDistanceRight > RobotMap.MAX_EXPECTED_TOTE_DISTANCE)
 					        {
 					        	RobotLogger.getInstance().sendToConsole("(INITIALIZE_AUTO_ALIGNMENT) Robot too far to the RIGHT of tote.");
 					        	// Move left
@@ -515,7 +548,7 @@ public class RobotDriveBase
 					        }
 					        
 					        // If the right sensor detects tote, but the left one doesn't
-					        else if (toteDistanceLeft > RobotMap.MAX_EXPECTED_TOTE_DISTANCE)
+					        else if (toteInstantDistanceLeft > RobotMap.MAX_EXPECTED_TOTE_DISTANCE)
 					        {
 					        	RobotLogger.getInstance().sendToConsole("(INITIALIZE_AUTO_ALIGNMENT) Robot too far to the LEFT of tote.");
 					        	// Move right
@@ -532,13 +565,11 @@ public class RobotDriveBase
 			        		
 			        	// BOTH SENSORS ARE IN RANGE
 			        	case LOSE_TOTE_EDGE:
-			        		if(toteDistanceLeft <= RobotMap.MAX_EXPECTED_TOTE_DISTANCE)
+			        		if(toteInstantDistanceLeft <= RobotMap.MAX_EXPECTED_TOTE_DISTANCE)
 			        		{
 			        			slideJaguar1.set(RobotMap.AUTO_ALIGN_STRAFE_SPEED*-1 );
 			        			slideJaguar2.set(RobotMap.AUTO_ALIGN_STRAFE_SPEED*-1 );
 			            		// Strafe STRAIGHT and use the GYRO to keep us straight
-						    	double gyroAngle = robotGyro.getAngle();
-				            	double compensatedSteeringValue = gyroAngle * RobotMap.TELEOP_P_CONTROL_VALUE_GYRO * -1;            	
 					            robotDrive.arcadeDrive(0, compensatedSteeringValue);
 			        		}
 			        		else
@@ -555,12 +586,12 @@ public class RobotDriveBase
 			        		// If we're moving right
 			        		if(currentAutoAlignSpeed > 0)
 			        		{
-			        			if(leftEncoderCount == 0 && toteDistanceLeft <= RobotMap.MAX_EXPECTED_TOTE_DISTANCE)
+			        			if(leftEncoderCount == 0 && toteInstantDistanceLeft <= RobotMap.MAX_EXPECTED_TOTE_DISTANCE)
 			        			{
 			        				leftEncoderCount = strafeEncoder.getRaw();
 						        	RobotLogger.getInstance().sendToConsole("(FIND_TOTE_EDGES) LEFT Tote Edge Found! Encoder count: " + leftEncoderCount);
 			        			}
-			        			else if (rightEncoderCount == 0 && toteDistanceRight >= RobotMap.MAX_EXPECTED_TOTE_DISTANCE)
+			        			else if (rightEncoderCount == 0 && toteInstantDistanceRight >= RobotMap.MAX_EXPECTED_TOTE_DISTANCE)
 			        			{
 			        				rightEncoderCount = strafeEncoder.getRaw();
 						        	RobotLogger.getInstance().sendToConsole("(FIND_TOTE_EDGES) RIGHT Tote Edge Found! Encoder count: " + rightEncoderCount);
@@ -569,12 +600,12 @@ public class RobotDriveBase
 			        		
 			        		else
 			        		{
-			        			if(leftEncoderCount == 0 && toteDistanceLeft >= RobotMap.MAX_EXPECTED_TOTE_DISTANCE)
+			        			if(leftEncoderCount == 0 && toteInstantDistanceLeft >= RobotMap.MAX_EXPECTED_TOTE_DISTANCE)
 			        			{
 			        				leftEncoderCount = strafeEncoder.getRaw();
 						        	RobotLogger.getInstance().sendToConsole("(FIND_TOTE_EDGES) LEFT Tote Edge Found! Encoder count: " + leftEncoderCount);
 			        			}
-			        			else if (rightEncoderCount == 0 && toteDistanceRight <= RobotMap.MAX_EXPECTED_TOTE_DISTANCE)
+			        			else if (rightEncoderCount == 0 && toteInstantDistanceRight <= RobotMap.MAX_EXPECTED_TOTE_DISTANCE)
 			        			{
 			        				rightEncoderCount = strafeEncoder.getRaw();
 						        	RobotLogger.getInstance().sendToConsole("(FIND_TOTE_EDGES) RIGHT Tote Edge Found! Encoder count: " + rightEncoderCount);
@@ -596,8 +627,6 @@ public class RobotDriveBase
 			        			slideJaguar1.set(currentAutoAlignSpeed);
 					        	slideJaguar2.set(currentAutoAlignSpeed);
 			            		// Strafe STRAIGHT and use the GYRO to keep us straight
-						    	double gyroAngle = robotGyro.getAngle();
-				            	double compensatedSteeringValue = gyroAngle * RobotMap.TELEOP_P_CONTROL_VALUE_GYRO * -1;            	
 					            robotDrive.arcadeDrive(0, compensatedSteeringValue);
 			        		}	
 			        		break;
@@ -612,7 +641,11 @@ public class RobotDriveBase
 					        	RobotLogger.getInstance().sendToConsole("(STRAFE_TO_TOTE_CENTER) End Encoder Count = " + strafeEncoder.getRaw());
 			        			slideJaguar1.set(0);
 				        		slideJaguar2.set(0);
-				        		toteAlignmentMode = ANGULAR_ALIGNMENT_WITH_TOTE;
+				        		// DO NOT PROCEED TO DRIVE FORWARD, INSTEAD STOP THE STATE ENGINE (04/18/15)					        	
+//				        		toteAlignmentMode = ANGULAR_ALIGNMENT_WITH_TOTE;
+					        	RobotLogger.getInstance().sendToConsole("(STRAFE_TO_TOTE_CENTER) Tote centering complete.");
+			        			toteAlignmentMode = AUTO_ALIGN_COMPLETE;
+			        			driveDelay = 0;
 			        		}
 				        	// We have not reached the position
 				        	else
@@ -622,17 +655,19 @@ public class RobotDriveBase
 				        		slideJaguar2.set(currentAutoAlignSpeed);
 			            		// Strafe STRAIGHT and use the GYRO to keep us straight
 						    	double gyroAngle = robotGyro.getAngle();
-				            	double compensatedSteeringValue = gyroAngle * RobotMap.TELEOP_P_CONTROL_VALUE_GYRO * -1;            	
+						    	double compensatedSteeringValue =  gyroAngle * RobotMap.TELEOP_P_CONTROL_VALUE_GYRO + gyroAngle*.02*RobotMap.TELEOP_I_CONTROL_VALUE_GYRO;
 					            robotDrive.arcadeDrive(0, compensatedSteeringValue);
 				        	}
 			        		break;
 			        	case ANGULAR_ALIGNMENT_WITH_TOTE:
 			        		// Try to get the left and right tote distances within 1/2 inch of each other
-			        		double angularAlignment = (Math.PI/2) - Math.atan((toteDistanceLeft - toteDistanceRight)/RobotMap.INTER_SENSOR_DISTANCE); 
+//			        		double angularAlignment = (Math.PI/2) - Math.atan((toteDistanceLeft - toteDistanceRight)/RobotMap.INTER_SENSOR_DISTANCE); // Lose the trig. (04/18/15) 
 //			        		angularAlignment = Math.min(angularAlignment, 5);
-			        		if(angularAlignment < RobotMap.ANGULAR_ALIGN_MAX_ERROR)
+//			        		if(angularAlignment < RobotMap.ANGULAR_ALIGN_MAX_ERROR)
+			        		double angularAlignment = Math.abs(toteDistanceLeft - toteDistanceRight); // Go back to the simple method (04/18/15)
+			        		if(angularAlignment < .5)
 			        		{
-			        			// We have acheived angular alignment
+			        			// We have achieved angular alignment
 					            robotDrive.arcadeDrive(0, 0);
 					        	RobotLogger.getInstance().sendToConsole("(ANGULAR_ALIGNMENT_WITH_TOTE) WE HAVE ACHIEVED ANGLUAR ALIGNMENT WITH THE TOTE!");
 					        	RobotLogger.getInstance().sendToConsole("(ANGULAR_ALIGNMENT_WITH_TOTE) Within Angular Alignment = " + angularAlignment);
@@ -645,8 +680,12 @@ public class RobotDriveBase
 //					        	}
 					        	//else
 					        //	{
-						        	RobotLogger.getInstance().sendToConsole("(ANGULAR_ALIGNMENT_WITH_TOTE) Driving Forward to Tote.");
-				        			toteAlignmentMode = DRIVE_FORWARD_TO_TOTE;
+// DO NOT PROCEED TO DRIVE FORWARD, INSTEAD STOP THE STATE ENGINE (04/18/15)					        	
+//						        	RobotLogger.getInstance().sendToConsole("(ANGULAR_ALIGNMENT_WITH_TOTE) Driving Forward to Tote.");
+//				        			toteAlignmentMode = DRIVE_FORWARD_TO_TOTE;
+						        	RobotLogger.getInstance().sendToConsole("(ANGULAR_ALIGNMENT_WITH_TOTE) Angular alignment complete.");
+				        			toteAlignmentMode = AUTO_ALIGN_COMPLETE;
+				        			driveDelay = 0;
 //					        	}	
 			        		}
 			        		else
@@ -660,13 +699,15 @@ public class RobotDriveBase
 			        				
 			        				// Turn left (Negative Steering Value)
 						        	RobotLogger.getInstance().sendToConsole("(ANGULAR_ALIGNMENT_WITH_TOTE) Turning Left...");
-						            robotDrive.arcadeDrive(0, -1 * Math.min(.5, RobotMap.AUTO_ALIGN_ANGULAR_P * angularAlignment));
+//						            robotDrive.arcadeDrive(0, -1 * Math.min(.5, RobotMap.AUTO_ALIGN_ANGULAR_P * angularAlignment));  // Lose the trig. (04/18/15)
+						            robotDrive.arcadeDrive(0, RobotMap.AUTO_ALIGN_ANGULAR_POWER * -1); // Go back to the simple method (04/18/15)
 			        			}
 			        			else
 			        			{
 			        				// Turn right (Positive Steering Value)
 						        	RobotLogger.getInstance().sendToConsole("(ANGULAR_ALIGNMENT_WITH_TOTE) Turning Right...");
-						            robotDrive.arcadeDrive(0, Math.min(.5, RobotMap.AUTO_ALIGN_ANGULAR_P * angularAlignment));
+//						            robotDrive.arcadeDrive(0, Math.min(.5, RobotMap.AUTO_ALIGN_ANGULAR_P * angularAlignment));  // Lose the trig. (04/18/15)
+						            robotDrive.arcadeDrive(0, RobotMap.AUTO_ALIGN_ANGULAR_POWER); // Go back to the simple method (04/18/15)
 			        			}
 			        		}
 			        		break;
@@ -688,6 +729,7 @@ public class RobotDriveBase
 				        			// Begin tote lift
 				        			RobotToteElevator.getInstance().startAutoLift();
 				        			RobotLogger.getInstance().sendToConsole("(DRIVE_FORWARD_TO_TOTE) AUTO LIFT STARTED!");
+					        		driveDelay = 100; // CYCLE
 				        			toteAlignmentMode = AUTO_ALIGN_COMPLETE;
 				        		}
 				        		else
@@ -701,10 +743,14 @@ public class RobotDriveBase
 			        	case AUTO_ALIGN_COMPLETE:
 			        		if(driveDelay != 0)
 			        		{
-			        			robotDrive.arcadeDrive(RobotMap.AUTO_ALIGN_DRIVE_CREEP_SPEED, 0);	
+			        			robotDrive.arcadeDrive(RobotMap.AUTO_ALIGN_DRIVE_FORWARD_SPEED, 0);	
 			        			driveDelay -= 1;
 			        		}
-			        		else robotDrive.arcadeDrive(0,0);
+			        		else
+			        		{
+			        			RobotLogger.getInstance().sendToConsole("(AUTO_ALIGN_COMPLETE) AUTO ALIGN IS FINISHED.");
+			        			robotDrive.arcadeDrive(0,0);
+			        		}
 			        		break;
 			        	default:
 			        		// We've pressed the button, but don't know what mode we're in?
@@ -714,13 +760,13 @@ public class RobotDriveBase
 			    }
 		        else 
 		        {
-		        	RobotLogger.getInstance().sendToConsole("(AUTO-ALIGN) NO TOTE IN RANGE!");
+		        	RobotLogger.getInstance().sendToConsole("(AUTO-ALIGN) NO TOTE IN RANGE! (" + toteDistanceLeft + ", " + toteDistanceRight + ")");
 		        }
 			}
     		SmartDashboard.putNumber("Left Proximity Sensor Voltage:",proximitySensorLeft.GetVoltage());
-    		SmartDashboard.putNumber("Left Proximity Sensor Distance:",proximitySensorLeft.getDistance());
+    		SmartDashboard.putNumber("Left Proximity Sensor Distance:",proximitySensorLeft.getFilteredDistance());
     		SmartDashboard.putNumber("Right Proximity Sensor Voltage:",proximitySensorRight.GetVoltage());
-    		SmartDashboard.putNumber("Right Proximity Sensor Distance:",proximitySensorRight.getDistance());
+    		SmartDashboard.putNumber("Right Proximity Sensor Distance:",proximitySensorRight.getFilteredDistance());
     	}
     	catch (Exception ex)
     	{
@@ -847,7 +893,7 @@ public class RobotDriveBase
     public boolean expectedToteDistance(double a, double b, ProximitySensor right)
     {
     	// Make sure the robot is aligned and the distance is less than 8.5 inches
-    	return (calculateToteDistanceError(a, b) < RobotMap.PROXIMITY_SENSOR_ERROR_VALUE && right.getDistance() < RobotMap.EXPECTED_TOTE_DISTANCE);
+    	return (calculateToteDistanceError(a, b) < RobotMap.PROXIMITY_SENSOR_ERROR_VALUE && right.getFilteredDistance() < RobotMap.EXPECTED_TOTE_DISTANCE);
     }
     
     public boolean bothProximitySensorsWithinRange(ProximitySensor left, ProximitySensor right)
@@ -855,7 +901,7 @@ public class RobotDriveBase
     	// The sweet spot distance away from the tote
     	double expectedDistanceFromTote = RobotMap.EXPECTED_TOTE_DISTANCE;
     	// Both sensors need to be in range
-    	return (left.getDistance() <= expectedDistanceFromTote && right.getDistance() <= expectedDistanceFromTote);
+    	return (left.getFilteredDistance() <= expectedDistanceFromTote && right.getFilteredDistance() <= expectedDistanceFromTote);
     }
     
     public void driveToAutoZone(boolean forward, double correctDistance)
@@ -920,8 +966,8 @@ public class RobotDriveBase
     public void autoDriveToTote()
     {
     	double correction = -1 * robotGyro.getAngle() * RobotMap.AUTONOMOUS_P_CONTROL_VALUE_GYRO;
-	    double leftDistance = proximitySensorLeft.getDistance();
-	    double rightDistance = proximitySensorRight.getDistance();
+	    double leftDistance = proximitySensorLeft.getFilteredDistance();
+	    double rightDistance = proximitySensorRight.getFilteredDistance();
 	    // We are at the correct distance; stop
 	    if(calculateToteDistanceError(leftDistance, rightDistance) <= RobotMap.PROXIMITY_SENSOR_ERROR_VALUE
 	    		&& rightDistance <= RobotMap.EXPECTED_TOTE_DISTANCE)
