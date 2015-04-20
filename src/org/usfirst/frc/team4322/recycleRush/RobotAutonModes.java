@@ -150,8 +150,8 @@ public class RobotAutonModes {
     	switch(autoPickUpMode)
     	{
     	case DRIVE_FORWARD_AND_PICK_UP_TOTE:
-    	    double leftDistance = RobotDriveBase.getInstance().proximitySensorLeft.getDistance();
-    	    double rightDistance = RobotDriveBase.getInstance().proximitySensorRight.getDistance();
+    	    double leftDistance = RobotDriveBase.getInstance().proximitySensorLeft.getFilteredDistance();
+    	    double rightDistance = RobotDriveBase.getInstance().proximitySensorRight.getFilteredDistance();
     	    // Pick up the tote!
     	    if(RobotDriveBase.getInstance().calculateToteDistanceError(leftDistance, rightDistance) <= RobotMap.PROXIMITY_SENSOR_ERROR_VALUE
     	    		&& rightDistance <= RobotMap.EXPECTED_TOTE_DISTANCE)
@@ -226,8 +226,8 @@ public class RobotAutonModes {
     	switch(autoPickUpMode)
     	{
     	case DRIVE_FORWARD_AND_PICK_UP_TOTE:
-    	    double leftDistance = RobotDriveBase.getInstance().proximitySensorLeft.getDistance();
-    	    double rightDistance = RobotDriveBase.getInstance().proximitySensorRight.getDistance();
+    	    double leftDistance = RobotDriveBase.getInstance().proximitySensorLeft.getFilteredDistance();
+    	    double rightDistance = RobotDriveBase.getInstance().proximitySensorRight.getFilteredDistance();
     	    // Pick up the tote!
     	    if(RobotDriveBase.getInstance().calculateToteDistanceError(leftDistance, rightDistance) <= RobotMap.PROXIMITY_SENSOR_ERROR_VALUE
     	    		&& rightDistance <= RobotMap.EXPECTED_TOTE_DISTANCE)
