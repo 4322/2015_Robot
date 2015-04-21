@@ -667,8 +667,6 @@ public class RobotDriveBase
 				        		slideJaguar1.set(currentAutoAlignSpeed);
 				        		slideJaguar2.set(currentAutoAlignSpeed);
 			            		// Strafe STRAIGHT and use the GYRO to keep us straight
-						    	double gyroAngle = robotGyro.getAngle();
-						    	double compensatedSteeringValue =  gyroAngle * RobotMap.TELEOP_P_CONTROL_VALUE_GYRO + gyroAngle*.02*RobotMap.TELEOP_I_CONTROL_VALUE_GYRO;
 					            robotDrive.arcadeDrive(0, compensatedSteeringValue);
 				        	}
 			        		break;
