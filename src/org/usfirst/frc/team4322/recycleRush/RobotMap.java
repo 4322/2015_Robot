@@ -89,6 +89,7 @@ public class RobotMap
 	public static double AUTONOMOUS_P_CONTROL_VALUE_GYRO = -0.1;
 	public static double TELEOP_P_CONTROL_VALUE_GYRO = 0.07; //0.07375; //I've made this number positive and removed the -1s from the code to correct --seth
 	public static double TELEOP_I_CONTROL_VALUE_GYRO = 0.05;
+    public static double TELEOP_D_CONTROL_VALUE_GYRO = 0.00;
 	public static double TELEOP_STRAFE_P_CONTROL_VALUE_GYRO = -0.09375;
 	
 	// Accelerometer Deadband values per axis

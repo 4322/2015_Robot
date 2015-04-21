@@ -57,9 +57,15 @@ public class RobotDriveBase
     private double strafingValue = 0;
     private double lastStrafingValue = 0;
     
-    // Gyro PI values
+    // Gyro PID values
     private double gyroAngle = 0;
-    private double steeringErrorSum = 0, compensatedSteeringValue = 0;
+    private double steeringErrorSum = 0;
+    private double steeringErrorDifference = 0;
+
+    private double compensatedSteeringValue = 0;
+    
+    private double lastGyroAngle = 0;
+    
     
     // Autonomous Gyro
     public Gyro robotGyro = null;
@@ -424,8 +430,15 @@ public class RobotDriveBase
 		    	}
 		    	
 	        	//Calculate steering compensation for current cycle
-		    	steeringErrorSum = steeringErrorSum + gyroAngle * .02 ;   
-		    	compensatedSteeringValue =  gyroAngle * RobotMap.TELEOP_P_CONTROL_VALUE_GYRO + steeringErrorSum * RobotMap.TELEOP_I_CONTROL_VALUE_GYRO; 	
+		    	steeringErrorSum = steeringErrorSum + gyroAngle * .02 ;
+                steeringErrorDifference = gyroAngle - lastGyroAngle;
+                
+                
+		    	compensatedSteeringValue =  gyroAngle * RobotMap.TELEOP_P_CONTROL_VALUE_GYRO + steeringErrorSum * RobotMap.TELEOP_I_CONTROL_VALUE_GYRO - steeringErrorDifference*RobotMap.TELEOP_D_CONTROL_VALUE_GYRO;
+                
+                
+                //remember gyro angle for next cycle
+                lastGyroAngle = gyroAngle;
 
 		        SmartDashboard.putNumber("[Gyro] Steering Error Sum", steeringErrorSum);
 		        SmartDashboard.putNumber("[Gryo] Compensated Steering Value", compensatedSteeringValue);
