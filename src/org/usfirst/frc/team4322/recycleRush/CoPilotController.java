@@ -18,7 +18,10 @@ public class CoPilotController {
 		}
 		return _instance;
 	}
-	
+	public boolean getDriveAndAutoLiftButton()
+	{
+		return controller.getXButton();
+	}
 	public boolean getElevatorSetPointUpButton()
 	{
 		return controller.getYButton() || controlPanel.getRawButton(4);
@@ -77,7 +80,7 @@ public class CoPilotController {
 	}
 	public boolean getStackButton()
 	{
-		return controller.getXButton() || controlPanel.getRawButton(5);
+		return controller.getBButton() || controlPanel.getRawButton(5);
 	}
 
 	

@@ -21,7 +21,7 @@ public class RobotToteElevator {
 	// Instance for the Singleton Class
     private static RobotToteElevator _instance = null;
     
-    private int brakeDelay = RobotMap.ELEVATOR_BRAKE_DELAY;
+    private int brakeDelay = 4;
     // Instance for tote lifting motor.
     private CANTalon toteMotor = null;
     private CANTalon toteSlave = null;
@@ -129,7 +129,8 @@ public class RobotToteElevator {
 	    	brakeSolenoid.set(Value.kReverse);
 	    	toteMotor.clearStickyFaults();
 	    	toteMotor.ClearIaccum();
-	    	toteSlave.clearStickyFaults();	    	autoDriveMode = false;
+	    	toteSlave.clearStickyFaults();
+	    	autoDriveMode = false;
 	    	currentPosition = 0;
 	    	if(!toteMotor.isControlEnabled()) toteMotor.enableControl();
 	    	setPointDelta = setPointChange.ARB;
@@ -184,7 +185,7 @@ public class RobotToteElevator {
         			autoLift = false;
         		}
         		else if(CoPilotController.getInstance().getElevatorSetPoint0Button())
-        		{        			
+        		{
         			targetIndex = 0;
         			setupStates();
         			RobotLogger.getInstance().sendToConsole("Set Point 0 Button.");
@@ -288,7 +289,7 @@ public class RobotToteElevator {
         			// Change to position mode
             		toteMotor.changeControlMode(ControlMode.Position);
             		toteMotor.setFeedbackDevice(FeedbackDevice.QuadEncoder);
-            		toteMotor.enableControl();    
+            		toteMotor.enableControl();
             		controlModeV = false;
         		}
         		// Run PID control
@@ -305,7 +306,7 @@ public class RobotToteElevator {
         			// Change to voltage mode
         			toteMotor.changeControlMode(ControlMode.PercentVbus);
         			toteMotor.setFeedbackDevice(FeedbackDevice.QuadEncoder);
-        			toteMotor.enableControl(); 
+        			toteMotor.enableControl();
         			controlModeV = true;
         		}
         		toteMotor.set(-CoPilotController.getInstance().getElevatorDriveStick());
@@ -377,9 +378,8 @@ public class RobotToteElevator {
     	if(newSetpoint)
     	{
     		//if we are moving up or down
-    		if(setPointDelta == setPointChange.UP || setPointDelta == setPointChange.DOWN) 
+    		if(setPointDelta == setPointChange.UP || setPointDelta == setPointChange.DOWN)
     		{
-    			//calculate setpoint
     			targetIndex = (int) Math.round((setPointDelta == setPointChange.DOWN) ? Math.floor((toteMotor.get() - RobotMap.ELEVATOR_DOWN_DEADBAND) / RobotMap.ELEVATOR_POSITION_DISTANCE) : Math.ceil((toteMotor.get() + RobotMap.ELEVATOR_UP_DEADBAND) / RobotMap.ELEVATOR_POSITION_DISTANCE));
     		}
     		//ensure setpoint is in bounds
@@ -402,7 +402,7 @@ public class RobotToteElevator {
     			toteMotor.set(RobotMap.ELEVATOR_POSITIONS[targetIndex]);
     		}
     		//If we are moving the container
-    		else if (setPointDelta == setPointChange.CONTAINER) 
+    		else if (setPointDelta == setPointChange.CONTAINER)
     		{
     			RobotLogger.getInstance().sendToConsole("In container Mode. Going to Container Index %d",containerModeTargetIndex);
     			//go to the container position
@@ -431,8 +431,7 @@ public class RobotToteElevator {
         		//say we are done stacking
         		if(!stackDone) stackDone = true;
         		RobotLogger.getInstance().sendToConsole("Exited AutoDriveMode.");
-        		//reset brakeDelay
-        		brakeDelay = RobotMap.ELEVATOR_BRAKE_DELAY;
+        		brakeDelay = 4;
     		}
     		else brakeDelay--;
 

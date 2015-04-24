@@ -56,14 +56,19 @@ public class RobotAutonModes {
     		autoChooser.addDefault("Do Nothing (Auto 1)", new Integer(DO_NOTHING));
     		autoChooser.addObject("Drive Backward into Auto (from Landfill)", new Integer(DRIVE_BACKWARD_LANDFILL_TO_AUTO));
     		autoChooser.addObject("Drive Forward into Auto (from Loading)", new Integer(DRIVE_FORWARD_LOADING_TO_AUTO));
-    		autoChooser.addObject("Push Tote / Container", new Integer(PULL_TOTE_OR_CONTAINER));
-    		autoChooser.addObject("Push Tote / Container [over platform]", new Integer(PULL_TOTE_OR_CONTAINER_OVER_PLATFORM));
+    		autoChooser.addObject("Pick up and Pull Tote / Container", new Integer(PULL_TOTE_OR_CONTAINER));
+    		autoChooser.addObject("Pick up and Pull Tote / Container [over platform]", new Integer(PULL_TOTE_OR_CONTAINER_OVER_PLATFORM));
     		autoChooser.addObject("Push Tote AND Container", new Integer(PUSH_TOTE_AND_CONTAINER));
     		autoChooser.addObject("Stack Yellow Totes", new Integer(STACK_YELLOW_TOTES));
     		autoChooser.addObject("Pick Up Grey Totes", new Integer(PICK_UP_GREY_TOTES));
     		SmartDashboard.putData("Auto Mode Chooser", autoChooser);
+    		RobotLogger.getInstance().sendToConsole("Auto Chooser created.");
     	}
+    	else
+    	{
+    		RobotLogger.getInstance().sendToConsole("Auto Chooser already exists.");
     	}
+    }
     
     /**
      * Gets the current autonomous mode.
@@ -129,7 +134,7 @@ public class RobotAutonModes {
     		break;
     	case PUSH_TOTE_AND_CONTAINER:
     		// Start at the loading zone, and strafe while pushing a tote & container into the auto zone
-    		RobotDriveBase.getInstance().strafeToAutoZone(RobotMap.AUTO_DRIVE_BACKWARD_WITH_TOTE_CONTAINER);
+    		RobotDriveBase.getInstance().strafeToAutoZone(RobotMap.AUTO_DRIVE_STRAFE_DISTANCE);
     		break;
     	case STACK_YELLOW_TOTES: //?
     		// Drive to yellow totes and stack them
