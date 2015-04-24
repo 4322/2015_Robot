@@ -104,7 +104,7 @@ public class RobotMain extends IterativeRobot
  				RobotDriveBase.getInstance().robotGyro = new Gyro(RobotMap.DRIVE_GYRO_ANALOG_PORT);
  			}
 			RobotAutonModes.getInstance().poll();
-			RobotDriveBase.getInstance().disabledPeriodic();
+//			RobotDriveBase.getInstance().disabledPeriodic();
  		}
 		catch (Exception ex)
 		{

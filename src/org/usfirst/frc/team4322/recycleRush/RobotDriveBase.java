@@ -63,7 +63,7 @@ public class RobotDriveBase
     private double steeringErrorDifference = 0;
 
     private double compensatedSteeringValue = 0;
-    
+    private Timer integralTimer = null;
     private double lastGyroAngle = 0;
     
     
@@ -141,7 +141,11 @@ public class RobotDriveBase
 	        	slideJaguar1 = new CANJaguar(RobotMap.CANJAGUAR_SLIDE_1_DRIVE_ADDRESS);
 	        	RobotLogger.getInstance().sendToConsole("CANJaguar Firmware Version: " + slideJaguar1.getFirmwareVersion());
 	        }
-	        
+	        if(integralTimer == null)
+	        {
+	        	integralTimer = new Timer();
+	        	integralTimer.start();
+	        }
 	        // Create slideJaguar2 if it does not exist.
 	        if(slideJaguar2 == null)
 	        {
@@ -257,15 +261,17 @@ public class RobotDriveBase
     		RobotLogger.getInstance().writeErrorToFile("Exception caught in shutdownRobotDrive()", ex);
     	}
     }
+    
     public void disabledPeriodic()
     {
-    	proximitySensorLeft.feedSensorBuffer();
-    	proximitySensorRight.feedSensorBuffer();
-    	SmartDashboard.putNumber("Left Proximity Sensor Voltage:",proximitySensorLeft.GetVoltage());
-		SmartDashboard.putNumber("Left Proximity Sensor Distance:",proximitySensorLeft.getFilteredDistance());
-		SmartDashboard.putNumber("Right Proximity Sensor Voltage:",proximitySensorRight.GetVoltage());
-		SmartDashboard.putNumber("Right Proximity Sensor Distance:",proximitySensorRight.getFilteredDistance());
+//    	proximitySensorLeft.feedSensorBuffer();
+//    	proximitySensorRight.feedSensorBuffer();
+//    	SmartDashboard.putNumber("Left Proximity Sensor Voltage:",proximitySensorLeft.GetVoltage());
+//		SmartDashboard.putNumber("Left Proximity Sensor Distance:",proximitySensorLeft.getFilteredDistance());
+//		SmartDashboard.putNumber("Right Proximity Sensor Voltage:",proximitySensorRight.GetVoltage());
+//		SmartDashboard.putNumber("Right Proximity Sensor Distance:",proximitySensorRight.getFilteredDistance());
     }
+    
     // Initialization code for autonomous mode should go here.
     public void initAutonomous()
     {
@@ -318,7 +324,8 @@ public class RobotDriveBase
     		// You must press and hold the button to auto align with the tote
 	        if(PilotController.getInstance().getAutoAlignButton()
 	        || PilotController.getInstance().getQuickAutoAlignButton()
-	        || PilotController.getInstance().getDriveAndAutoLiftButton())
+	        || PilotController.getInstance().getDriveAndAutoLiftButton()
+	        || CoPilotController.getInstance().getDriveAndAutoLiftButton())
 	        {
 	    		if(!autoAlignButtonPressed)
 	    		{
@@ -333,7 +340,7 @@ public class RobotDriveBase
 			        		// Normal
 			        		toteAlignmentMode = INITIALIZE_AUTO_ALIGNMENT;
 			        	}
-			        	else if(PilotController.getInstance().getDriveAndAutoLiftButton())
+			        	else if(PilotController.getInstance().getDriveAndAutoLiftButton() || CoPilotController.getInstance().getDriveAndAutoLiftButton())
 			        	{
 			        		// Already align, just drive forward and lift
 			        		toteAlignmentMode = DRIVE_FORWARD_TO_TOTE;
@@ -430,9 +437,10 @@ public class RobotDriveBase
 		    	}
 		    	
 	        	//Calculate steering compensation for current cycle
-		    	steeringErrorSum = steeringErrorSum + gyroAngle * .02 ;
+		    	double integralTime =  integralTimer.get() / 1000;
+		    	steeringErrorSum =+ gyroAngle * integralTime ;
                 steeringErrorDifference = gyroAngle - lastGyroAngle;
-                
+                integralTimer.reset();
                 
 		    	compensatedSteeringValue =  gyroAngle * RobotMap.TELEOP_P_CONTROL_VALUE_GYRO + steeringErrorSum * RobotMap.TELEOP_I_CONTROL_VALUE_GYRO - steeringErrorDifference*RobotMap.TELEOP_D_CONTROL_VALUE_GYRO;
                 
@@ -441,6 +449,7 @@ public class RobotDriveBase
                 lastGyroAngle = gyroAngle;
 
 		        SmartDashboard.putNumber("[Gyro] Steering Error Sum", steeringErrorSum);
+		        SmartDashboard.putNumber("[Gyro] Steering Error Difference", steeringErrorDifference);
 		        SmartDashboard.putNumber("[Gryo] Compensated Steering Value", compensatedSteeringValue);
 		    	
 	        	//get X axis of accelerometer
@@ -486,6 +495,7 @@ public class RobotDriveBase
 		           			{
 		    	           		// Reset the Gyro ONLY ONCE per dirty
 		    	               	robotGyro.reset();
+		    	               	integralTimer.reset();
 		    	               	dirtyGyro = false;
 		           			}
 		           			else
@@ -499,6 +509,7 @@ public class RobotDriveBase
 		            {
 		            	gyroAngle = 0;
 		            	steeringErrorSum = 0;
+		            	integralTimer.reset();
 		            }
 	    	        try
 	            	{

@@ -442,7 +442,7 @@ public class RobotToteElevator {
     	{
     		if(setPointDelta != setPointChange.NONE) 
     		{
-    			targetIndex = (int) Math.round((setPointDelta == setPointChange.DOWN) ? Math.floor((toteMotor.get() - 200) / RobotMap.ELEVATOR_POSITION_DISTANCE) : Math.ceil((toteMotor.get() + 250) / RobotMap.ELEVATOR_POSITION_DISTANCE));
+    			targetIndex = (int) Math.round((setPointDelta == setPointChange.DOWN) ? Math.floor((toteMotor.get() - RobotMap.ELEVATOR_DOWN_DEADBAND) / RobotMap.ELEVATOR_POSITION_DISTANCE) : Math.ceil((toteMotor.get() + RobotMap.ELEVATOR_UP_DEADBAND) / RobotMap.ELEVATOR_POSITION_DISTANCE));
     		}
     		if(targetIndex >= RobotMap.ELEVATOR_POSITIONS.length) targetIndex = RobotMap.ELEVATOR_POSITIONS.length -1;
     		else if(targetIndex < 0) targetIndex = 1;

@@ -52,7 +52,7 @@ public class RobotMap
 	public static double THROTTLE_DEADBAND = 0.17;
 	public static double CREEP_DRIVE_SPEED = -.30;     
 	public static double AUTO_ALIGN_STRAFE_SPEED = 0.4;
-	public static double AUTO_ALIGN_DRIVE_FORWARD_SPEED = -.525;
+	public static double AUTO_ALIGN_DRIVE_FORWARD_SPEED = -.625;
 	public static double AUTO_ALIGN_ANGULAR_POWER = -.5;
 	public static double AUTO_ALIGN_ANGULAR_P = -.30; //-.425
 	public static double BACK_AWAY_FROM_TOTE_SPEED = 0.2;
@@ -88,8 +88,8 @@ public class RobotMap
 	// P constants for autonomous driving
 	public static double AUTONOMOUS_P_CONTROL_VALUE_GYRO = -0.1;
 	public static double TELEOP_P_CONTROL_VALUE_GYRO = 0.07; //0.07375; //I've made this number positive and removed the -1s from the code to correct --seth
-	public static double TELEOP_I_CONTROL_VALUE_GYRO = 0.05;
-    public static double TELEOP_D_CONTROL_VALUE_GYRO = 0.00;
+	public static double TELEOP_I_CONTROL_VALUE_GYRO = 0.00; //.05
+    public static double TELEOP_D_CONTROL_VALUE_GYRO = 0.00; //.01
 	public static double TELEOP_STRAFE_P_CONTROL_VALUE_GYRO = -0.09375;
 	
 	// Accelerometer Deadband values per axis
@@ -136,10 +136,13 @@ public class RobotMap
 	public static double ELEVATOR_PROFILE_2_D_VALUE = 0.05;
 	public static double ELEVATOR_PROFILE_2_F_VALUE = 0;
 	public static int ELEVATOR_PROFILE_2_IZONE_VALUE = 300;
+	public static double ELEVATOR_DOWN_DEADBAND = 200;
+	public static double ELEVATOR_UP_DEADBAND = 250;
+	
 	// Tote Elevator positions
 	public static double ELEVATOR_JOYSTICK_DEADBAND = .05; //0.1;
-//	public static double[] ELEVATOR_POSITIONS = {0,2970,6030,8972,10423}; //1877 //3151 //2948 //2934 
-	public static double[] ELEVATOR_POSITIONS = {0,2961,5862,8907,10423}; // PRACITICE BOT (04/19/15)
+	public static double[] ELEVATOR_POSITIONS = {0,2905,5869,8850,10423}; //1877 //3151 //2948 //2934 
+//	public static double[] ELEVATOR_POSITIONS = {0,2961,5862,8907,10423}; // PRACITICE BOT (04/19/15)
 	public static double[] ELEVATOR_STACK_POSITIONS = {0,0, 2869, 5490, 7911}; //2758, 5049, 7508, 8282
 	public static double[] ELEVATOR_CONTAINER_POSITIONS = {1057,2694};
 

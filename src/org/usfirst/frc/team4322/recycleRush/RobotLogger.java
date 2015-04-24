@@ -74,10 +74,10 @@ public class RobotLogger
 	private String getProperLogFile()
 	{
 		String file = logFolder + LOG_FILE;
-//		if(m_ds.isFMSAttached())
-//		{
-//			return logFolder + FMSFormat.format(Calendar.getInstance().getTime()) + "MatchLog.txt";
-//		}
+		if(m_ds.isFMSAttached())
+		{
+			return logFolder + "FRC4322CompetitionMatch.txt";
+		}
 		if (m_ds.isDisabled())
 			file = logFolder + Robot_Disabled_Log;
 		if (m_ds.isAutonomous())
