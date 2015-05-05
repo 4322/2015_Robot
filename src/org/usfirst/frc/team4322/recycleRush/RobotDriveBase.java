@@ -1,6 +1,6 @@
 /*
 2 * This singleton class will provide access to the Robot Drivebase.
- * FRC4322 will use the singleton pattern in the 2014 robot code to simplfy access to robot subsystems.
+ * FRC4322 will use the singleton pattern in the 2015 robot code to simplfy access to robot subsystems.
  * The robot will never have more than one instance of any subsystem, so the single pattern fits nicely.
  * http://en.wikipedia.org/wiki/Singleton_pattern
  */
@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.RobotDrive.MotorType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
+	
 /**
  *
  * @author FRC4322
@@ -65,7 +65,7 @@ public class RobotDriveBase
     private double compensatedSteeringValue = 0;
     private Timer integralTimer = null;
     private double lastGyroAngle = 0;
-    
+    private double dynamicPValue = 0;
     
     // Autonomous Gyro
     public Gyro robotGyro = null;
@@ -405,27 +405,41 @@ public class RobotDriveBase
 		        rampStrafingValues(strafingValue, lastStrafingValue);
 		        
 		        // Scale Values
-		        boolean dualRateEnabled = (!PilotController.getInstance().isPilotDriving) ? true : PilotController.getInstance().getDualRateButton();
+		        boolean dualRateEnabled = !PilotController.getInstance().getDualRateButton();
 		        
 		        throttleValue = (throttleValue * RobotMap.THROTTLE_LIMIT)  / (dualRateEnabled ? RobotMap.THROTTLE_DUAL_RATE : 1);
 		        steeringValue  = (steeringValue * RobotMap.STEERING_LIMIT) / (dualRateEnabled ? RobotMap.STEERING_DUAL_RATE : 1);
 		        strafingValue = (strafingValue * RobotMap.STRAFE_LIMIT) / (dualRateEnabled ? RobotMap.STRAFE_DUAL_RATE : 1);
 		        
 		        // Toggle Strafe Mode
-		    	if(getSlideDriveLiftButton())
-		    	{
-		    		if(!strafePressed)
-		    		{
-		        		strafeMode = !strafeMode;
-		        		strafePressed = true;
-		    		}
-		    	}
-		    	else
-		    	{
-		    		strafePressed = false;
-		    	}
+//		    	if(getSlideDriveLiftButton())
+//		    	{
+//		    		if(!strafePressed)
+//		    		{
+//		        		strafeMode = !strafeMode;
+//		        		strafePressed = true;
+//		    		}
+//		    	}
+//		    	else
+//		    	{
+//		    		strafePressed = false;
+//		    	}
 		    	
-		    	// get gyro and set to gyroAngle
+		    	// Start strafing when not strafe mode
+		        if(!strafeMode)
+		        {
+		        	// strafeMode turns on when joystick is greater than deadband
+		        	strafeMode = Math.abs(PilotController.getInstance().getDriveBaseStrafingStick()) > RobotMap.STRAFE_MODE_DEADBAND;
+		        }
+		        // Turn off strafeMode only when the accelerometer is within deadband
+		        else
+		        {
+		        	if(Math.abs(robotAccelerometer.getX()) < (compressor.enabled() ? RobotMap.ACCELEROMETER_DEADBAND_X_COMPRESSOR : RobotMap.ACCELEROMETER_DEADBAND_X) && Math.abs(PilotController.getInstance().getDriveBaseStrafingStick()) < RobotMap.STRAFE_MODE_DEADBAND)
+		        	{
+		        		strafeMode = false;
+		        	}
+		        }
+		        // get gyro and set to gyroAngle	
 		    	// this should be the only place we read the gyro
 		    	try
 		    	{
@@ -438,20 +452,40 @@ public class RobotDriveBase
 		    	
 	        	//Calculate steering compensation for current cycle
 		    	double integralTime =  integralTimer.get() / 1000;
-		    	steeringErrorSum =+ gyroAngle * integralTime ;
+		    	// Accumulate error
+		    	steeringErrorSum =+ gyroAngle * integralTime; 
+		    	//calculate Derivative term
                 steeringErrorDifference = gyroAngle - lastGyroAngle;
+                //reset Timer
                 integralTimer.reset();
+                double PBoost = 0;
+                //if turning
+                if(Math.abs(PilotController.getInstance().getDriveBaseSteeringStick()) < RobotMap.STEERING_DEADBAND)
+                {
+                	//velocity boost
+                	PBoost = Math.max(1 , 1 + ( (Math.toRadians(Math.abs(robotGyro.getRate()) ) ) * .25) );
+                }
+                else
+                {
+                	//tote count boost
+                	PBoost =  1 + RobotToteElevator.getInstance().getAmountOfTotes() * ((RobotMap.DRIVE_GYRO_MAX_ALLOWED_RATE - 1)/ 4);
+                }
+                //Make sure boost doesnt exceed cap
+                if(PBoost > RobotMap.DRIVE_GYRO_MAX_ALLOWED_RATE)  PBoost = RobotMap.DRIVE_MAX_APPLIED_ANGULAR_SPEED;
+                //multiply static kP by boost
+                dynamicPValue = RobotMap.TELEOP_P_CONTROL_VALUE_GYRO * PBoost;
                 
-		    	compensatedSteeringValue =  gyroAngle * RobotMap.TELEOP_P_CONTROL_VALUE_GYRO + steeringErrorSum * RobotMap.TELEOP_I_CONTROL_VALUE_GYRO - steeringErrorDifference*RobotMap.TELEOP_D_CONTROL_VALUE_GYRO;
-                
+                //calculate pid output
+		    	compensatedSteeringValue =  gyroAngle * dynamicPValue  + steeringErrorSum * RobotMap.TELEOP_I_CONTROL_VALUE_GYRO - steeringErrorDifference*RobotMap.TELEOP_D_CONTROL_VALUE_GYRO;
                 
                 //remember gyro angle for next cycle
                 lastGyroAngle = gyroAngle;
 
 		        SmartDashboard.putNumber("[Gyro] Steering Error Sum", steeringErrorSum);
 		        SmartDashboard.putNumber("[Gyro] Steering Error Difference", steeringErrorDifference);
-		        SmartDashboard.putNumber("[Gryo] Compensated Steering Value", compensatedSteeringValue);
-		    	
+		        SmartDashboard.putNumber("[Gyro] PBoost",PBoost);
+		        SmartDashboard.putNumber("[Gyro] Compensated Steering Value", compensatedSteeringValue);
+                SmartDashboard.putNumber("[Gyro] Dynamic P Value",dynamicPValue);
 	        	//get X axis of accelerometer
 		    	double accelerometerXAxis = robotAccelerometer.getX();
 		    	
@@ -470,17 +504,25 @@ public class RobotDriveBase
 		        // Handle STRAFING mode
 		        else if(strafeMode)
 			    {
+		        	slideActuatorPiston.set(Value.kForward);
 			        // Reset the gyro and get a new heading when we first enter STRAFE mode
 			        if(!strafeStart)
 			        {
 			        	strafeStart = true;
 			        	robotGyro.reset();
 			        }
-		        	slideActuatorPiston.set(Value.kForward);
-		        	slideJaguar1.set(strafingValue * -1);
-		        	slideJaguar2.set(strafingValue * -1);
+			        if(Math.abs(PilotController.getInstance().getDriveBaseStrafingStick()) > RobotMap.STRAFE_MOTOR_DEADBAND)
+			        {
+			        	slideJaguar1.set(strafingValue * -1);
+			        	slideJaguar2.set(strafingValue * -1);
+			        }
+			        else
+			        {
+			        	slideJaguar1.set(0);
+			        	slideJaguar2.set(0);
+			        }
 			    }
-		        
+		       
 		        // Check to see if we are not steering and reset the gyro heading 
 		        if(Math.abs(PilotController.getInstance().getDriveBaseSteeringStick()) < RobotMap.STEERING_DEADBAND)
 		        {
@@ -489,7 +531,7 @@ public class RobotDriveBase
 	//	           			     && Math.abs(robotAccelerometer.getY()) < RobotMap.ACCELEROMETER_DEADBAND_Y)
 		           	if(dirtyGyro)
 		           	{
-		           		if(Math.abs(accelerometerXAxis) < (compressor.enabled() ? RobotMap.ACCELEROMETER_DEADBAND_X_COMPRESSOR : RobotMap.ACCELEROMETER_DEADBAND_X))
+		           		if(Math.abs(accelerometerXAxis) < (compressor.enabled() ? RobotMap.ACCELEROMETER_DEADBAND_X_COMPRESSOR : RobotMap.ACCELEROMETER_DEADBAND_X) || Math.abs(robotGyro.getRate()) < RobotMap.DRIVE_GYRO_MAX_ALLOWED_RATE)
 		           		{
 		           			if(accelerometerDeadbandCount <= 0)
 		           			{
@@ -537,8 +579,8 @@ public class RobotDriveBase
 		        SmartDashboard.putNumber("[Strafe] Distance", strafeEncoder.getDistance());
 		        SmartDashboard.putNumber("[Strafe] Distance (RAW)", strafeEncoder.getRaw());
 		        SmartDashboard.putNumber("Gyro Angle", /*dirtyGyro ? 999999 : */gyroAngle);
-//				SmartDashboard.putNumber("ACCEL (X)", robotAccelerometer.getX());
-//				SmartDashboard.putBoolean("ACCEL Deadband", (Math.abs(accelerometerXAxis) < (compressor.enabled() ? RobotMap.ACCELEROMETER_DEADBAND_X_COMPRESSOR : RobotMap.ACCELEROMETER_DEADBAND_X)));
+				SmartDashboard.putNumber("ACCEL (X)", robotAccelerometer.getX());
+				SmartDashboard.putBoolean("ACCEL Deadband", (Math.abs(accelerometerXAxis) < (compressor.enabled() ? RobotMap.ACCELEROMETER_DEADBAND_X_COMPRESSOR : RobotMap.ACCELEROMETER_DEADBAND_X)));
 //				SmartDashboard.putBoolean("Strafing On", (Math.abs(strafingValue) > 0) ? true : false);
 				
     		}
@@ -759,13 +801,13 @@ public class RobotDriveBase
 				        			pickupDelay--;
 				        		}
 				        			// Drive Forward (Negative Value)
-					            robotDrive.arcadeDrive(RobotMap.AUTO_ALIGN_DRIVE_FORWARD_SPEED, 0);
+					            robotDrive.arcadeDrive(RobotMap.AUTO_ALIGN_DRIVE_FORWARD_SPEED[RobotToteElevator.getInstance().getAmountOfTotes()], 0);
 			    			}
 							break;
 			        	case AUTO_ALIGN_COMPLETE:
 			        		if(driveDelay != 0)
 			        		{
-			        			robotDrive.arcadeDrive(RobotMap.AUTO_ALIGN_DRIVE_FORWARD_SPEED, 0);	
+			        			robotDrive.arcadeDrive(RobotMap.AUTO_ALIGN_DRIVE_FORWARD_SPEED[RobotToteElevator.getInstance().getAmountOfTotes()], 0);	
 			        			driveDelay -= 1;
 			        		}
 			        		else

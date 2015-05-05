@@ -105,7 +105,8 @@ public class RobotMain extends IterativeRobot
  			}
 			RobotAutonModes.getInstance().poll();
 //			RobotDriveBase.getInstance().disabledPeriodic();
- 		}
+			SmartDashboard.putNumber("Gyro Rate of Change", RobotDriveBase.getInstance().robotGyro.getRate());
+		}
 		catch (Exception ex)
 		{
 			RobotLogger.getInstance().writeErrorToFile("disabledPeriodic()", ex);
@@ -198,6 +199,7 @@ public class RobotMain extends IterativeRobot
 			RobotDriveBase.getInstance().runTeleop();
 			RobotToteElevator.getInstance().runTeleop();
 			//RobotVision.getInstance().runTeleop();
+			SmartDashboard.putNumber("Gyro Rate of Change", RobotDriveBase.getInstance().robotGyro.getRate());
 		}
 		catch (Exception ex)
 		{

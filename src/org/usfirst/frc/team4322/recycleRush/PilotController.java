@@ -16,7 +16,7 @@ public class PilotController {
 	// TODO: This value could be selected in a configuration file or using a SmartDashboard selector
 	public boolean useAlternateDriveProfile = true; // Seth's preference
     
-	static PilotController getInstance()
+	public static PilotController getInstance()
 	{
 		if(_instance == null)
 		{

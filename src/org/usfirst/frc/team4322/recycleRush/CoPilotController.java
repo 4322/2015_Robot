@@ -8,7 +8,7 @@ public class CoPilotController {
 	private XboxOneController controller = null;
 	private RobotControlPanel controlPanel = null;
 	
-	static CoPilotController getInstance()
+	public static CoPilotController getInstance()
 	{
 		if(_instance == null)
 		{
