@@ -352,9 +352,16 @@ public class RobotToteElevator {
     {
     	autoLift = true;
     }
-    public void runAuto()
+    public void runAuto(boolean container)
     {
-    	targetIndex++;
+    	if(!container)
+    	{
+        	targetIndex++;
+    	}
+    	else
+    	{
+    		targetIndex = 5;
+    	}
     	toteMotor.disableControl();
 		// Change to position mode
 		toteMotor.changeControlMode(ControlMode.Position);
@@ -439,6 +446,10 @@ public class RobotToteElevator {
     	//exit if controller moves
     	if(Math.abs(CoPilotController.getInstance().getElevatorDriveStick()) > RobotMap.ELEVATOR_ANALOG_STICK_DEADBAND) autoDriveMode = false;
     	
+    }
+    public int getAmountOfTotes()
+    {
+    	return targetIndex;
     }
     public double getCLError()
     {

@@ -52,10 +52,11 @@ public class RobotMap
 	public static double THROTTLE_DEADBAND = 0.17;
 	public static double CREEP_DRIVE_SPEED = -.30;     
 	public static double AUTO_ALIGN_STRAFE_SPEED = 0.4;
-	public static double AUTO_ALIGN_DRIVE_FORWARD_SPEED = -.625;
 	public static double AUTO_ALIGN_ANGULAR_POWER = -.5;
 	public static double AUTO_ALIGN_ANGULAR_P = -.30; //-.425
 	public static double BACK_AWAY_FROM_TOTE_SPEED = 0.2;
+	// Drive Speed Relative to Amt. of Totes CURRENTLY HOLDING (0, 1, 2, 3)
+	public static double[] AUTO_ALIGN_DRIVE_FORWARD_SPEED = {-.4, -.4, -.5, -.5, -.5}; //-.625
 	
 	//dual rates (crawl mode) //motor power is divided by this value
 	public static double THROTTLE_DUAL_RATE = 1.625;
@@ -75,7 +76,7 @@ public class RobotMap
 	public static double ENCODER_DISTANCE_PER_TICK = 0.0523598776; //inches; diameter of wheel * pi / counts per revolution
 	public static double BACK_AWAY_FROM_TOTE_DISTANCE = 10;
 	public static double AUTO_DRIVE_FORWARD_DISTANCE = 60; //60-70
-	public static double AUTO_DRIVE_STRAFE_DISTANCE = 200; //140
+	public static double AUTO_DRIVE_STRAFE_DISTANCE = 140; //200 too far //140   
 	public static double AUTO_DRIVE_BACKWARD_WITH_TOTE_CONTAINER = 115;
 	public static double AUTO_DRIVE_BACKWARD_WITH_TOTE_CONTAINER_OVER_PLATFORM = 80;
 	
@@ -87,19 +88,24 @@ public class RobotMap
 	
 	// P constants for autonomous driving
 	public static double AUTONOMOUS_P_CONTROL_VALUE_GYRO = -0.1;
-	public static double TELEOP_P_CONTROL_VALUE_GYRO = 0.07; //0.07375; //I've made this number positive and removed the -1s from the code to correct --seth
-	public static double TELEOP_I_CONTROL_VALUE_GYRO = 0.00; //.05
-    public static double TELEOP_D_CONTROL_VALUE_GYRO = 0.00; //.01
+	public static double TELEOP_P_CONTROL_VALUE_GYRO = 0.04; //0.07375; //I've made this number positive and removed the -1s from the code to correct --seth
+	public static double TELEOP_I_CONTROL_VALUE_GYRO = 0.05; //.05
+    public static double TELEOP_D_CONTROL_VALUE_GYRO = 0.01; //.01
 	public static double TELEOP_STRAFE_P_CONTROL_VALUE_GYRO = -0.09375;
-	
+	public static double DRIVE_GYRO_MAX_ALLOWED_RATE = 1;
+	public static double DRIVE_MAX_APPLIED_ANGULAR_SPEED = 1.5;
 	// Accelerometer Deadband values per axis
-	public static double ACCELEROMETER_DEADBAND_X = 0.05; //0.4;
+	public static double ACCELEROMETER_DEADBAND_X = 0.03; //0.4;
 	public static double ACCELEROMETER_DEADBAND_Y = 0.4; //0.15; not used
 	public static double ACCELEROMETER_DEADBAND_Z = 1; //pretty sensitive
 	public static double ACCELEROMETER_DEADBAND_X_COMPRESSOR = 0.1;
 	public static double ACCELEROMETER_DEADBAND_Y_COMPRESSOR = 0.8; //not used
 	public static double ACCELEROMETER_DEADBAND_Z_COMPRESSOR = 1; //not used
 	public static int ACCELEROMETER_DEADBAND_COUNTDOWN = 10;
+	
+	// Strafe Wheel Deadband
+	public static double STRAFE_MOTOR_DEADBAND = 0.4;
+	public static double STRAFE_MODE_DEADBAND = 0.17;
 	
 	// Initialize Elevator CAN Addresses
 	public static int TOTE_ELEVATOR_CONTROLLER_ADDRESS = 31;
