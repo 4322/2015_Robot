@@ -1,8 +1,10 @@
 package org.usfirst.frc.team4322.recycleRush;
+
 import java.io.IOException;
 import java.util.jar.JarFile;
 
 import edu.wpi.first.wpilibj.GenericHID;
+
 public class RobotMap
 {
 	public static final double INTER_SENSOR_DISTANCE = 19.5;
@@ -11,14 +13,18 @@ public class RobotMap
 
 
 	public static String LAST_BUILD_TIME;
-	static{
-		try {
+	static
+	{
+		try
+		{
 			LAST_BUILD_TIME = new JarFile(RobotMap.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getManifest().getMainAttributes().getValue("Build-Time");
-		} catch (IOException e) {
+		}
+		catch(IOException e)
+		{
 			e.printStackTrace();
 		}
 	}
-	 
+
 	// Initialize Joystick Ports
 	public static int PILOT_CONTROLLER_JOYSTICK_PORT = 0;
 	public static int COPILOT_CONTROLLER_JOYSTICK_PORT = 1;
@@ -41,16 +47,16 @@ public class RobotMap
 	public static double STEERING_RAMP = 1;//0.12; //.06
 	public static double STRAFE_RAMP = 1;//0.06; //03
 	public static double AUTO_ALIGN_STRAFE_RAMP = 0.5;
-		
+
 	// Drive Power Limits
 	public static double THROTTLE_LIMIT = 1;//0.8;
 	public static double STEERING_LIMIT = -1;//0.7;
 	public static double STRAFE_LIMIT = .67;//0.8;  //lowered to make strafe speed match fw/reverse speed;
 	public static double AUTONOMOUS_DRIVE_SPEED = -0.6;
-	public static double AUTONOMOUS_REVERSE_SPEED =- .25;
+	public static double AUTONOMOUS_REVERSE_SPEED = -.25;
 	public static double STEERING_DEADBAND = 0.17; //0.04
 	public static double THROTTLE_DEADBAND = 0.17;
-	public static double CREEP_DRIVE_SPEED = -.30;     
+	public static double CREEP_DRIVE_SPEED = -.30;
 	public static double AUTO_ALIGN_STRAFE_SPEED = 0.4;
 	public static double AUTO_ALIGN_ANGULAR_POWER = -.5;
 	public static double AUTO_ALIGN_ANGULAR_P = -.30; //-.425
@@ -90,17 +96,13 @@ public class RobotMap
 	public static double AUTONOMOUS_P_CONTROL_VALUE_GYRO = -0.1;
 	public static double TELEOP_P_CONTROL_VALUE_GYRO = 0.04; //0.07375; //I've made this number positive and removed the -1s from the code to correct --seth
 	public static double TELEOP_I_CONTROL_VALUE_GYRO = 0.05; //.05
-    public static double TELEOP_D_CONTROL_VALUE_GYRO = 0.01; //.01
+	public static double TELEOP_D_CONTROL_VALUE_GYRO = 0.01; //.01
 	public static double TELEOP_STRAFE_P_CONTROL_VALUE_GYRO = -0.09375;
 	public static double DRIVE_GYRO_MAX_ALLOWED_RATE = 1;
 	public static double DRIVE_MAX_APPLIED_ANGULAR_SPEED = 1.5;
 	// Accelerometer Deadband values per axis
 	public static double ACCELEROMETER_DEADBAND_X = 0.03; //0.4;
-	public static double ACCELEROMETER_DEADBAND_Y = 0.4; //0.15; not used
-	public static double ACCELEROMETER_DEADBAND_Z = 1; //pretty sensitive
 	public static double ACCELEROMETER_DEADBAND_X_COMPRESSOR = 0.1;
-	public static double ACCELEROMETER_DEADBAND_Y_COMPRESSOR = 0.8; //not used
-	public static double ACCELEROMETER_DEADBAND_Z_COMPRESSOR = 1; //not used
 	public static int ACCELEROMETER_DEADBAND_COUNTDOWN = 10;
 	
 	// Strafe Wheel Deadband
@@ -136,8 +138,6 @@ public class RobotMap
 	public static int ELEVATOR_RAMPRATE_VALUE = 0;
 	public static double ELEVATOR_ANALOG_STICK_DEADBAND = 0.1;
 	public static int ELEVATOR_POSITION_DISTANCE = 3011;
-	public static int ELEVATOR_UP_DEADBAND = 200;
-	public static int ELEVATOR_DOWN_DEADBAND = 200;
 	public static int ELEVATOR_BRAKE_DELAY = 4;
 	public static double ELEVATOR_ALLOWED_CLOSED_LOOP_ERROR = 25;
 	public static double ELEVATOR_PROFILE_2_P_VALUE = 2.5;
@@ -150,11 +150,9 @@ public class RobotMap
 	
 	// Tote Elevator positions
 	public static double ELEVATOR_JOYSTICK_DEADBAND = .05; //0.1;
-	public static double[] ELEVATOR_POSITIONS = {0,2905,5869,8850,10423}; //1877 //3151 //2948 //2934 
-//	public static double[] ELEVATOR_POSITIONS = {0,2961,5862,8907,10423}; // PRACITICE BOT (04/19/15)
-	public static double[] ELEVATOR_STACK_POSITIONS = {0,0, 2869, 5490, 7911}; //2758, 5049, 7508, 8282
-	public static double[] ELEVATOR_CONTAINER_POSITIONS = {1057,2694};
-
+	public static double[] ELEVATOR_POSITIONS = {0, 2905, 5869, 8850, 10423}; //1877 //3151 //2948 //2934
+	//	public static double[] ELEVATOR_POSITIONS = {0,2961,5862,8907,10423}; // PRACITICE BOT (04/19/15)
+	public static double[] ELEVATOR_STACK_POSITIONS = {0, 0, 2869, 5490, 7911}; //2758, 5049, 7508, 8282
+	public static double[] ELEVATOR_CONTAINER_POSITIONS = {1057, 2694};
 	public static double AUTO_ALIGN_DRIVE_CREEP_SPEED = -.2;
-	
 }
