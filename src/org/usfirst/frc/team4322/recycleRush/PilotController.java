@@ -2,20 +2,22 @@ package org.usfirst.frc.team4322.recycleRush;
 
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 
-public class PilotController {
+public class PilotController
+{
 
 	private static PilotController _instance = null;
 	private XboxOneController controller = null;
 	public boolean isPilotDriving = true;
 	
-	/** The Alternate Drive Profile swaps driving sticks
+	/**
+	 * The Alternate Drive Profile swaps driving sticks
 	 * Steering will be left stick X axis
 	 * Throttle will be right stick Y axis
 	 * Strafing will be right stick X axis
 	 */
 	// TODO: This value could be selected in a configuration file or using a SmartDashboard selector
 	public boolean useAlternateDriveProfile = true; // Seth's preference
-    
+
 	public static PilotController getInstance()
 	{
 		if(_instance == null)
@@ -93,7 +95,6 @@ public class PilotController {
 	{
 		this.useAlternateDriveProfile = useAlternateDriveProfile;
 	}
-	
 	
 	
 	public boolean getBuddyDriverTransferButton()

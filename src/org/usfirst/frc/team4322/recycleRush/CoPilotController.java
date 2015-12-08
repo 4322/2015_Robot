@@ -2,7 +2,8 @@ package org.usfirst.frc.team4322.recycleRush;
 
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 
-public class CoPilotController {
+public class CoPilotController
+{
 
 	private static CoPilotController _instance = null;
 	private XboxOneController controller = null;
@@ -86,7 +87,7 @@ public class CoPilotController {
 	
 	/**
 	 * Driver transfer, only happens when driver holds down right trigger button
-	 * 
+	 * <p/>
 	 * The current drive profile is (false):
 	 * -Steering is right stick X axis
 	 * -Strafing is left stick X axis

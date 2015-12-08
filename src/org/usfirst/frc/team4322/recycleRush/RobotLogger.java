@@ -10,19 +10,18 @@ import edu.wpi.first.wpilibj.*;
 
 /**
  * @NOTE: The following methods are used in this class:
- * 		getInstance() - gets the instance for the class (Singleton method)
- * 		update() - opens and updates the file system [FileWriter and BufferedWriter] ONLY when the system is initially closed, then sets closed to false
- * 		writeToFile(String) - writes message to log file ONLY when the system is open
- * 		writeErrorToFile(String, Throwable) - writes exception to log file
- * 		sendToConsole(String) - writes message to system output (Riolog) AND to the log file
- * 		addFileToZip(File, String) - sends a file to a zip folder
- * 		CurrentReadable_DateTime() - gets the current date and time
- * 		getString(Throwable) - gets a string out of a throwable
- * 		close() - closes the FileWriter and BufferedWriter
+ * getInstance() - gets the instance for the class (Singleton method)
+ * update() - opens and updates the file system [FileWriter and BufferedWriter] ONLY when the system is initially closed, then sets closed to false
+ * writeToFile(String) - writes message to log file ONLY when the system is open
+ * writeErrorToFile(String, Throwable) - writes exception to log file
+ * sendToConsole(String) - writes message to system output (Riolog) AND to the log file
+ * addFileToZip(File, String) - sends a file to a zip folder
+ * CurrentReadable_DateTime() - gets the current date and time
+ * getString(Throwable) - gets a string out of a throwable
+ * close() - closes the FileWriter and BufferedWriter
  */
 
 /**
- *
  * @author FRC4322
  */
 
@@ -40,9 +39,7 @@ public class RobotLogger
 			Robot_Auto_Log = "FRC4322AutoLog.txt",
 			Robot_Teleop_Log = "FRC4322TeleopLog.txt",
 			Robot_Test_Log = "FRC4322TestLog.txt";
-	private File oldLog = null;
-	private FileWriter fw = null;
-	private BufferedWriter bw = null;
+	private File log = null;
 	private PrintWriter pw = null;
 	private boolean closed = true;
 
@@ -52,25 +49,24 @@ public class RobotLogger
 
 	// Get Date Format
 	private static final SimpleDateFormat sdf_ = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
-//	private static final SimpleDateFormat FMSFormat = new SimpleDateFormat("MM/dd-hh:mm");
 
 	// Constants for file
 	private final long MAX_FILE_LENGTH = 10485760; //10MB, 1 MiB = 1024^2 or 2^20
 	// http://highscalability.com/blog/2012/9/11/how-big-is-a-petabyte-exabyte-zettabyte-or-a-yottabyte.html <-- must visit
 
-	 // This is the static getInstance() method that provides easy access to the RobotLogger singleton class.
+	// This is the static getInstance() method that provides easy access to the RobotLogger singleton class.
 	public static RobotLogger getInstance()
 	{
 		// Look to see if the instance has already been created...
-        if(_instance == null)
-        {
-            // If the instance does not yet exist, create it.
-            _instance = new RobotLogger();
-        }
-        // Return the singleton instance to the caller.
-        return _instance;
+		if(_instance == null)
+		{
+			// If the instance does not yet exist, create it.
+			_instance = new RobotLogger();
+		}
+		// Return the singleton instance to the caller.
+		return _instance;
 	}
-	
+
 	private String getProperLogFile()
 	{
 		String file = logFolder + LOG_FILE;
@@ -78,18 +74,18 @@ public class RobotLogger
 		{
 			return logFolder + "FRC4322CompetitionMatch.txt";
 		}
-		if (m_ds.isDisabled())
+		if(m_ds.isDisabled())
 			file = logFolder + Robot_Disabled_Log;
-		if (m_ds.isAutonomous())
+		if(m_ds.isAutonomous())
 			file = logFolder + Robot_Auto_Log;
-		if (m_ds.isOperatorControl())
+		if(m_ds.isOperatorControl())
 			file = logFolder + Robot_Teleop_Log;
-		if (m_ds.isTest())
+		if(m_ds.isTest())
 			file = logFolder + Robot_Test_Log;
 		// Default is initLog
 		return file;
 	}
-	
+
 	public void update(boolean zip)
 	{
 		if(closed)
@@ -97,36 +93,35 @@ public class RobotLogger
 			try
 			{
 				// Get the correct file
-				oldLog = new File(getProperLogFile());
-				
-				// Get the directory
-				if(!oldLog.getParentFile().exists())
+				log = new File(getProperLogFile());
+
+				// Make sure the log directory exists.
+				if(!log.getParentFile().exists())
 				{
-					oldLog.getParentFile().mkdirs();
+					log.getParentFile().mkdirs();
 				}
-				
+
 				// If the file exists & the length is too long, send it to ZIP
-				if(oldLog.exists())
+				if(log.exists())
 				{
-					if(oldLog.length() > MAX_FILE_LENGTH && zip)
+					if(log.length() > MAX_FILE_LENGTH && zip)
 					{
-						addFileToZip(oldLog, LOGS_ZIP_FILE);
-						// Create a new .txt file, and rename it
-						oldLog.createNewFile();
-						File newFile = new File(getProperLogFile().replace(".txt", "") + " [" + CurrentReadable_DateTime() + "]" + ".txt");
-						oldLog.renameTo(newFile);
+						File archivedLog = new File(log.getAbsolutePath().replace(".txt", "") + " [" + CurrentReadable_DateTime() + "]" + ".txt");
+						log.renameTo(archivedLog);
+						addFileToZip(log, LOGS_ZIP_FILE);
+						log = new File(getProperLogFile());
 					}
 				}
 				// If log file does not exist, create it
 				else
 				{
-					//oldLog.createNewFile();
-					if(!oldLog.createNewFile()) 
-						System.out.println("****************ERROR IN CREATING FILE: " + oldLog + " ***********");
+					if(!log.createNewFile())
+						System.out.println("****************ERROR IN CREATING FILE: " + log + " ***********");
 				}
+				pw = new PrintWriter(log);
 				closed = false;
 			}
-			catch (IOException ex)
+			catch(IOException ex)
 			{
 				writeErrorToFile("RobotLogger.update()", ex);
 			}
@@ -144,60 +139,24 @@ public class RobotLogger
 	 */
 	private void writeToFile(final String msg, Object... args)
 	{
-		try
-		{
-			if (!closed)
-			{
-				// Get the correct file
-				oldLog = new File(getProperLogFile());
-				
-				// If file does not exist, create it.
-				if (!oldLog.exists())
-				{
-					oldLog.createNewFile();
-					System.out.printf("Creating new file:%s\n",getProperLogFile());
-				}
-				// Write data using buffered writer; enhances IO operations
-				fw = new FileWriter(oldLog, true);
-				bw = new BufferedWriter(fw);
-				pw = new PrintWriter(bw);
-			}
-			pw.format(msg,args);
-		}
-		catch (IOException e)
-		{
-			System.out.println("IOException caught while writing to file: " + getString(e));
-		}
-		finally
-		{
-			try
-			{
-				if(bw != null)
-				{
-					fw.flush();
-					bw.flush();
-					pw.flush();
-				}				
-			}
-			catch (IOException ex)
-			{
-				System.out.println("IOException caught while flushing file: " + ex);
-			}
-		}
+		pw.format(msg, args);
 	}
 
 	// Writes the throwable error to the .txt log file
 	public void writeErrorToFile(final String method, final Throwable t)
 	{
-		if (closed)
+		if(closed)
 		{
 			update(false);
 		}
 		String msg = "\nException in " + method + ": " + getString(t);
-		if(!DriverStation.getInstance().isFMSAttached()) System.err.println(msg);
+		if(!DriverStation.getInstance().isFMSAttached())
+		{
+			System.err.println(msg);
+		}
 		writeToFile(msg);
 	}
-	
+
 	//Writes throwable error to DS.
 	public void writeErrorToDS(final String message, final Throwable thrown)
 	{
@@ -207,53 +166,52 @@ public class RobotLogger
 	public void sendToConsole(String thisMessage, Object... args)
 	{
 		// Prevent different threads from interrupting log entries
-		synchronized (System.out)
+		synchronized(System.out)
 		{
 			// Output logging messages to the console with a standard format
 			String datetimeFormat = "\n [" + CurrentReadable_DateTime() + "] - Robot4322: ";
-			if(!DriverStation.getInstance().isFMSAttached()) System.out.format(datetimeFormat + thisMessage+"\n", args);
+			if(!DriverStation.getInstance().isFMSAttached())
+				System.out.format(datetimeFormat + thisMessage + "\n", args);
 			// Output logging messages to a .txt log file
-			writeToFile(datetimeFormat + thisMessage+"\n",args);
+			writeToFile(datetimeFormat + thisMessage + "\n", args);
 		}
 	}
 
 	// Adds given file to given ZIP Folder
 	public void addFileToZip(File file, String zipfile)
 	{
-		//TODO If there are more than 10 files in ZIP, delete them
 		try
 		{
 			// In Java 7, we get to use the ZipFileSystem!
-	        env.put("create", "true");
+			env.put("create", "true");
 
 	        /* Get the uniform resource identifier, &
 	         * locate file system by using the syntax
 	         * defined in java.net.JarURLConnection.
 	         */
-	        URI uri = URI.create("jar:file:" + zipfile);
-	        
-	       
+			URI uri = URI.create("jar:file:" + zipfile);
+
 	        /* The ZipFileSystem treats jars and ZIPs as a file
 	         * system, allowing the user to manipulate the contents
 	         * in the ZIP as one would in a folder.
-	         */ 
-	        try (FileSystem zipfs = FileSystems.newFileSystem(uri, env))
-	        {
-	        	// Get the log file
-	            Path externalLogFile = Paths.get(file.getPath().replace(".txt", "") + " [" + CurrentReadable_DateTime() + "]" + ".txt" );
-	            // Get the path the log file will be put into
-	            Path pathInZipfile = zipfs.getPath(file.getName());
-	            // Copy the log file into the ZIP, replace if necessary
-	            Files.copy(externalLogFile, pathInZipfile, StandardCopyOption.REPLACE_EXISTING);
-	            // Delete the log file
-	            Files.delete(externalLogFile);
-	        }
-	        catch (FileSystemException e)
-	        {
-	        	writeErrorToFile("FileSystem, addFileToZip()", e);
-	        }
+	         */
+			try(FileSystem zipfs = FileSystems.newFileSystem(uri, env))
+			{
+				// Get the log file
+				Path externalLogFile = Paths.get(file.getPath());
+				// Get the path the log file will be put into
+				Path pathInZipfile = zipfs.getPath(file.getName());
+				// Copy the log file into the ZIP, replace if necessary
+				Files.copy(externalLogFile, pathInZipfile, StandardCopyOption.REPLACE_EXISTING);
+				// Delete the log file
+				Files.delete(externalLogFile);
+			}
+			catch(FileSystemException e)
+			{
+				writeErrorToFile("FileSystem, addFileToZip()", e);
+			}
 		}
-		catch (IOException e)
+		catch(IOException e)
 		{
 			writeErrorToFile("addFileToZip()", e);
 		}
@@ -282,16 +240,16 @@ public class RobotLogger
 		{
 			try
 			{
-				if (pw != null)
+				if(pw != null)
 				{
 					pw.close();
 				}
-				if (sw != null)
+				if(sw != null)
 				{
 					sw.close();
 				}
 			}
-			catch (IOException ignore)
+			catch(IOException ignore)
 			{
 				System.out.println("IOException caught while closing String/Print Writer: " + ignore);
 			}
@@ -301,24 +259,13 @@ public class RobotLogger
 
 	public void close()
 	{
-		if (closed)
+		if(closed)
 			return;
-		try
+		if(pw != null)
 		{
-			if(bw != null)
-			{
-				fw.flush();
-				bw.flush();
-				pw.flush();
-				fw.close();
-				bw.close();
-				pw.close();
-				closed = true;
-			}
-		}
-		catch (IOException ex)
-		{
-			System.out.println("IOException caught while closing log files: " + ex);
+			pw.flush();
+			pw.close();
+			closed = true;
 		}
 	}
 }

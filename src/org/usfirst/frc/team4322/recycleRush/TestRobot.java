@@ -11,7 +11,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * This class is called for testing purposes
  */
 
-public class TestRobot {
+public class TestRobot
+{
 	
 	//Initialize the CAN motor controllers
 	private CANTalon toteElevatorController = null;
@@ -83,7 +84,8 @@ public class TestRobot {
 	{
 		LiveWindow.setEnabled(true); //bleh
 		counter++;
-		if (counter == 5) {
+		if(counter == 5)
+		{
 //			RobotLogger.getInstance().sendToConsole("Compressor Current: " + compressor.getCompressorCurrent());
 //			RobotLogger.getInstance().sendToConsole("Compressor Switch Value LOW: " + compressor.getPressureSwitchValue());
 //			boolean highCurrent = compressor.getCompressorCurrentTooHighFault();

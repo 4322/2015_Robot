@@ -8,149 +8,165 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.lang.reflect.*;
+
+/**
+ * Created by nicolasmachado on 2/19/15.
+ */
+
 public class RobotConfigFileReader
 {
 	private static RobotConfigFileReader _instance = null;
 	private static Pattern arrayFinder = Pattern.compile("\\{\\s*([^}]+)\\s*\\}");
-	private static Pattern commentFinder = Pattern.compile(";.*");
-    public final String CONFIG_FILE = "/home/lvuser/robotConfig.ini";
-    private static Map<Class<?>,Method> primitiveMap = new HashMap<Class<?>,Method>();
-    static {
-	try {
-		primitiveMap.put(boolean.class, Boolean.class.getMethod("parseBoolean",String.class));
-		primitiveMap.put(byte.class, Byte.class.getMethod("parseByte",String.class));
-		primitiveMap.put(short.class, Short.class.getMethod("parseShort",String.class));
-		primitiveMap.put(int.class, Integer.class.getMethod("parseInt",String.class));
-		primitiveMap.put(long.class, Long.class.getMethod("parseLong",String.class));
-		primitiveMap.put(float.class, Float.class.getMethod("parseFloat",String.class));
-		primitiveMap.put(double.class, Double.class.getMethod("parseDouble",String.class));
-	} catch (NoSuchMethodException | SecurityException ex) {
-		RobotLogger.getInstance().writeErrorToFile("Exception caught in RobotConfigFileReader", ex);
-	}  
-    }
-    public static RobotConfigFileReader getInstance()
-    {
+	public final String CONFIG_FILE = "/home/lvuser/robotConfig.ini";
+	private static Map<Class<?>, Method> primitiveMap = new HashMap<Class<?>, Method>();
+	static
+	{
+		try
+		{
+			primitiveMap.put(boolean.class, Boolean.class.getMethod("parseBoolean", String.class));
+			primitiveMap.put(byte.class, Byte.class.getMethod("parseByte", String.class));
+			primitiveMap.put(short.class, Short.class.getMethod("parseShort", String.class));
+			primitiveMap.put(int.class, Integer.class.getMethod("parseInt", String.class));
+			primitiveMap.put(long.class, Long.class.getMethod("parseLong", String.class));
+			primitiveMap.put(float.class, Float.class.getMethod("parseFloat", String.class));
+			primitiveMap.put(double.class, Double.class.getMethod("parseDouble", String.class));
+		}
+		catch(NoSuchMethodException | SecurityException ex)
+		{
+			RobotLogger.getInstance().sendToConsole("Exception caught in RobotConfigFileReader", ex);
+		}
+	}
+	public static RobotConfigFileReader getInstance()
+	{
 		// Look to see if the instance has already been created
-        if(_instance == null)
-        {
-            // If the instance does not yet exist, create it.
-            _instance = new RobotConfigFileReader();
-        }
-        // Return the singleton instance to the caller.
-        return _instance;
-    }
-    
-    /**
-     * This method only reads values that may be changed during the
-     * course of the competition. Please avoid adding port / CAN
-     * addresses and other fixed values, so as to limit the errors
-     * from reading from this file. Variable values include those
-     * used for autonomous, driving, and elevator control.
-     */
-    public void runRobotFileReader()
-    {
-    	RobotLogger.getInstance().sendToConsole("Started Config Update.");
-        Properties p = new Properties();
-        try
-        {
-            p.load(new FileInputStream(CONFIG_FILE));
-        }
-        catch (IOException ex)
-        {
-            System.out.println("Failed to load robotConfig.ini");
-            return;
-        }
-    	try
-    	{
-    		Enumeration<?> enumeration = p.propertyNames();
-    	    while (enumeration.hasMoreElements()) {
-    	        String key = (String) enumeration.nextElement();
-    	        String value = commentFinder.matcher(p.getProperty(key)).replaceAll(""); //Strips Comments, which start with semicolons
-    	        Field current = null;
-    	        try
-    	        {
-    	        current = RobotMap.class.getField(key);
-    	        }
-    	        catch(NoSuchFieldException ex)
-    	        {
-    	        	RobotLogger.getInstance().sendToConsole("The field \"%s\" doesnt exist in RobotMap!", key);
-    	        	RobotLogger.getInstance().writeErrorToFile("RobotConfigFileReader.runRobotFileReader()", ex);
-    	        	continue;
-    	        }
-    	        if(current.getType().isArray())
-    	        {
-    	        	//use regex to parse array
-    	        	Matcher m = arrayFinder.matcher(value);
-    	        	m.find();
-    	        	//split array into strings
-    	        	String[] arrayValues = m.group().split("[\\s,]+");
-    	        	//strip brackets
-    	        	arrayValues[0] = arrayValues[0].replace("{", "");
-    	        	arrayValues[arrayValues.length-1] = arrayValues[arrayValues.length-1].replace("}", "");
-    	        	//instantiate array
-    	        	Object elementArray = Array.newInstance(current.getType().getComponentType(), arrayValues.length);
-    	        	try
-    	        	{
-    	        		//fill array
-    	        		for(int i = 0; i< arrayValues.length;i++)
-    	        		{
-    	        			//if the array is made of strings, set the array value to the raw string
-    	        			if(current.getType().getComponentType() == String.class)
-    	        			{
-    	        				Array.set(elementArray, i,arrayValues[i]);
-    	        			}
-    	        			//if not, cast it and then set
-    	        			else
-    	        			{
-    	        				Array.set(elementArray, i, primitiveMap.get(current.getType().getComponentType()).invoke(null, arrayValues[i]));
-    	        			}
-    	        		}
-    	        	}
-    	        	catch(InvocationTargetException ex)
-    	        	{
-    	        		RobotLogger.getInstance().sendToConsole("Unable to set property \"%s\" to \"%s\". Target type was %s[].", key,value,current.getType().getComponentType().getSimpleName());
-    	        		RobotLogger.getInstance().writeErrorToFile("RobotConfigFileReader.runRobotFileReader()", ex);
-    	        		continue;
-    	        	}
-	        		current.set(null,elementArray);
-    	        }
-    	        else
-    	        {
-    	        	
-    	        	Object finalValue = null;
-    	        	if(current.getType() == String.class)
-    	        	{
-    	        		finalValue = value;
-    	        	}
-    	        	else
-    	        	{
-    	        		try
-    	        		{
-    	        			finalValue = primitiveMap.get(current.getType()).invoke(null, value);
-    	        		}
-    	        		catch(InvocationTargetException ex)
-    	        		{
-    	        			RobotLogger.getInstance().sendToConsole("Unable to set property \"%s\" to \"%s\". Target type was %s.", key,value,current.getType().getSimpleName());
-    	        			RobotLogger.getInstance().writeErrorToFile("RobotConfigFileReader.runRobotFileReader()", ex);
-    	        			continue;
-    	        		}
-    	        	}
-    	        	current.set(null, finalValue);       
-    	        }
-    	    }
-    	} 
-    	catch (IllegalArgumentException ex) 
-    	{
-    		RobotLogger.getInstance().writeErrorToFile("Exception caught in runRobotFileReader()", ex);
+		if(_instance == null)
+		{
+			// If the instance does not yet exist, create it.
+			_instance = new RobotConfigFileReader();
 		}
-    	catch (IllegalAccessException ex) 
-    	{
-			RobotLogger.getInstance().writeErrorToFile("Exception caught in runRobotFileReader()", ex);
-		} 
-    	catch (SecurityException ex	)
-    	{
-			RobotLogger.getInstance().writeErrorToFile("Exception caught in runRobotFileReader()", ex);
+		// Return the singleton instance to the caller.
+		return _instance;
+	}
+
+	/**
+	 * Behold the magical update method.
+	 * It reads new constants from robotConfig.ini
+	 */
+	public void runRobotFileReader()
+	{
+		RobotLogger.getInstance().sendToConsole("Started Config Update.");
+		//Initialize INI value holder.
+		Properties p = new Properties();
+		try
+		{
+			//load Values from File.
+			p.load(new FileInputStream(CONFIG_FILE));
 		}
-    	RobotLogger.getInstance().sendToConsole("Finished Config Update.");
-   }
+		catch(IOException ex)
+		{
+			RobotLogger.getInstance().sendToConsole("Failed to load robotConfig.ini");
+			return;
+		}
+		try
+		{
+			//Make an enumerable list of keys in the INI.
+			Enumeration<?> enumeration = p.propertyNames();
+			//While there are unparsed keys;
+			while(enumeration.hasMoreElements())
+			{
+				//Get the name of the next key.
+				String key = (String) enumeration.nextElement();
+				//Grab the value for the key.
+				String value = p.getProperty(key);
+				//create a field to store the RobotMap var.
+				Field current = null;
+				try
+				{
+					//Attempt to get the field for the key name.
+					current = RobotMap.class.getField(key);
+				}
+				//If the field doesnt exist, log it as a warning.
+				catch(NoSuchFieldException ex)
+				{
+					RobotLogger.getInstance().sendToConsole(String.format("The field \"%s\" doesnt exist in RobotMap!", key));
+					RobotLogger.getInstance().sendToConsole("RobotConfigFileReader.runRobotFileReader()", ex);
+					continue;
+				}
+				//if the field is an array....
+				if(current.getType().isArray())
+				{
+					//use the array Finder to split the values.
+					Matcher m = arrayFinder.matcher(value);
+					//apply the matcher to the string.
+					m.find();
+					//get our values into a string array.
+					String[] arrayValues = m.group().split("[\\s,]+");
+					//remove the brackets from the first and last values.
+					arrayValues[0] = arrayValues[0].replace("{", "");
+					arrayValues[arrayValues.length - 1] = arrayValues[arrayValues.length - 1].replace("}", "");
+					//instantiate an array.
+					Object elementArray = Array.newInstance(current.getType().getComponentType(), arrayValues.length);
+					try
+					{
+						//If we are dealing with a string array, directly set the values.
+						if(current.getType().getComponentType() == String.class)
+						{
+							//Set each value in the array.
+							for(int i = 0; i < arrayValues.length; i++)
+							{
+								Array.set(elementArray, i, arrayValues[i]);
+							}
+						}
+						//if not, cast appropriately.
+						else
+						{
+							//set each value in the array.
+							for(int i = 0; i < arrayValues.length; i++)
+							{
+								Array.set(elementArray, i, primitiveMap.get(current.getType().getComponentType()).invoke(null, arrayValues[i]));
+							}
+						}
+					}
+					//If we cant set it, log the error.
+					catch(InvocationTargetException ex)
+					{
+						RobotLogger.getInstance().sendToConsole("Unable to set property \"%s\" to \"%s\". Target type was %s[].", key, value, current.getType().getComponentType().getSimpleName());
+						RobotLogger.getInstance().sendToConsole("RobotConfigFileReader.runRobotFileReader()", ex);
+						continue;
+					}
+					//update the field.
+					current.set(null, elementArray);
+				}
+				//If we are dealing with a single value....
+				else
+				{
+					try
+					{
+						//set it, with a cast if necessary.
+						current.set(null, current.getType() == String.class ? value : primitiveMap.get(current.getType()).invoke(null, value));
+					}
+					catch(InvocationTargetException ex)
+					{
+						RobotLogger.getInstance().sendToConsole("Unable to set property \"%s\" to \"%s\". Target type was %s.", key, value, current.getType().getSimpleName());
+						RobotLogger.getInstance().sendToConsole("RobotConfigFileReader.runRobotFileReader()", ex);
+						continue;
+					}
+				}
+			}
+		}
+		//Deal with misc errors.
+		catch(IllegalArgumentException ex)
+		{
+			RobotLogger.getInstance().sendToConsole("Exception caught in runRobotFileReader()", ex);
+		}
+		catch(IllegalAccessException ex)
+		{
+			RobotLogger.getInstance().sendToConsole("Exception caught in runRobotFileReader()", ex);
+		}
+		catch(SecurityException ex)
+		{
+			RobotLogger.getInstance().sendToConsole("Exception caught in runRobotFileReader()", ex);
+		}
+		RobotLogger.getInstance().sendToConsole("Finished Config Update.");
+	}
 }
