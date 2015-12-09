@@ -55,6 +55,7 @@ public class RobotMap
 	public static double AUTO_ALIGN_ANGULAR_POWER = -.5;
 	public static double AUTO_ALIGN_ANGULAR_P = -.30; //-.425
 	public static double BACK_AWAY_FROM_TOTE_SPEED = 0.2;
+	
 	// Drive Speed Relative to Amt. of Totes CURRENTLY HOLDING (0, 1, 2, 3)
 	public static double[] AUTO_ALIGN_DRIVE_FORWARD_SPEED = {-.4, -.4, -.5, -.5, -.5}; //-.625
 	
